@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.sql.Date;
 
-// line 63 "../../../../../CarShopModel.ump"
+// line 64 "../../../../../CarShopModel.ump"
 public class Holiday
 {
 

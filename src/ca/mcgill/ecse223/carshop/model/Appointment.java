@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 99 "../../../../../CarShopModel.ump"
+// line 100 "../../../../../CarShopModel.ump"
 public class Appointment
 {
 

@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.sql.Time;
 import java.util.*;
 
-// line 67 "../../../../../CarShopModel.ump"
+// line 68 "../../../../../CarShopModel.ump"
 public class DailySchedule
 {
 

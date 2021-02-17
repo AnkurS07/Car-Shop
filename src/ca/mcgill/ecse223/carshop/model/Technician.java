@@ -3,7 +3,7 @@
 
 package ca.mcgill.ecse223.carshop.model;
 
-// line 38 "../../../../../CarShopModel.ump"
+// line 39 "../../../../../CarShopModel.ump"
 public class Technician extends UserRole
 {
 
@@ -60,35 +60,29 @@ public class Technician extends UserRole
     boolean has = garage != null;
     return has;
   }
-  /* Code from template association_SetOptionalOneToOptionalOne */
+  /* Code from template association_SetOptionalOneToOne */
   public boolean setGarage(Garage aNewGarage)
   {
     boolean wasSet = false;
-    if (aNewGarage == null)
+    if (garage != null && !garage.equals(aNewGarage) && equals(garage.getTechnician()))
     {
-      Garage existingGarage = garage;
-      garage = null;
-      
-      if (existingGarage != null && existingGarage.getTechnician() != null)
-      {
-        existingGarage.setTechnician(null);
-      }
-      wasSet = true;
+      //Unable to setGarage, as existing garage would become an orphan
       return wasSet;
     }
 
-    Garage currentGarage = getGarage();
-    if (currentGarage != null && !currentGarage.equals(aNewGarage))
-    {
-      currentGarage.setTechnician(null);
-    }
-
     garage = aNewGarage;
-    Technician existingTechnician = aNewGarage.getTechnician();
+    Technician anOldTechnician = aNewGarage != null ? aNewGarage.getTechnician() : null;
 
-    if (!equals(existingTechnician))
+    if (!this.equals(anOldTechnician))
     {
-      aNewGarage.setTechnician(this);
+      if (anOldTechnician != null)
+      {
+        anOldTechnician.garage = null;
+      }
+      if (garage != null)
+      {
+        garage.setTechnician(this);
+      }
     }
     wasSet = true;
     return wasSet;
@@ -96,9 +90,11 @@ public class Technician extends UserRole
 
   public void delete()
   {
-    if (garage != null)
+    Garage existingGarage = garage;
+    garage = null;
+    if (existingGarage != null)
     {
-      garage.setTechnician(null);
+      existingGarage.delete();
     }
     super.delete();
   }

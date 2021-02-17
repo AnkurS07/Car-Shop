@@ -6,7 +6,7 @@ import java.util.*;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 44 "../../../../../CarShopModel.ump"
+// line 45 "../../../../../CarShopModel.ump"
 public class Client extends UserRole
 {
 

@@ -35,9 +35,10 @@ class Owner {
 	isA UserRole;
 }
 
+	
 class Technician {
-	enum TechnicianType { TiresTechnician, EngineTehcnician, TransmissionTechnician, ElectronicsTechnician, FluidsTechnician }
 	isA UserRole;
+	enum TechnicianType { TiresTechnician, EngineTehcnician, TransmissionTechnician, ElectronicsTechnician, FluidsTechnician }
 	TechnicianType technicianType;
 }
 
@@ -91,7 +92,7 @@ class ServiceCombo {
 }
 
 class Garage {
-	0..1 garage -- 0..1 Technician technician;
+	0..1 garage -- 1 Technician technician;
 	1 garage -- * Service services;
 	1 garage -> 0..7 DailySchedule schedules;
 }
