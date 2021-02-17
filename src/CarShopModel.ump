@@ -1,1 +1,109 @@
 namespace ca.mcgill.ecse223.carshop.model;
+
+class CarShopModel {
+  1 <@>- * UserAccount accounts;
+  1 <@>- * UserRole userRoles;
+  1 <@>- * Business businesses;
+  1 <@>- * Holiday holidays;
+  1 <@>- * Garage garages;
+  1 <@>- * DailySchedule schedules;
+  1 <@>- * AppointmentCalendar appointmentCalendars;
+  
+  public java.util.Date getCurrentDate() {
+    java.util.Calendar cal = java.util.Calendar.getInstance();
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 0);
+    java.util.Date date = cal.getTime();
+    return date;
+  }
+  
+}
+
+class UserAccount {
+  unique String userName;
+  String password;
+  0..1 userAccount -- 0..1 UserRole userRole;
+}
+
+class UserRole {
+  abstract;
+}
+
+class Owner {
+	isA UserRole;
+}
+
+class Technician {
+	enum TechnicianType { TiresTechnician, EngineTehcnician, TransmissionTechnician, ElectronicsTechnician, FluidsTechnician }
+	isA UserRole;
+	TechnicianType technicianType;
+}
+
+class Client {
+	isA UserRole;
+	1 <@>- * Appointment appointments;
+}
+
+class Business {
+	String address;
+	String phoneNumber;
+	String emailAddress;
+	
+	1..* business -- 1 Owner owner;
+	1 business -> * Holiday holidays;
+	1 business -> 0..7 DailySchedule schedules;
+	1 business -- 1..* Garage garages;
+	1 <@>- * Service services;
+	1 <@>- * ServiceCombo combos;
+	1 <@>- 1 AppointmentCalendar appointmentCalendar;
+}
+
+class Holiday {
+	Date date;
+}	
+
+class DailySchedule {
+	enum Day { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+	Day day;
+	Time openingTime;
+	Time closingTime;
+	
+	1 <@>- * Break breaks;
+}
+
+class Break {
+	Time startTime;
+	Time endTime;
+}
+
+class Service {
+	String name;
+	Time duration;
+}
+
+class ServiceCombo {
+	String name;
+	Boolean isRequired;
+	
+	* combos -> * Service services;
+}
+
+class Garage {
+	0..1 garage -- 0..1 Technician technician;
+	1 garage -- * Service services;
+	1 garage -> 0..7 DailySchedule schedules;
+}
+
+class Appointment {
+	Date date;
+	Time time;
+	
+	* appointments -- 0..1 Service service;
+	* appointments -- 0..1 ServiceCombo combos;
+}
+
+class AppointmentCalendar {
+	1 appointmentCalendar -- * Appointment appointments;
+}
