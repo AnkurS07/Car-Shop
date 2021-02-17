@@ -6,7 +6,7 @@ import java.util.*;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 49 "../../../../../CarShopModel.ump"
+// line 50 "../../../../../CarShopModel.ump"
 public class Business
 {
 
@@ -478,9 +478,9 @@ public class Business
     return 1;
   }
   /* Code from template association_AddMandatoryManyToOne */
-  public Garage addGarage(CarShopModel aCarShopModel)
+  public Garage addGarage(Technician aTechnician, CarShopModel aCarShopModel)
   {
-    Garage aNewGarage = new Garage(aCarShopModel, this);
+    Garage aNewGarage = new Garage(aTechnician, aCarShopModel, this);
     return aNewGarage;
   }
 

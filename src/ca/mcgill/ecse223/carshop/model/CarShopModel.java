@@ -542,9 +542,9 @@ public class CarShopModel
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Garage addGarage(Business aBusiness)
+  public Garage addGarage(Technician aTechnician, Business aBusiness)
   {
-    return new Garage(this, aBusiness);
+    return new Garage(aTechnician, this, aBusiness);
   }
 
   public boolean addGarage(Garage aGarage)

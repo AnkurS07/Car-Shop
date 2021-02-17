@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 import java.sql.Time;
 
-// line 93 "../../../../../CarShopModel.ump"
+// line 94 "../../../../../CarShopModel.ump"
 public class Garage
 {
 
@@ -24,8 +24,13 @@ public class Garage
   // CONSTRUCTOR
   //------------------------
 
-  public Garage(CarShopModel aCarShopModel, Business aBusiness)
+  public Garage(Technician aTechnician, CarShopModel aCarShopModel, Business aBusiness)
   {
+    boolean didAddTechnician = setTechnician(aTechnician);
+    if (!didAddTechnician)
+    {
+      throw new RuntimeException("Unable to create garage due to technician. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
     services = new ArrayList<Service>();
     schedules = new ArrayList<DailySchedule>();
     boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
@@ -47,12 +52,6 @@ public class Garage
   public Technician getTechnician()
   {
     return technician;
-  }
-
-  public boolean hasTechnician()
-  {
-    boolean has = technician != null;
-    return has;
   }
   /* Code from template association_GetMany */
   public Service getService(int index)
@@ -124,35 +123,30 @@ public class Garage
   {
     return business;
   }
-  /* Code from template association_SetOptionalOneToOptionalOne */
+  /* Code from template association_SetOneToOptionalOne */
   public boolean setTechnician(Technician aNewTechnician)
   {
     boolean wasSet = false;
     if (aNewTechnician == null)
     {
-      Technician existingTechnician = technician;
-      technician = null;
-      
-      if (existingTechnician != null && existingTechnician.getGarage() != null)
-      {
-        existingTechnician.setGarage(null);
-      }
-      wasSet = true;
+      //Unable to setTechnician to null, as garage must always be associated to a technician
       return wasSet;
     }
-
-    Technician currentTechnician = getTechnician();
-    if (currentTechnician != null && !currentTechnician.equals(aNewTechnician))
-    {
-      currentTechnician.setGarage(null);
-    }
-
-    technician = aNewTechnician;
+    
     Garage existingGarage = aNewTechnician.getGarage();
-
-    if (!equals(existingGarage))
+    if (existingGarage != null && !equals(existingGarage))
     {
-      aNewTechnician.setGarage(this);
+      //Unable to setTechnician, the current technician already has a garage, which would be orphaned if it were re-assigned
+      return wasSet;
+    }
+    
+    Technician anOldTechnician = technician;
+    technician = aNewTechnician;
+    technician.setGarage(this);
+
+    if (anOldTechnician != null)
+    {
+      anOldTechnician.setGarage(null);
     }
     wasSet = true;
     return wasSet;
@@ -370,9 +364,11 @@ public class Garage
 
   public void delete()
   {
-    if (technician != null)
+    Technician existingTechnician = technician;
+    technician = null;
+    if (existingTechnician != null)
     {
-      technician.setGarage(null);
+      existingTechnician.setGarage(null);
     }
     for(int i=services.size(); i > 0; i--)
     {
