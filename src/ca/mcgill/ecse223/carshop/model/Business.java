@@ -534,22 +534,15 @@ public class Business
     }
     return wasAdded;
   }
-  /* Code from template association_IsNumberOfValidMethod */
-  public boolean isNumberOfGaragesValid()
-  {
-    boolean isValid = numberOfGarages() >= minimumNumberOfGarages();
-    return isValid;
-  }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfGarages()
   {
-    return 1;
+    return 0;
   }
-  /* Code from template association_AddMandatoryManyToOne */
+  /* Code from template association_AddManyToOne */
   public Garage addGarage(Technician aTechnician, CarShopSystem aCarShopSystem)
   {
-    Garage aNewGarage = new Garage(aTechnician, aCarShopSystem, this);
-    return aNewGarage;
+    return new Garage(aTechnician, aCarShopSystem, this);
   }
 
   public boolean addGarage(Garage aGarage)
@@ -558,11 +551,6 @@ public class Business
     if (garages.contains(aGarage)) { return false; }
     Business existingBusiness = aGarage.getBusiness();
     boolean isNewBusiness = existingBusiness != null && !this.equals(existingBusiness);
-
-    if (isNewBusiness && existingBusiness.numberOfGarages() <= minimumNumberOfGarages())
-    {
-      return wasAdded;
-    }
     if (isNewBusiness)
     {
       aGarage.setBusiness(this);
@@ -579,19 +567,11 @@ public class Business
   {
     boolean wasRemoved = false;
     //Unable to remove aGarage, as it must always have a business
-    if (this.equals(aGarage.getBusiness()))
+    if (!this.equals(aGarage.getBusiness()))
     {
-      return wasRemoved;
+      garages.remove(aGarage);
+      wasRemoved = true;
     }
-
-    //business already at minimum (1)
-    if (numberOfGarages() <= minimumNumberOfGarages())
-    {
-      return wasRemoved;
-    }
-
-    garages.remove(aGarage);
-    wasRemoved = true;
     return wasRemoved;
   }
   /* Code from template association_AddIndexControlFunctions */

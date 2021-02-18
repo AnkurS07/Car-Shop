@@ -44,7 +44,7 @@ class Business {
 	1..* business -- * Owner owner;
 	0..1 business -> * Holiday holidays;
 	1 business -> 0..7 DailySchedule schedules;
-	1 business -- 1..* Garage garages;
+	1 business -- * Garage garages;
 	1 <@>- * ServiceTemplate serviceTemplate;
 	1 <@>- * ServiceComboTemplate comboTemplate;
 	1 <@>- 1 AppointmentCalendar appointmentCalendar;
