@@ -398,9 +398,9 @@ public class CarShopModel
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Business addBusiness(String aAddress, String aPhoneNumber, String aEmailAddress, Owner aOwner, AppointmentCalendar aAppointmentCalendar)
+  public Business addBusiness(String aAddress, String aPhoneNumber, String aEmailAddress, AppointmentCalendar aAppointmentCalendar)
   {
-    return new Business(aAddress, aPhoneNumber, aEmailAddress, aOwner, aAppointmentCalendar, this);
+    return new Business(aAddress, aPhoneNumber, aEmailAddress, aAppointmentCalendar, this);
   }
 
   public boolean addBusiness(Business aBusiness)

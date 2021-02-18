@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 import java.sql.Time;
 
-// line 94 "../../../../../CarShopModel.ump"
+// line 108 "../../../../../CarShopModel.ump"
 public class Garage
 {
 
@@ -15,7 +15,7 @@ public class Garage
 
   //Garage Associations
   private Technician technician;
-  private List<Service> services;
+  private List<ServiceTemplate> serviceTemplate;
   private List<DailySchedule> schedules;
   private CarShopModel carShopModel;
   private Business business;
@@ -31,7 +31,7 @@ public class Garage
     {
       throw new RuntimeException("Unable to create garage due to technician. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    services = new ArrayList<Service>();
+    serviceTemplate = new ArrayList<ServiceTemplate>();
     schedules = new ArrayList<DailySchedule>();
     boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
     if (!didAddCarShopModel)
@@ -54,33 +54,33 @@ public class Garage
     return technician;
   }
   /* Code from template association_GetMany */
-  public Service getService(int index)
+  public ServiceTemplate getServiceTemplate(int index)
   {
-    Service aService = services.get(index);
-    return aService;
+    ServiceTemplate aServiceTemplate = serviceTemplate.get(index);
+    return aServiceTemplate;
   }
 
-  public List<Service> getServices()
+  public List<ServiceTemplate> getServiceTemplate()
   {
-    List<Service> newServices = Collections.unmodifiableList(services);
-    return newServices;
+    List<ServiceTemplate> newServiceTemplate = Collections.unmodifiableList(serviceTemplate);
+    return newServiceTemplate;
   }
 
-  public int numberOfServices()
+  public int numberOfServiceTemplate()
   {
-    int number = services.size();
+    int number = serviceTemplate.size();
     return number;
   }
 
-  public boolean hasServices()
+  public boolean hasServiceTemplate()
   {
-    boolean has = services.size() > 0;
+    boolean has = serviceTemplate.size() > 0;
     return has;
   }
 
-  public int indexOfService(Service aService)
+  public int indexOfServiceTemplate(ServiceTemplate aServiceTemplate)
   {
-    int index = services.indexOf(aService);
+    int index = serviceTemplate.indexOf(aServiceTemplate);
     return index;
   }
   /* Code from template association_GetMany */
@@ -152,74 +152,74 @@ public class Garage
     return wasSet;
   }
   /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfServices()
+  public static int minimumNumberOfServiceTemplate()
   {
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Service addService(String aName, Time aDuration, Business aBusiness)
+  public ServiceTemplate addServiceTemplate(String aName, Time aDuration, Business aBusiness)
   {
-    return new Service(aName, aDuration, aBusiness, this);
+    return new ServiceTemplate(aName, aDuration, aBusiness, this);
   }
 
-  public boolean addService(Service aService)
+  public boolean addServiceTemplate(ServiceTemplate aServiceTemplate)
   {
     boolean wasAdded = false;
-    if (services.contains(aService)) { return false; }
-    Garage existingGarage = aService.getGarage();
+    if (serviceTemplate.contains(aServiceTemplate)) { return false; }
+    Garage existingGarage = aServiceTemplate.getGarage();
     boolean isNewGarage = existingGarage != null && !this.equals(existingGarage);
     if (isNewGarage)
     {
-      aService.setGarage(this);
+      aServiceTemplate.setGarage(this);
     }
     else
     {
-      services.add(aService);
+      serviceTemplate.add(aServiceTemplate);
     }
     wasAdded = true;
     return wasAdded;
   }
 
-  public boolean removeService(Service aService)
+  public boolean removeServiceTemplate(ServiceTemplate aServiceTemplate)
   {
     boolean wasRemoved = false;
-    //Unable to remove aService, as it must always have a garage
-    if (!this.equals(aService.getGarage()))
+    //Unable to remove aServiceTemplate, as it must always have a garage
+    if (!this.equals(aServiceTemplate.getGarage()))
     {
-      services.remove(aService);
+      serviceTemplate.remove(aServiceTemplate);
       wasRemoved = true;
     }
     return wasRemoved;
   }
   /* Code from template association_AddIndexControlFunctions */
-  public boolean addServiceAt(Service aService, int index)
+  public boolean addServiceTemplateAt(ServiceTemplate aServiceTemplate, int index)
   {  
     boolean wasAdded = false;
-    if(addService(aService))
+    if(addServiceTemplate(aServiceTemplate))
     {
       if(index < 0 ) { index = 0; }
-      if(index > numberOfServices()) { index = numberOfServices() - 1; }
-      services.remove(aService);
-      services.add(index, aService);
+      if(index > numberOfServiceTemplate()) { index = numberOfServiceTemplate() - 1; }
+      serviceTemplate.remove(aServiceTemplate);
+      serviceTemplate.add(index, aServiceTemplate);
       wasAdded = true;
     }
     return wasAdded;
   }
 
-  public boolean addOrMoveServiceAt(Service aService, int index)
+  public boolean addOrMoveServiceTemplateAt(ServiceTemplate aServiceTemplate, int index)
   {
     boolean wasAdded = false;
-    if(services.contains(aService))
+    if(serviceTemplate.contains(aServiceTemplate))
     {
       if(index < 0 ) { index = 0; }
-      if(index > numberOfServices()) { index = numberOfServices() - 1; }
-      services.remove(aService);
-      services.add(index, aService);
+      if(index > numberOfServiceTemplate()) { index = numberOfServiceTemplate() - 1; }
+      serviceTemplate.remove(aServiceTemplate);
+      serviceTemplate.add(index, aServiceTemplate);
       wasAdded = true;
     } 
     else 
     {
-      wasAdded = addServiceAt(aService, index);
+      wasAdded = addServiceTemplateAt(aServiceTemplate, index);
     }
     return wasAdded;
   }
@@ -370,10 +370,10 @@ public class Garage
     {
       existingTechnician.setGarage(null);
     }
-    for(int i=services.size(); i > 0; i--)
+    for(int i=serviceTemplate.size(); i > 0; i--)
     {
-      Service aService = services.get(i - 1);
-      aService.delete();
+      ServiceTemplate aServiceTemplate = serviceTemplate.get(i - 1);
+      aServiceTemplate.delete();
     }
     schedules.clear();
     CarShopModel placeholderCarShopModel = carShopModel;

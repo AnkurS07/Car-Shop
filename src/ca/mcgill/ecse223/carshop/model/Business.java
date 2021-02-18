@@ -3,7 +3,6 @@
 
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
-import java.sql.Date;
 import java.sql.Time;
 
 // line 50 "../../../../../CarShopModel.ump"
@@ -20,12 +19,12 @@ public class Business
   private String emailAddress;
 
   //Business Associations
-  private Owner owner;
+  private List<Owner> owner;
   private List<Holiday> holidays;
   private List<DailySchedule> schedules;
   private List<Garage> garages;
-  private List<Service> services;
-  private List<ServiceCombo> combos;
+  private List<ServiceTemplate> serviceTemplate;
+  private List<ServiceComboTemplate> comboTemplate;
   private AppointmentCalendar appointmentCalendar;
   private CarShopModel carShopModel;
 
@@ -33,21 +32,17 @@ public class Business
   // CONSTRUCTOR
   //------------------------
 
-  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, Owner aOwner, AppointmentCalendar aAppointmentCalendar, CarShopModel aCarShopModel)
+  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, AppointmentCalendar aAppointmentCalendar, CarShopModel aCarShopModel)
   {
     address = aAddress;
     phoneNumber = aPhoneNumber;
     emailAddress = aEmailAddress;
-    boolean didAddOwner = setOwner(aOwner);
-    if (!didAddOwner)
-    {
-      throw new RuntimeException("Unable to create business due to owner. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-    }
+    owner = new ArrayList<Owner>();
     holidays = new ArrayList<Holiday>();
     schedules = new ArrayList<DailySchedule>();
     garages = new ArrayList<Garage>();
-    services = new ArrayList<Service>();
-    combos = new ArrayList<ServiceCombo>();
+    serviceTemplate = new ArrayList<ServiceTemplate>();
+    comboTemplate = new ArrayList<ServiceComboTemplate>();
     if (aAppointmentCalendar == null || aAppointmentCalendar.getBusiness() != null)
     {
       throw new RuntimeException("Unable to create Business due to aAppointmentCalendar. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
@@ -60,21 +55,17 @@ public class Business
     }
   }
 
-  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, Owner aOwner, CarShopModel aCarShopModelForAppointmentCalendar, CarShopModel aCarShopModel)
+  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, CarShopModel aCarShopModelForAppointmentCalendar, CarShopModel aCarShopModel)
   {
     address = aAddress;
     phoneNumber = aPhoneNumber;
     emailAddress = aEmailAddress;
-    boolean didAddOwner = setOwner(aOwner);
-    if (!didAddOwner)
-    {
-      throw new RuntimeException("Unable to create business due to owner. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-    }
+    owner = new ArrayList<Owner>();
     holidays = new ArrayList<Holiday>();
     schedules = new ArrayList<DailySchedule>();
     garages = new ArrayList<Garage>();
-    services = new ArrayList<Service>();
-    combos = new ArrayList<ServiceCombo>();
+    serviceTemplate = new ArrayList<ServiceTemplate>();
+    comboTemplate = new ArrayList<ServiceComboTemplate>();
     appointmentCalendar = new AppointmentCalendar(aCarShopModelForAppointmentCalendar, this);
     boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
     if (!didAddCarShopModel)
@@ -125,10 +116,35 @@ public class Business
   {
     return emailAddress;
   }
-  /* Code from template association_GetOne */
-  public Owner getOwner()
+  /* Code from template association_GetMany */
+  public Owner getOwner(int index)
   {
-    return owner;
+    Owner aOwner = owner.get(index);
+    return aOwner;
+  }
+
+  public List<Owner> getOwner()
+  {
+    List<Owner> newOwner = Collections.unmodifiableList(owner);
+    return newOwner;
+  }
+
+  public int numberOfOwner()
+  {
+    int number = owner.size();
+    return number;
+  }
+
+  public boolean hasOwner()
+  {
+    boolean has = owner.size() > 0;
+    return has;
+  }
+
+  public int indexOfOwner(Owner aOwner)
+  {
+    int index = owner.indexOf(aOwner);
+    return index;
   }
   /* Code from template association_GetMany */
   public Holiday getHoliday(int index)
@@ -221,63 +237,63 @@ public class Business
     return index;
   }
   /* Code from template association_GetMany */
-  public Service getService(int index)
+  public ServiceTemplate getServiceTemplate(int index)
   {
-    Service aService = services.get(index);
-    return aService;
+    ServiceTemplate aServiceTemplate = serviceTemplate.get(index);
+    return aServiceTemplate;
   }
 
-  public List<Service> getServices()
+  public List<ServiceTemplate> getServiceTemplate()
   {
-    List<Service> newServices = Collections.unmodifiableList(services);
-    return newServices;
+    List<ServiceTemplate> newServiceTemplate = Collections.unmodifiableList(serviceTemplate);
+    return newServiceTemplate;
   }
 
-  public int numberOfServices()
+  public int numberOfServiceTemplate()
   {
-    int number = services.size();
+    int number = serviceTemplate.size();
     return number;
   }
 
-  public boolean hasServices()
+  public boolean hasServiceTemplate()
   {
-    boolean has = services.size() > 0;
+    boolean has = serviceTemplate.size() > 0;
     return has;
   }
 
-  public int indexOfService(Service aService)
+  public int indexOfServiceTemplate(ServiceTemplate aServiceTemplate)
   {
-    int index = services.indexOf(aService);
+    int index = serviceTemplate.indexOf(aServiceTemplate);
     return index;
   }
   /* Code from template association_GetMany */
-  public ServiceCombo getCombo(int index)
+  public ServiceComboTemplate getComboTemplate(int index)
   {
-    ServiceCombo aCombo = combos.get(index);
-    return aCombo;
+    ServiceComboTemplate aComboTemplate = comboTemplate.get(index);
+    return aComboTemplate;
   }
 
-  public List<ServiceCombo> getCombos()
+  public List<ServiceComboTemplate> getComboTemplate()
   {
-    List<ServiceCombo> newCombos = Collections.unmodifiableList(combos);
-    return newCombos;
+    List<ServiceComboTemplate> newComboTemplate = Collections.unmodifiableList(comboTemplate);
+    return newComboTemplate;
   }
 
-  public int numberOfCombos()
+  public int numberOfComboTemplate()
   {
-    int number = combos.size();
+    int number = comboTemplate.size();
     return number;
   }
 
-  public boolean hasCombos()
+  public boolean hasComboTemplate()
   {
-    boolean has = combos.size() > 0;
+    boolean has = comboTemplate.size() > 0;
     return has;
   }
 
-  public int indexOfCombo(ServiceCombo aCombo)
+  public int indexOfComboTemplate(ServiceComboTemplate aComboTemplate)
   {
-    int index = combos.indexOf(aCombo);
+    int index = comboTemplate.indexOf(aComboTemplate);
     return index;
   }
   /* Code from template association_GetOne */
@@ -290,35 +306,87 @@ public class Business
   {
     return carShopModel;
   }
-  /* Code from template association_SetOneToMandatoryMany */
-  public boolean setOwner(Owner aOwner)
+  /* Code from template association_MinimumNumberOfMethod */
+  public static int minimumNumberOfOwner()
   {
-    boolean wasSet = false;
-    //Must provide owner to business
-    if (aOwner == null)
+    return 0;
+  }
+  /* Code from template association_AddManyToManyMethod */
+  public boolean addOwner(Owner aOwner)
+  {
+    boolean wasAdded = false;
+    if (owner.contains(aOwner)) { return false; }
+    owner.add(aOwner);
+    if (aOwner.indexOfBusiness(this) != -1)
     {
-      return wasSet;
+      wasAdded = true;
     }
-
-    if (owner != null && owner.numberOfBusiness() <= Owner.minimumNumberOfBusiness())
+    else
     {
-      return wasSet;
-    }
-
-    Owner existingOwner = owner;
-    owner = aOwner;
-    if (existingOwner != null && !existingOwner.equals(aOwner))
-    {
-      boolean didRemove = existingOwner.removeBusiness(this);
-      if (!didRemove)
+      wasAdded = aOwner.addBusiness(this);
+      if (!wasAdded)
       {
-        owner = existingOwner;
-        return wasSet;
+        owner.remove(aOwner);
       }
     }
-    owner.addBusiness(this);
-    wasSet = true;
-    return wasSet;
+    return wasAdded;
+  }
+  /* Code from template association_RemoveMany */
+  public boolean removeOwner(Owner aOwner)
+  {
+    boolean wasRemoved = false;
+    if (!owner.contains(aOwner))
+    {
+      return wasRemoved;
+    }
+
+    int oldIndex = owner.indexOf(aOwner);
+    owner.remove(oldIndex);
+    if (aOwner.indexOfBusiness(this) == -1)
+    {
+      wasRemoved = true;
+    }
+    else
+    {
+      wasRemoved = aOwner.removeBusiness(this);
+      if (!wasRemoved)
+      {
+        owner.add(oldIndex,aOwner);
+      }
+    }
+    return wasRemoved;
+  }
+  /* Code from template association_AddIndexControlFunctions */
+  public boolean addOwnerAt(Owner aOwner, int index)
+  {  
+    boolean wasAdded = false;
+    if(addOwner(aOwner))
+    {
+      if(index < 0 ) { index = 0; }
+      if(index > numberOfOwner()) { index = numberOfOwner() - 1; }
+      owner.remove(aOwner);
+      owner.add(index, aOwner);
+      wasAdded = true;
+    }
+    return wasAdded;
+  }
+
+  public boolean addOrMoveOwnerAt(Owner aOwner, int index)
+  {
+    boolean wasAdded = false;
+    if(owner.contains(aOwner))
+    {
+      if(index < 0 ) { index = 0; }
+      if(index > numberOfOwner()) { index = numberOfOwner() - 1; }
+      owner.remove(aOwner);
+      owner.add(index, aOwner);
+      wasAdded = true;
+    } 
+    else 
+    {
+      wasAdded = addOwnerAt(aOwner, index);
+    }
+    return wasAdded;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfHolidays()
@@ -559,146 +627,146 @@ public class Business
     return wasAdded;
   }
   /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfServices()
+  public static int minimumNumberOfServiceTemplate()
   {
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Service addService(String aName, Time aDuration, Garage aGarage)
+  public ServiceTemplate addServiceTemplate(String aName, Time aDuration, Garage aGarage)
   {
-    return new Service(aName, aDuration, this, aGarage);
+    return new ServiceTemplate(aName, aDuration, this, aGarage);
   }
 
-  public boolean addService(Service aService)
+  public boolean addServiceTemplate(ServiceTemplate aServiceTemplate)
   {
     boolean wasAdded = false;
-    if (services.contains(aService)) { return false; }
-    Business existingBusiness = aService.getBusiness();
+    if (serviceTemplate.contains(aServiceTemplate)) { return false; }
+    Business existingBusiness = aServiceTemplate.getBusiness();
     boolean isNewBusiness = existingBusiness != null && !this.equals(existingBusiness);
     if (isNewBusiness)
     {
-      aService.setBusiness(this);
+      aServiceTemplate.setBusiness(this);
     }
     else
     {
-      services.add(aService);
+      serviceTemplate.add(aServiceTemplate);
     }
     wasAdded = true;
     return wasAdded;
   }
 
-  public boolean removeService(Service aService)
+  public boolean removeServiceTemplate(ServiceTemplate aServiceTemplate)
   {
     boolean wasRemoved = false;
-    //Unable to remove aService, as it must always have a business
-    if (!this.equals(aService.getBusiness()))
+    //Unable to remove aServiceTemplate, as it must always have a business
+    if (!this.equals(aServiceTemplate.getBusiness()))
     {
-      services.remove(aService);
+      serviceTemplate.remove(aServiceTemplate);
       wasRemoved = true;
     }
     return wasRemoved;
   }
   /* Code from template association_AddIndexControlFunctions */
-  public boolean addServiceAt(Service aService, int index)
+  public boolean addServiceTemplateAt(ServiceTemplate aServiceTemplate, int index)
   {  
     boolean wasAdded = false;
-    if(addService(aService))
+    if(addServiceTemplate(aServiceTemplate))
     {
       if(index < 0 ) { index = 0; }
-      if(index > numberOfServices()) { index = numberOfServices() - 1; }
-      services.remove(aService);
-      services.add(index, aService);
+      if(index > numberOfServiceTemplate()) { index = numberOfServiceTemplate() - 1; }
+      serviceTemplate.remove(aServiceTemplate);
+      serviceTemplate.add(index, aServiceTemplate);
       wasAdded = true;
     }
     return wasAdded;
   }
 
-  public boolean addOrMoveServiceAt(Service aService, int index)
+  public boolean addOrMoveServiceTemplateAt(ServiceTemplate aServiceTemplate, int index)
   {
     boolean wasAdded = false;
-    if(services.contains(aService))
+    if(serviceTemplate.contains(aServiceTemplate))
     {
       if(index < 0 ) { index = 0; }
-      if(index > numberOfServices()) { index = numberOfServices() - 1; }
-      services.remove(aService);
-      services.add(index, aService);
+      if(index > numberOfServiceTemplate()) { index = numberOfServiceTemplate() - 1; }
+      serviceTemplate.remove(aServiceTemplate);
+      serviceTemplate.add(index, aServiceTemplate);
       wasAdded = true;
     } 
     else 
     {
-      wasAdded = addServiceAt(aService, index);
+      wasAdded = addServiceTemplateAt(aServiceTemplate, index);
     }
     return wasAdded;
   }
   /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfCombos()
+  public static int minimumNumberOfComboTemplate()
   {
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public ServiceCombo addCombo(String aName, boolean aIsRequired)
+  public ServiceComboTemplate addComboTemplate(String aName, boolean aIsRequired)
   {
-    return new ServiceCombo(aName, aIsRequired, this);
+    return new ServiceComboTemplate(aName, aIsRequired, this);
   }
 
-  public boolean addCombo(ServiceCombo aCombo)
+  public boolean addComboTemplate(ServiceComboTemplate aComboTemplate)
   {
     boolean wasAdded = false;
-    if (combos.contains(aCombo)) { return false; }
-    Business existingBusiness = aCombo.getBusiness();
+    if (comboTemplate.contains(aComboTemplate)) { return false; }
+    Business existingBusiness = aComboTemplate.getBusiness();
     boolean isNewBusiness = existingBusiness != null && !this.equals(existingBusiness);
     if (isNewBusiness)
     {
-      aCombo.setBusiness(this);
+      aComboTemplate.setBusiness(this);
     }
     else
     {
-      combos.add(aCombo);
+      comboTemplate.add(aComboTemplate);
     }
     wasAdded = true;
     return wasAdded;
   }
 
-  public boolean removeCombo(ServiceCombo aCombo)
+  public boolean removeComboTemplate(ServiceComboTemplate aComboTemplate)
   {
     boolean wasRemoved = false;
-    //Unable to remove aCombo, as it must always have a business
-    if (!this.equals(aCombo.getBusiness()))
+    //Unable to remove aComboTemplate, as it must always have a business
+    if (!this.equals(aComboTemplate.getBusiness()))
     {
-      combos.remove(aCombo);
+      comboTemplate.remove(aComboTemplate);
       wasRemoved = true;
     }
     return wasRemoved;
   }
   /* Code from template association_AddIndexControlFunctions */
-  public boolean addComboAt(ServiceCombo aCombo, int index)
+  public boolean addComboTemplateAt(ServiceComboTemplate aComboTemplate, int index)
   {  
     boolean wasAdded = false;
-    if(addCombo(aCombo))
+    if(addComboTemplate(aComboTemplate))
     {
       if(index < 0 ) { index = 0; }
-      if(index > numberOfCombos()) { index = numberOfCombos() - 1; }
-      combos.remove(aCombo);
-      combos.add(index, aCombo);
+      if(index > numberOfComboTemplate()) { index = numberOfComboTemplate() - 1; }
+      comboTemplate.remove(aComboTemplate);
+      comboTemplate.add(index, aComboTemplate);
       wasAdded = true;
     }
     return wasAdded;
   }
 
-  public boolean addOrMoveComboAt(ServiceCombo aCombo, int index)
+  public boolean addOrMoveComboTemplateAt(ServiceComboTemplate aComboTemplate, int index)
   {
     boolean wasAdded = false;
-    if(combos.contains(aCombo))
+    if(comboTemplate.contains(aComboTemplate))
     {
       if(index < 0 ) { index = 0; }
-      if(index > numberOfCombos()) { index = numberOfCombos() - 1; }
-      combos.remove(aCombo);
-      combos.add(index, aCombo);
+      if(index > numberOfComboTemplate()) { index = numberOfComboTemplate() - 1; }
+      comboTemplate.remove(aComboTemplate);
+      comboTemplate.add(index, aComboTemplate);
       wasAdded = true;
     } 
     else 
     {
-      wasAdded = addComboAt(aCombo, index);
+      wasAdded = addComboTemplateAt(aComboTemplate, index);
     }
     return wasAdded;
   }
@@ -724,11 +792,18 @@ public class Business
 
   public void delete()
   {
-    Owner placeholderOwner = owner;
-    this.owner = null;
-    if(placeholderOwner != null)
+    ArrayList<Owner> copyOfOwner = new ArrayList<Owner>(owner);
+    owner.clear();
+    for(Owner aOwner : copyOfOwner)
     {
-      placeholderOwner.removeBusiness(this);
+      if (aOwner.numberOfBusiness() <= Owner.minimumNumberOfBusiness())
+      {
+        aOwner.delete();
+      }
+      else
+      {
+        aOwner.removeBusiness(this);
+      }
     }
     holidays.clear();
     schedules.clear();
@@ -737,18 +812,18 @@ public class Business
       Garage aGarage = garages.get(i - 1);
       aGarage.delete();
     }
-    while (services.size() > 0)
+    while (serviceTemplate.size() > 0)
     {
-      Service aService = services.get(services.size() - 1);
-      aService.delete();
-      services.remove(aService);
+      ServiceTemplate aServiceTemplate = serviceTemplate.get(serviceTemplate.size() - 1);
+      aServiceTemplate.delete();
+      serviceTemplate.remove(aServiceTemplate);
     }
     
-    while (combos.size() > 0)
+    while (comboTemplate.size() > 0)
     {
-      ServiceCombo aCombo = combos.get(combos.size() - 1);
-      aCombo.delete();
-      combos.remove(aCombo);
+      ServiceComboTemplate aComboTemplate = comboTemplate.get(comboTemplate.size() - 1);
+      aComboTemplate.delete();
+      comboTemplate.remove(aComboTemplate);
     }
     
     AppointmentCalendar existingAppointmentCalendar = appointmentCalendar;
@@ -772,7 +847,6 @@ public class Business
             "address" + ":" + getAddress()+ "," +
             "phoneNumber" + ":" + getPhoneNumber()+ "," +
             "emailAddress" + ":" + getEmailAddress()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "owner = "+(getOwner()!=null?Integer.toHexString(System.identityHashCode(getOwner())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "appointmentCalendar = "+(getAppointmentCalendar()!=null?Integer.toHexString(System.identityHashCode(getAppointmentCalendar())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "carShopModel = "+(getCarShopModel()!=null?Integer.toHexString(System.identityHashCode(getCarShopModel())):"null");
   }

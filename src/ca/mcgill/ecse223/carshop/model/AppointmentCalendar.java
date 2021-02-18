@@ -6,7 +6,7 @@ import java.util.*;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 108 "../../../../../CarShopModel.ump"
+// line 122 "../../../../../CarShopModel.ump"
 public class AppointmentCalendar
 {
 
@@ -38,7 +38,7 @@ public class AppointmentCalendar
     business = aBusiness;
   }
 
-  public AppointmentCalendar(CarShopModel aCarShopModel, String aAddressForBusiness, String aPhoneNumberForBusiness, String aEmailAddressForBusiness, Owner aOwnerForBusiness, CarShopModel aCarShopModelForBusiness)
+  public AppointmentCalendar(CarShopModel aCarShopModel, String aAddressForBusiness, String aPhoneNumberForBusiness, String aEmailAddressForBusiness, CarShopModel aCarShopModelForBusiness)
   {
     appointments = new ArrayList<Appointment>();
     boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
@@ -46,7 +46,7 @@ public class AppointmentCalendar
     {
       throw new RuntimeException("Unable to create appointmentCalendar due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    business = new Business(aAddressForBusiness, aPhoneNumberForBusiness, aEmailAddressForBusiness, aOwnerForBusiness, this, aCarShopModelForBusiness);
+    business = new Business(aAddressForBusiness, aPhoneNumberForBusiness, aEmailAddressForBusiness, this, aCarShopModelForBusiness);
   }
 
   //------------------------

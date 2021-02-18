@@ -3,9 +3,8 @@
 
 package ca.mcgill.ecse223.carshop.model;
 import java.sql.Time;
-import java.util.*;
 
-// line 82 "../../../../../CarShopModel.ump"
+// line 90 "../../../../../CarShopModel.ump"
 public class Service
 {
 
@@ -14,241 +13,147 @@ public class Service
   //------------------------
 
   //Service Attributes
-  private String name;
-  private Time duration;
+  private Time startTime;
+  private Time endTime;
 
   //Service Associations
-  private Business business;
-  private Garage garage;
-  private List<Appointment> appointments;
+  private ServiceTemplate serviceTemplate;
+  private Appointment appointments;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Service(String aName, Time aDuration, Business aBusiness, Garage aGarage)
+  public Service(Time aStartTime, Time aEndTime, ServiceTemplate aServiceTemplate)
   {
-    name = aName;
-    duration = aDuration;
-    boolean didAddBusiness = setBusiness(aBusiness);
-    if (!didAddBusiness)
+    startTime = aStartTime;
+    endTime = aEndTime;
+    boolean didAddServiceTemplate = setServiceTemplate(aServiceTemplate);
+    if (!didAddServiceTemplate)
     {
-      throw new RuntimeException("Unable to create service due to business. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create service due to serviceTemplate. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    boolean didAddGarage = setGarage(aGarage);
-    if (!didAddGarage)
-    {
-      throw new RuntimeException("Unable to create service due to garage. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-    }
-    appointments = new ArrayList<Appointment>();
   }
 
   //------------------------
   // INTERFACE
   //------------------------
 
-  public boolean setName(String aName)
+  public boolean setStartTime(Time aStartTime)
   {
     boolean wasSet = false;
-    name = aName;
+    startTime = aStartTime;
     wasSet = true;
     return wasSet;
   }
 
-  public boolean setDuration(Time aDuration)
+  public boolean setEndTime(Time aEndTime)
   {
     boolean wasSet = false;
-    duration = aDuration;
+    endTime = aEndTime;
     wasSet = true;
     return wasSet;
   }
 
-  public String getName()
+  public Time getStartTime()
   {
-    return name;
+    return startTime;
   }
 
-  public Time getDuration()
+  public Time getEndTime()
   {
-    return duration;
+    return endTime;
   }
   /* Code from template association_GetOne */
-  public Business getBusiness()
+  public ServiceTemplate getServiceTemplate()
   {
-    return business;
+    return serviceTemplate;
   }
   /* Code from template association_GetOne */
-  public Garage getGarage()
+  public Appointment getAppointments()
   {
-    return garage;
-  }
-  /* Code from template association_GetMany */
-  public Appointment getAppointment(int index)
-  {
-    Appointment aAppointment = appointments.get(index);
-    return aAppointment;
-  }
-
-  public List<Appointment> getAppointments()
-  {
-    List<Appointment> newAppointments = Collections.unmodifiableList(appointments);
-    return newAppointments;
-  }
-
-  public int numberOfAppointments()
-  {
-    int number = appointments.size();
-    return number;
+    return appointments;
   }
 
   public boolean hasAppointments()
   {
-    boolean has = appointments.size() > 0;
+    boolean has = appointments != null;
     return has;
   }
-
-  public int indexOfAppointment(Appointment aAppointment)
-  {
-    int index = appointments.indexOf(aAppointment);
-    return index;
-  }
   /* Code from template association_SetOneToMany */
-  public boolean setBusiness(Business aBusiness)
+  public boolean setServiceTemplate(ServiceTemplate aServiceTemplate)
   {
     boolean wasSet = false;
-    if (aBusiness == null)
+    if (aServiceTemplate == null)
     {
       return wasSet;
     }
 
-    Business existingBusiness = business;
-    business = aBusiness;
-    if (existingBusiness != null && !existingBusiness.equals(aBusiness))
+    ServiceTemplate existingServiceTemplate = serviceTemplate;
+    serviceTemplate = aServiceTemplate;
+    if (existingServiceTemplate != null && !existingServiceTemplate.equals(aServiceTemplate))
     {
-      existingBusiness.removeService(this);
+      existingServiceTemplate.removeService(this);
     }
-    business.addService(this);
+    serviceTemplate.addService(this);
     wasSet = true;
     return wasSet;
   }
-  /* Code from template association_SetOneToMany */
-  public boolean setGarage(Garage aGarage)
+  /* Code from template association_SetOptionalOneToOptionalOne */
+  public boolean setAppointments(Appointment aNewAppointments)
   {
     boolean wasSet = false;
-    if (aGarage == null)
+    if (aNewAppointments == null)
     {
+      Appointment existingAppointments = appointments;
+      appointments = null;
+      
+      if (existingAppointments != null && existingAppointments.getService() != null)
+      {
+        existingAppointments.setService(null);
+      }
+      wasSet = true;
       return wasSet;
     }
 
-    Garage existingGarage = garage;
-    garage = aGarage;
-    if (existingGarage != null && !existingGarage.equals(aGarage))
+    Appointment currentAppointments = getAppointments();
+    if (currentAppointments != null && !currentAppointments.equals(aNewAppointments))
     {
-      existingGarage.removeService(this);
+      currentAppointments.setService(null);
     }
-    garage.addService(this);
+
+    appointments = aNewAppointments;
+    Service existingService = aNewAppointments.getService();
+
+    if (!equals(existingService))
+    {
+      aNewAppointments.setService(this);
+    }
     wasSet = true;
     return wasSet;
-  }
-  /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfAppointments()
-  {
-    return 0;
-  }
-  /* Code from template association_AddManyToOptionalOne */
-  public boolean addAppointment(Appointment aAppointment)
-  {
-    boolean wasAdded = false;
-    if (appointments.contains(aAppointment)) { return false; }
-    Service existingService = aAppointment.getService();
-    if (existingService == null)
-    {
-      aAppointment.setService(this);
-    }
-    else if (!this.equals(existingService))
-    {
-      existingService.removeAppointment(aAppointment);
-      addAppointment(aAppointment);
-    }
-    else
-    {
-      appointments.add(aAppointment);
-    }
-    wasAdded = true;
-    return wasAdded;
-  }
-
-  public boolean removeAppointment(Appointment aAppointment)
-  {
-    boolean wasRemoved = false;
-    if (appointments.contains(aAppointment))
-    {
-      appointments.remove(aAppointment);
-      aAppointment.setService(null);
-      wasRemoved = true;
-    }
-    return wasRemoved;
-  }
-  /* Code from template association_AddIndexControlFunctions */
-  public boolean addAppointmentAt(Appointment aAppointment, int index)
-  {  
-    boolean wasAdded = false;
-    if(addAppointment(aAppointment))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfAppointments()) { index = numberOfAppointments() - 1; }
-      appointments.remove(aAppointment);
-      appointments.add(index, aAppointment);
-      wasAdded = true;
-    }
-    return wasAdded;
-  }
-
-  public boolean addOrMoveAppointmentAt(Appointment aAppointment, int index)
-  {
-    boolean wasAdded = false;
-    if(appointments.contains(aAppointment))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfAppointments()) { index = numberOfAppointments() - 1; }
-      appointments.remove(aAppointment);
-      appointments.add(index, aAppointment);
-      wasAdded = true;
-    } 
-    else 
-    {
-      wasAdded = addAppointmentAt(aAppointment, index);
-    }
-    return wasAdded;
   }
 
   public void delete()
   {
-    Business placeholderBusiness = business;
-    this.business = null;
-    if(placeholderBusiness != null)
+    ServiceTemplate placeholderServiceTemplate = serviceTemplate;
+    this.serviceTemplate = null;
+    if(placeholderServiceTemplate != null)
     {
-      placeholderBusiness.removeService(this);
+      placeholderServiceTemplate.removeService(this);
     }
-    Garage placeholderGarage = garage;
-    this.garage = null;
-    if(placeholderGarage != null)
+    if (appointments != null)
     {
-      placeholderGarage.removeService(this);
-    }
-    while( !appointments.isEmpty() )
-    {
-      appointments.get(0).setService(null);
+      appointments.setService(null);
     }
   }
 
 
   public String toString()
   {
-    return super.toString() + "["+
-            "name" + ":" + getName()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "duration" + "=" + (getDuration() != null ? !getDuration().equals(this)  ? getDuration().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "business = "+(getBusiness()!=null?Integer.toHexString(System.identityHashCode(getBusiness())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "garage = "+(getGarage()!=null?Integer.toHexString(System.identityHashCode(getGarage())):"null");
+    return super.toString() + "["+ "]" + System.getProperties().getProperty("line.separator") +
+            "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+            "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+            "  " + "serviceTemplate = "+(getServiceTemplate()!=null?Integer.toHexString(System.identityHashCode(getServiceTemplate())):"null") + System.getProperties().getProperty("line.separator") +
+            "  " + "appointments = "+(getAppointments()!=null?Integer.toHexString(System.identityHashCode(getAppointments())):"null");
   }
 }

@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 
-// line 87 "../../../../../CarShopModel.ump"
+// line 104 "../../../../../CarShopModel.ump"
 public class ServiceCombo
 {
 
@@ -12,66 +12,33 @@ public class ServiceCombo
   // MEMBER VARIABLES
   //------------------------
 
-  //ServiceCombo Attributes
-  private String name;
-  private boolean isRequired;
-
   //ServiceCombo Associations
   private List<Service> services;
-  private Business business;
-  private List<Appointment> appointments;
+  private ServiceComboTemplate serviceComboTemplate;
+  private Appointment appointments;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public ServiceCombo(String aName, boolean aIsRequired, Business aBusiness)
+  public ServiceCombo(ServiceComboTemplate aServiceComboTemplate, Appointment aAppointments)
   {
-    name = aName;
-    isRequired = aIsRequired;
     services = new ArrayList<Service>();
-    boolean didAddBusiness = setBusiness(aBusiness);
-    if (!didAddBusiness)
+    boolean didAddServiceComboTemplate = setServiceComboTemplate(aServiceComboTemplate);
+    if (!didAddServiceComboTemplate)
     {
-      throw new RuntimeException("Unable to create combo due to business. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create combo due to serviceComboTemplate. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    appointments = new ArrayList<Appointment>();
+    boolean didAddAppointments = setAppointments(aAppointments);
+    if (!didAddAppointments)
+    {
+      throw new RuntimeException("Unable to create combos due to appointments. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
   }
 
   //------------------------
   // INTERFACE
   //------------------------
-
-  public boolean setName(String aName)
-  {
-    boolean wasSet = false;
-    name = aName;
-    wasSet = true;
-    return wasSet;
-  }
-
-  public boolean setIsRequired(boolean aIsRequired)
-  {
-    boolean wasSet = false;
-    isRequired = aIsRequired;
-    wasSet = true;
-    return wasSet;
-  }
-
-  public String getName()
-  {
-    return name;
-  }
-
-  public boolean getIsRequired()
-  {
-    return isRequired;
-  }
-  /* Code from template attribute_IsBoolean */
-  public boolean isIsRequired()
-  {
-    return isRequired;
-  }
   /* Code from template association_GetMany */
   public Service getService(int index)
   {
@@ -103,39 +70,14 @@ public class ServiceCombo
     return index;
   }
   /* Code from template association_GetOne */
-  public Business getBusiness()
+  public ServiceComboTemplate getServiceComboTemplate()
   {
-    return business;
+    return serviceComboTemplate;
   }
-  /* Code from template association_GetMany */
-  public Appointment getAppointment(int index)
+  /* Code from template association_GetOne */
+  public Appointment getAppointments()
   {
-    Appointment aAppointment = appointments.get(index);
-    return aAppointment;
-  }
-
-  public List<Appointment> getAppointments()
-  {
-    List<Appointment> newAppointments = Collections.unmodifiableList(appointments);
-    return newAppointments;
-  }
-
-  public int numberOfAppointments()
-  {
-    int number = appointments.size();
-    return number;
-  }
-
-  public boolean hasAppointments()
-  {
-    boolean has = appointments.size() > 0;
-    return has;
-  }
-
-  public int indexOfAppointment(Appointment aAppointment)
-  {
-    int index = appointments.indexOf(aAppointment);
-    return index;
+    return appointments;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfServices()
@@ -195,117 +137,68 @@ public class ServiceCombo
     return wasAdded;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setBusiness(Business aBusiness)
+  public boolean setServiceComboTemplate(ServiceComboTemplate aServiceComboTemplate)
   {
     boolean wasSet = false;
-    if (aBusiness == null)
+    if (aServiceComboTemplate == null)
     {
       return wasSet;
     }
 
-    Business existingBusiness = business;
-    business = aBusiness;
-    if (existingBusiness != null && !existingBusiness.equals(aBusiness))
+    ServiceComboTemplate existingServiceComboTemplate = serviceComboTemplate;
+    serviceComboTemplate = aServiceComboTemplate;
+    if (existingServiceComboTemplate != null && !existingServiceComboTemplate.equals(aServiceComboTemplate))
     {
-      existingBusiness.removeCombo(this);
+      existingServiceComboTemplate.removeCombo(this);
     }
-    business.addCombo(this);
+    serviceComboTemplate.addCombo(this);
     wasSet = true;
     return wasSet;
   }
-  /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfAppointments()
+  /* Code from template association_SetOneToOptionalOne */
+  public boolean setAppointments(Appointment aNewAppointments)
   {
-    return 0;
-  }
-  /* Code from template association_AddManyToOptionalOne */
-  public boolean addAppointment(Appointment aAppointment)
-  {
-    boolean wasAdded = false;
-    if (appointments.contains(aAppointment)) { return false; }
-    ServiceCombo existingCombos = aAppointment.getCombos();
-    if (existingCombos == null)
+    boolean wasSet = false;
+    if (aNewAppointments == null)
     {
-      aAppointment.setCombos(this);
+      //Unable to setAppointments to null, as combos must always be associated to a appointments
+      return wasSet;
     }
-    else if (!this.equals(existingCombos))
+    
+    ServiceCombo existingCombos = aNewAppointments.getCombos();
+    if (existingCombos != null && !equals(existingCombos))
     {
-      existingCombos.removeAppointment(aAppointment);
-      addAppointment(aAppointment);
+      //Unable to setAppointments, the current appointments already has a combos, which would be orphaned if it were re-assigned
+      return wasSet;
     }
-    else
-    {
-      appointments.add(aAppointment);
-    }
-    wasAdded = true;
-    return wasAdded;
-  }
+    
+    Appointment anOldAppointments = appointments;
+    appointments = aNewAppointments;
+    appointments.setCombos(this);
 
-  public boolean removeAppointment(Appointment aAppointment)
-  {
-    boolean wasRemoved = false;
-    if (appointments.contains(aAppointment))
+    if (anOldAppointments != null)
     {
-      appointments.remove(aAppointment);
-      aAppointment.setCombos(null);
-      wasRemoved = true;
+      anOldAppointments.setCombos(null);
     }
-    return wasRemoved;
-  }
-  /* Code from template association_AddIndexControlFunctions */
-  public boolean addAppointmentAt(Appointment aAppointment, int index)
-  {  
-    boolean wasAdded = false;
-    if(addAppointment(aAppointment))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfAppointments()) { index = numberOfAppointments() - 1; }
-      appointments.remove(aAppointment);
-      appointments.add(index, aAppointment);
-      wasAdded = true;
-    }
-    return wasAdded;
-  }
-
-  public boolean addOrMoveAppointmentAt(Appointment aAppointment, int index)
-  {
-    boolean wasAdded = false;
-    if(appointments.contains(aAppointment))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfAppointments()) { index = numberOfAppointments() - 1; }
-      appointments.remove(aAppointment);
-      appointments.add(index, aAppointment);
-      wasAdded = true;
-    } 
-    else 
-    {
-      wasAdded = addAppointmentAt(aAppointment, index);
-    }
-    return wasAdded;
+    wasSet = true;
+    return wasSet;
   }
 
   public void delete()
   {
     services.clear();
-    Business placeholderBusiness = business;
-    this.business = null;
-    if(placeholderBusiness != null)
+    ServiceComboTemplate placeholderServiceComboTemplate = serviceComboTemplate;
+    this.serviceComboTemplate = null;
+    if(placeholderServiceComboTemplate != null)
     {
-      placeholderBusiness.removeCombo(this);
+      placeholderServiceComboTemplate.removeCombo(this);
     }
-    while( !appointments.isEmpty() )
+    Appointment existingAppointments = appointments;
+    appointments = null;
+    if (existingAppointments != null)
     {
-      appointments.get(0).setCombos(null);
+      existingAppointments.setCombos(null);
     }
   }
 
-
-  public String toString()
-  {
-    return super.toString() + "["+
-            "name" + ":" + getName()+ "," +
-            "isRequired" + ":" + getIsRequired()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "business = "+(getBusiness()!=null?Integer.toHexString(System.identityHashCode(getBusiness())):"null");
-  }
 }

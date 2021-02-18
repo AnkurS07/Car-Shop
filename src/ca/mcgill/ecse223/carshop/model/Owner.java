@@ -19,10 +19,15 @@ public class Owner extends UserRole
   // CONSTRUCTOR
   //------------------------
 
-  public Owner(CarShopModel aCarShopModel)
+  public Owner(CarShopModel aCarShopModel, Business... allBusiness)
   {
     super(aCarShopModel);
     business = new ArrayList<Business>();
+    boolean didAddBusiness = setBusiness(allBusiness);
+    if (!didAddBusiness)
+    {
+      throw new RuntimeException("Unable to create Owner, must have at least 1 business. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
   }
 
   //------------------------
@@ -69,54 +74,96 @@ public class Owner extends UserRole
   {
     return 1;
   }
-  /* Code from template association_AddMandatoryManyToOne */
-  public Business addBusiness(String aAddress, String aPhoneNumber, String aEmailAddress, AppointmentCalendar aAppointmentCalendar, CarShopModel aCarShopModel)
-  {
-    Business aNewBusiness = new Business(aAddress, aPhoneNumber, aEmailAddress, this, aAppointmentCalendar, aCarShopModel);
-    return aNewBusiness;
-  }
-
+  /* Code from template association_AddManyToManyMethod */
   public boolean addBusiness(Business aBusiness)
   {
     boolean wasAdded = false;
     if (business.contains(aBusiness)) { return false; }
-    Owner existingOwner = aBusiness.getOwner();
-    boolean isNewOwner = existingOwner != null && !this.equals(existingOwner);
-
-    if (isNewOwner && existingOwner.numberOfBusiness() <= minimumNumberOfBusiness())
+    business.add(aBusiness);
+    if (aBusiness.indexOfOwner(this) != -1)
     {
-      return wasAdded;
-    }
-    if (isNewOwner)
-    {
-      aBusiness.setOwner(this);
+      wasAdded = true;
     }
     else
     {
-      business.add(aBusiness);
+      wasAdded = aBusiness.addOwner(this);
+      if (!wasAdded)
+      {
+        business.remove(aBusiness);
+      }
     }
-    wasAdded = true;
     return wasAdded;
   }
-
+  /* Code from template association_AddMStarToMany */
   public boolean removeBusiness(Business aBusiness)
   {
     boolean wasRemoved = false;
-    //Unable to remove aBusiness, as it must always have a owner
-    if (this.equals(aBusiness.getOwner()))
+    if (!business.contains(aBusiness))
     {
       return wasRemoved;
     }
 
-    //owner already at minimum (1)
     if (numberOfBusiness() <= minimumNumberOfBusiness())
     {
       return wasRemoved;
     }
 
-    business.remove(aBusiness);
-    wasRemoved = true;
+    int oldIndex = business.indexOf(aBusiness);
+    business.remove(oldIndex);
+    if (aBusiness.indexOfOwner(this) == -1)
+    {
+      wasRemoved = true;
+    }
+    else
+    {
+      wasRemoved = aBusiness.removeOwner(this);
+      if (!wasRemoved)
+      {
+        business.add(oldIndex,aBusiness);
+      }
+    }
     return wasRemoved;
+  }
+  /* Code from template association_SetMStarToMany */
+  public boolean setBusiness(Business... newBusiness)
+  {
+    boolean wasSet = false;
+    ArrayList<Business> verifiedBusiness = new ArrayList<Business>();
+    for (Business aBusiness : newBusiness)
+    {
+      if (verifiedBusiness.contains(aBusiness))
+      {
+        continue;
+      }
+      verifiedBusiness.add(aBusiness);
+    }
+
+    if (verifiedBusiness.size() != newBusiness.length || verifiedBusiness.size() < minimumNumberOfBusiness())
+    {
+      return wasSet;
+    }
+
+    ArrayList<Business> oldBusiness = new ArrayList<Business>(business);
+    business.clear();
+    for (Business aNewBusiness : verifiedBusiness)
+    {
+      business.add(aNewBusiness);
+      if (oldBusiness.contains(aNewBusiness))
+      {
+        oldBusiness.remove(aNewBusiness);
+      }
+      else
+      {
+        aNewBusiness.addOwner(this);
+      }
+    }
+
+    for (Business anOldBusiness : oldBusiness)
+    {
+      anOldBusiness.removeOwner(this);
+    }
+    wasSet = true;
+    return wasSet;
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addBusinessAt(Business aBusiness, int index)
@@ -153,10 +200,11 @@ public class Owner extends UserRole
 
   public void delete()
   {
-    for(int i=business.size(); i > 0; i--)
+    ArrayList<Business> copyOfBusiness = new ArrayList<Business>(business);
+    business.clear();
+    for(Business aBusiness : copyOfBusiness)
     {
-      Business aBusiness = business.get(i - 1);
-      aBusiness.delete();
+      aBusiness.removeOwner(this);
     }
     super.delete();
   }

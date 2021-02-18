@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 100 "../../../../../CarShopModel.ump"
+// line 114 "../../../../../CarShopModel.ump"
 public class Appointment
 {
 
@@ -104,36 +104,62 @@ public class Appointment
   {
     return appointmentCalendar;
   }
-  /* Code from template association_SetOptionalOneToMany */
-  public boolean setService(Service aService)
+  /* Code from template association_SetOptionalOneToOptionalOne */
+  public boolean setService(Service aNewService)
   {
     boolean wasSet = false;
-    Service existingService = service;
-    service = aService;
-    if (existingService != null && !existingService.equals(aService))
+    if (aNewService == null)
     {
-      existingService.removeAppointment(this);
+      Service existingService = service;
+      service = null;
+      
+      if (existingService != null && existingService.getAppointments() != null)
+      {
+        existingService.setAppointments(null);
+      }
+      wasSet = true;
+      return wasSet;
     }
-    if (aService != null)
+
+    Service currentService = getService();
+    if (currentService != null && !currentService.equals(aNewService))
     {
-      aService.addAppointment(this);
+      currentService.setAppointments(null);
+    }
+
+    service = aNewService;
+    Appointment existingAppointments = aNewService.getAppointments();
+
+    if (!equals(existingAppointments))
+    {
+      aNewService.setAppointments(this);
     }
     wasSet = true;
     return wasSet;
   }
-  /* Code from template association_SetOptionalOneToMany */
-  public boolean setCombos(ServiceCombo aCombos)
+  /* Code from template association_SetOptionalOneToOne */
+  public boolean setCombos(ServiceCombo aNewCombos)
   {
     boolean wasSet = false;
-    ServiceCombo existingCombos = combos;
-    combos = aCombos;
-    if (existingCombos != null && !existingCombos.equals(aCombos))
+    if (combos != null && !combos.equals(aNewCombos) && equals(combos.getAppointments()))
     {
-      existingCombos.removeAppointment(this);
+      //Unable to setCombos, as existing combos would become an orphan
+      return wasSet;
     }
-    if (aCombos != null)
+
+    combos = aNewCombos;
+    Appointment anOldAppointments = aNewCombos != null ? aNewCombos.getAppointments() : null;
+
+    if (!this.equals(anOldAppointments))
     {
-      aCombos.addAppointment(this);
+      if (anOldAppointments != null)
+      {
+        anOldAppointments.combos = null;
+      }
+      if (combos != null)
+      {
+        combos.setAppointments(this);
+      }
     }
     wasSet = true;
     return wasSet;
@@ -181,15 +207,13 @@ public class Appointment
   {
     if (service != null)
     {
-      Service placeholderService = service;
-      this.service = null;
-      placeholderService.removeAppointment(this);
+      service.setAppointments(null);
     }
-    if (combos != null)
+    ServiceCombo existingCombos = combos;
+    combos = null;
+    if (existingCombos != null)
     {
-      ServiceCombo placeholderCombos = combos;
-      this.combos = null;
-      placeholderCombos.removeAppointment(this);
+      existingCombos.delete();
     }
     Client placeholderClient = client;
     this.client = null;
