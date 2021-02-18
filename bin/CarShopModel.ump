@@ -1,34 +1,23 @@
 namespace ca.mcgill.ecse223.carshop.model;
 
-class CarShopModel {
+class CarShopSystem {
   1 <@>- * UserAccount accounts;
   1 <@>- * UserRole userRoles;
   1 <@>- * Business businesses;
   1 <@>- * Holiday holidays;
   1 <@>- * Garage garages;
   1 <@>- * DailySchedule schedules;
-  1 <@>- * AppointmentCalendar appointmentCalendars;
-  
-  public java.util.Date getCurrentDate() {
-    java.util.Calendar cal = java.util.Calendar.getInstance();
-    cal.set(Calendar.HOUR_OF_DAY, 0);
-    cal.set(Calendar.MINUTE, 0);
-    cal.set(Calendar.SECOND, 0);
-    cal.set(Calendar.MILLISECOND, 0);
-    java.util.Date date = cal.getTime();
-    return date;
-  }
   
 }
 
 class UserAccount {
-  unique String userName;
-  String password;
-  0..1 userAccount -- 0..1 UserRole userRole;
+  	unique String userName;
+  	String password;
+	0..1 userAccount -- 0..1 UserRole userRole;
 }
 
 class UserRole {
-  abstract;
+	abstract;
 }
 
 class Owner {
@@ -113,7 +102,6 @@ class Garage {
 
 class Appointment {
 	Date date;
-	Time time;
 	
 	0..1 appointments -- 0..1 Service service;
 	1 appointments -- 0..1 ServiceCombo combos;

@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.sql.Time;
 import java.util.*;
 
-// line 68 "../../../../../CarShopModel.ump"
+// line 57 "../../../../../CarShopModel.ump"
 public class DailySchedule
 {
 
@@ -26,22 +26,22 @@ public class DailySchedule
 
   //DailySchedule Associations
   private List<Break> breaks;
-  private CarShopModel carShopModel;
+  private CarShopSystem carShopSystem;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public DailySchedule(Day aDay, Time aOpeningTime, Time aClosingTime, CarShopModel aCarShopModel)
+  public DailySchedule(Day aDay, Time aOpeningTime, Time aClosingTime, CarShopSystem aCarShopSystem)
   {
     day = aDay;
     openingTime = aOpeningTime;
     closingTime = aClosingTime;
     breaks = new ArrayList<Break>();
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create schedule due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create schedule due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -118,9 +118,9 @@ public class DailySchedule
     return index;
   }
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
+  public CarShopSystem getCarShopSystem()
   {
-    return carShopModel;
+    return carShopSystem;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfBreaks()
@@ -195,21 +195,21 @@ public class DailySchedule
     return wasAdded;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
+  public boolean setCarShopSystem(CarShopSystem aCarShopSystem)
   {
     boolean wasSet = false;
-    if (aCarShopModel == null)
+    if (aCarShopSystem == null)
     {
       return wasSet;
     }
 
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
+    CarShopSystem existingCarShopSystem = carShopSystem;
+    carShopSystem = aCarShopSystem;
+    if (existingCarShopSystem != null && !existingCarShopSystem.equals(aCarShopSystem))
     {
-      existingCarShopModel.removeSchedule(this);
+      existingCarShopSystem.removeSchedule(this);
     }
-    carShopModel.addSchedule(this);
+    carShopSystem.addSchedule(this);
     wasSet = true;
     return wasSet;
   }
@@ -223,11 +223,11 @@ public class DailySchedule
       breaks.remove(aBreak);
     }
     
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
+    CarShopSystem placeholderCarShopSystem = carShopSystem;
+    this.carShopSystem = null;
+    if(placeholderCarShopSystem != null)
     {
-      placeholderCarShopModel.removeSchedule(this);
+      placeholderCarShopSystem.removeSchedule(this);
     }
   }
 
@@ -238,6 +238,6 @@ public class DailySchedule
             "  " + "day" + "=" + (getDay() != null ? !getDay().equals(this)  ? getDay().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "openingTime" + "=" + (getOpeningTime() != null ? !getOpeningTime().equals(this)  ? getOpeningTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "closingTime" + "=" + (getClosingTime() != null ? !getClosingTime().equals(this)  ? getClosingTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "carShopModel = "+(getCarShopModel()!=null?Integer.toHexString(System.identityHashCode(getCarShopModel())):"null");
+            "  " + "carShopSystem = "+(getCarShopSystem()!=null?Integer.toHexString(System.identityHashCode(getCarShopSystem())):"null");
   }
 }

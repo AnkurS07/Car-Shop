@@ -3,7 +3,7 @@
 
 package ca.mcgill.ecse223.carshop.model;
 
-// line 30 "../../../../../CarShopModel.ump"
+// line 19 "../../../../../CarShopModel.ump"
 public abstract class UserRole
 {
 
@@ -12,19 +12,19 @@ public abstract class UserRole
   //------------------------
 
   //UserRole Associations
-  private CarShopModel carShopModel;
+  private CarShopSystem carShopSystem;
   private UserAccount userAccount;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public UserRole(CarShopModel aCarShopModel)
+  public UserRole(CarShopSystem aCarShopSystem)
   {
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create userRole due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create userRole due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -32,9 +32,9 @@ public abstract class UserRole
   // INTERFACE
   //------------------------
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
+  public CarShopSystem getCarShopSystem()
   {
-    return carShopModel;
+    return carShopSystem;
   }
   /* Code from template association_GetOne */
   public UserAccount getUserAccount()
@@ -48,21 +48,21 @@ public abstract class UserRole
     return has;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
+  public boolean setCarShopSystem(CarShopSystem aCarShopSystem)
   {
     boolean wasSet = false;
-    if (aCarShopModel == null)
+    if (aCarShopSystem == null)
     {
       return wasSet;
     }
 
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
+    CarShopSystem existingCarShopSystem = carShopSystem;
+    carShopSystem = aCarShopSystem;
+    if (existingCarShopSystem != null && !existingCarShopSystem.equals(aCarShopSystem))
     {
-      existingCarShopModel.removeUserRole(this);
+      existingCarShopSystem.removeUserRole(this);
     }
-    carShopModel.addUserRole(this);
+    carShopSystem.addUserRole(this);
     wasSet = true;
     return wasSet;
   }
@@ -102,11 +102,11 @@ public abstract class UserRole
 
   public void delete()
   {
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
+    CarShopSystem placeholderCarShopSystem = carShopSystem;
+    this.carShopSystem = null;
+    if(placeholderCarShopSystem != null)
     {
-      placeholderCarShopModel.removeUserRole(this);
+      placeholderCarShopSystem.removeUserRole(this);
     }
     if (userAccount != null)
     {

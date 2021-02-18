@@ -4,9 +4,8 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 import java.sql.Date;
-import java.sql.Time;
 
-// line 122 "../../../../../CarShopModel.ump"
+// line 110 "../../../../../CarShopModel.ump"
 public class AppointmentCalendar
 {
 
@@ -16,21 +15,15 @@ public class AppointmentCalendar
 
   //AppointmentCalendar Associations
   private List<Appointment> appointments;
-  private CarShopModel carShopModel;
   private Business business;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public AppointmentCalendar(CarShopModel aCarShopModel, Business aBusiness)
+  public AppointmentCalendar(Business aBusiness)
   {
     appointments = new ArrayList<Appointment>();
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
-    {
-      throw new RuntimeException("Unable to create appointmentCalendar due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-    }
     if (aBusiness == null || aBusiness.getAppointmentCalendar() != null)
     {
       throw new RuntimeException("Unable to create AppointmentCalendar due to aBusiness. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
@@ -38,15 +31,10 @@ public class AppointmentCalendar
     business = aBusiness;
   }
 
-  public AppointmentCalendar(CarShopModel aCarShopModel, String aAddressForBusiness, String aPhoneNumberForBusiness, String aEmailAddressForBusiness, CarShopModel aCarShopModelForBusiness)
+  public AppointmentCalendar(String aAddressForBusiness, String aPhoneNumberForBusiness, String aEmailAddressForBusiness, CarShopSystem aCarShopSystemForBusiness)
   {
     appointments = new ArrayList<Appointment>();
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
-    {
-      throw new RuntimeException("Unable to create appointmentCalendar due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-    }
-    business = new Business(aAddressForBusiness, aPhoneNumberForBusiness, aEmailAddressForBusiness, this, aCarShopModelForBusiness);
+    business = new Business(aAddressForBusiness, aPhoneNumberForBusiness, aEmailAddressForBusiness, this, aCarShopSystemForBusiness);
   }
 
   //------------------------
@@ -83,11 +71,6 @@ public class AppointmentCalendar
     return index;
   }
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
-  {
-    return carShopModel;
-  }
-  /* Code from template association_GetOne */
   public Business getBusiness()
   {
     return business;
@@ -98,9 +81,9 @@ public class AppointmentCalendar
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Appointment addAppointment(Date aDate, Time aTime, Client aClient)
+  public Appointment addAppointment(Date aDate, Client aClient)
   {
-    return new Appointment(aDate, aTime, aClient, this);
+    return new Appointment(aDate, aClient, this);
   }
 
   public boolean addAppointment(Appointment aAppointment)
@@ -164,25 +147,6 @@ public class AppointmentCalendar
     }
     return wasAdded;
   }
-  /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
-  {
-    boolean wasSet = false;
-    if (aCarShopModel == null)
-    {
-      return wasSet;
-    }
-
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
-    {
-      existingCarShopModel.removeAppointmentCalendar(this);
-    }
-    carShopModel.addAppointmentCalendar(this);
-    wasSet = true;
-    return wasSet;
-  }
 
   public void delete()
   {
@@ -190,12 +154,6 @@ public class AppointmentCalendar
     {
       Appointment aAppointment = appointments.get(i - 1);
       aAppointment.delete();
-    }
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
-    {
-      placeholderCarShopModel.removeAppointmentCalendar(this);
     }
     Business existingBusiness = business;
     business = null;

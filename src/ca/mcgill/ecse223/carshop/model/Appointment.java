@@ -3,9 +3,8 @@
 
 package ca.mcgill.ecse223.carshop.model;
 import java.sql.Date;
-import java.sql.Time;
 
-// line 114 "../../../../../CarShopModel.ump"
+// line 103 "../../../../../CarShopModel.ump"
 public class Appointment
 {
 
@@ -15,7 +14,6 @@ public class Appointment
 
   //Appointment Attributes
   private Date date;
-  private Time time;
 
   //Appointment Associations
   private Service service;
@@ -27,10 +25,9 @@ public class Appointment
   // CONSTRUCTOR
   //------------------------
 
-  public Appointment(Date aDate, Time aTime, Client aClient, AppointmentCalendar aAppointmentCalendar)
+  public Appointment(Date aDate, Client aClient, AppointmentCalendar aAppointmentCalendar)
   {
     date = aDate;
-    time = aTime;
     boolean didAddClient = setClient(aClient);
     if (!didAddClient)
     {
@@ -55,22 +52,9 @@ public class Appointment
     return wasSet;
   }
 
-  public boolean setTime(Time aTime)
-  {
-    boolean wasSet = false;
-    time = aTime;
-    wasSet = true;
-    return wasSet;
-  }
-
   public Date getDate()
   {
     return date;
-  }
-
-  public Time getTime()
-  {
-    return time;
   }
   /* Code from template association_GetOne */
   public Service getService()
@@ -234,7 +218,6 @@ public class Appointment
   {
     return super.toString() + "["+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "date" + "=" + (getDate() != null ? !getDate().equals(this)  ? getDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "time" + "=" + (getTime() != null ? !getTime().equals(this)  ? getTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "service = "+(getService()!=null?Integer.toHexString(System.identityHashCode(getService())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "combos = "+(getCombos()!=null?Integer.toHexString(System.identityHashCode(getCombos())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "client = "+(getClient()!=null?Integer.toHexString(System.identityHashCode(getClient())):"null") + System.getProperties().getProperty("line.separator") +

@@ -7,27 +7,26 @@ import java.sql.Date;
 import java.sql.Time;
 
 // line 3 "../../../../../CarShopModel.ump"
-public class CarShopModel
+public class CarShopSystem
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
 
-  //CarShopModel Associations
+  //CarShopSystem Associations
   private List<UserAccount> accounts;
   private List<UserRole> userRoles;
   private List<Business> businesses;
   private List<Holiday> holidays;
   private List<Garage> garages;
   private List<DailySchedule> schedules;
-  private List<AppointmentCalendar> appointmentCalendars;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public CarShopModel()
+  public CarShopSystem()
   {
     accounts = new ArrayList<UserAccount>();
     userRoles = new ArrayList<UserRole>();
@@ -35,7 +34,6 @@ public class CarShopModel
     holidays = new ArrayList<Holiday>();
     garages = new ArrayList<Garage>();
     schedules = new ArrayList<DailySchedule>();
-    appointmentCalendars = new ArrayList<AppointmentCalendar>();
   }
 
   //------------------------
@@ -221,36 +219,6 @@ public class CarShopModel
     int index = schedules.indexOf(aSchedule);
     return index;
   }
-  /* Code from template association_GetMany */
-  public AppointmentCalendar getAppointmentCalendar(int index)
-  {
-    AppointmentCalendar aAppointmentCalendar = appointmentCalendars.get(index);
-    return aAppointmentCalendar;
-  }
-
-  public List<AppointmentCalendar> getAppointmentCalendars()
-  {
-    List<AppointmentCalendar> newAppointmentCalendars = Collections.unmodifiableList(appointmentCalendars);
-    return newAppointmentCalendars;
-  }
-
-  public int numberOfAppointmentCalendars()
-  {
-    int number = appointmentCalendars.size();
-    return number;
-  }
-
-  public boolean hasAppointmentCalendars()
-  {
-    boolean has = appointmentCalendars.size() > 0;
-    return has;
-  }
-
-  public int indexOfAppointmentCalendar(AppointmentCalendar aAppointmentCalendar)
-  {
-    int index = appointmentCalendars.indexOf(aAppointmentCalendar);
-    return index;
-  }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfAccounts()
   {
@@ -266,11 +234,11 @@ public class CarShopModel
   {
     boolean wasAdded = false;
     if (accounts.contains(aAccount)) { return false; }
-    CarShopModel existingCarShopModel = aAccount.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
+    CarShopSystem existingCarShopSystem = aAccount.getCarShopSystem();
+    boolean isNewCarShopSystem = existingCarShopSystem != null && !this.equals(existingCarShopSystem);
+    if (isNewCarShopSystem)
     {
-      aAccount.setCarShopModel(this);
+      aAccount.setCarShopSystem(this);
     }
     else
     {
@@ -283,8 +251,8 @@ public class CarShopModel
   public boolean removeAccount(UserAccount aAccount)
   {
     boolean wasRemoved = false;
-    //Unable to remove aAccount, as it must always have a carShopModel
-    if (!this.equals(aAccount.getCarShopModel()))
+    //Unable to remove aAccount, as it must always have a carShopSystem
+    if (!this.equals(aAccount.getCarShopSystem()))
     {
       accounts.remove(aAccount);
       wasRemoved = true;
@@ -335,11 +303,11 @@ public class CarShopModel
   {
     boolean wasAdded = false;
     if (userRoles.contains(aUserRole)) { return false; }
-    CarShopModel existingCarShopModel = aUserRole.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
+    CarShopSystem existingCarShopSystem = aUserRole.getCarShopSystem();
+    boolean isNewCarShopSystem = existingCarShopSystem != null && !this.equals(existingCarShopSystem);
+    if (isNewCarShopSystem)
     {
-      aUserRole.setCarShopModel(this);
+      aUserRole.setCarShopSystem(this);
     }
     else
     {
@@ -352,8 +320,8 @@ public class CarShopModel
   public boolean removeUserRole(UserRole aUserRole)
   {
     boolean wasRemoved = false;
-    //Unable to remove aUserRole, as it must always have a carShopModel
-    if (!this.equals(aUserRole.getCarShopModel()))
+    //Unable to remove aUserRole, as it must always have a carShopSystem
+    if (!this.equals(aUserRole.getCarShopSystem()))
     {
       userRoles.remove(aUserRole);
       wasRemoved = true;
@@ -407,11 +375,11 @@ public class CarShopModel
   {
     boolean wasAdded = false;
     if (businesses.contains(aBusiness)) { return false; }
-    CarShopModel existingCarShopModel = aBusiness.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
+    CarShopSystem existingCarShopSystem = aBusiness.getCarShopSystem();
+    boolean isNewCarShopSystem = existingCarShopSystem != null && !this.equals(existingCarShopSystem);
+    if (isNewCarShopSystem)
     {
-      aBusiness.setCarShopModel(this);
+      aBusiness.setCarShopSystem(this);
     }
     else
     {
@@ -424,8 +392,8 @@ public class CarShopModel
   public boolean removeBusiness(Business aBusiness)
   {
     boolean wasRemoved = false;
-    //Unable to remove aBusiness, as it must always have a carShopModel
-    if (!this.equals(aBusiness.getCarShopModel()))
+    //Unable to remove aBusiness, as it must always have a carShopSystem
+    if (!this.equals(aBusiness.getCarShopSystem()))
     {
       businesses.remove(aBusiness);
       wasRemoved = true;
@@ -479,11 +447,11 @@ public class CarShopModel
   {
     boolean wasAdded = false;
     if (holidays.contains(aHoliday)) { return false; }
-    CarShopModel existingCarShopModel = aHoliday.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
+    CarShopSystem existingCarShopSystem = aHoliday.getCarShopSystem();
+    boolean isNewCarShopSystem = existingCarShopSystem != null && !this.equals(existingCarShopSystem);
+    if (isNewCarShopSystem)
     {
-      aHoliday.setCarShopModel(this);
+      aHoliday.setCarShopSystem(this);
     }
     else
     {
@@ -496,8 +464,8 @@ public class CarShopModel
   public boolean removeHoliday(Holiday aHoliday)
   {
     boolean wasRemoved = false;
-    //Unable to remove aHoliday, as it must always have a carShopModel
-    if (!this.equals(aHoliday.getCarShopModel()))
+    //Unable to remove aHoliday, as it must always have a carShopSystem
+    if (!this.equals(aHoliday.getCarShopSystem()))
     {
       holidays.remove(aHoliday);
       wasRemoved = true;
@@ -551,11 +519,11 @@ public class CarShopModel
   {
     boolean wasAdded = false;
     if (garages.contains(aGarage)) { return false; }
-    CarShopModel existingCarShopModel = aGarage.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
+    CarShopSystem existingCarShopSystem = aGarage.getCarShopSystem();
+    boolean isNewCarShopSystem = existingCarShopSystem != null && !this.equals(existingCarShopSystem);
+    if (isNewCarShopSystem)
     {
-      aGarage.setCarShopModel(this);
+      aGarage.setCarShopSystem(this);
     }
     else
     {
@@ -568,8 +536,8 @@ public class CarShopModel
   public boolean removeGarage(Garage aGarage)
   {
     boolean wasRemoved = false;
-    //Unable to remove aGarage, as it must always have a carShopModel
-    if (!this.equals(aGarage.getCarShopModel()))
+    //Unable to remove aGarage, as it must always have a carShopSystem
+    if (!this.equals(aGarage.getCarShopSystem()))
     {
       garages.remove(aGarage);
       wasRemoved = true;
@@ -623,11 +591,11 @@ public class CarShopModel
   {
     boolean wasAdded = false;
     if (schedules.contains(aSchedule)) { return false; }
-    CarShopModel existingCarShopModel = aSchedule.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
+    CarShopSystem existingCarShopSystem = aSchedule.getCarShopSystem();
+    boolean isNewCarShopSystem = existingCarShopSystem != null && !this.equals(existingCarShopSystem);
+    if (isNewCarShopSystem)
     {
-      aSchedule.setCarShopModel(this);
+      aSchedule.setCarShopSystem(this);
     }
     else
     {
@@ -640,8 +608,8 @@ public class CarShopModel
   public boolean removeSchedule(DailySchedule aSchedule)
   {
     boolean wasRemoved = false;
-    //Unable to remove aSchedule, as it must always have a carShopModel
-    if (!this.equals(aSchedule.getCarShopModel()))
+    //Unable to remove aSchedule, as it must always have a carShopSystem
+    if (!this.equals(aSchedule.getCarShopSystem()))
     {
       schedules.remove(aSchedule);
       wasRemoved = true;
@@ -677,78 +645,6 @@ public class CarShopModel
     else 
     {
       wasAdded = addScheduleAt(aSchedule, index);
-    }
-    return wasAdded;
-  }
-  /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfAppointmentCalendars()
-  {
-    return 0;
-  }
-  /* Code from template association_AddManyToOne */
-  public AppointmentCalendar addAppointmentCalendar(Business aBusiness)
-  {
-    return new AppointmentCalendar(this, aBusiness);
-  }
-
-  public boolean addAppointmentCalendar(AppointmentCalendar aAppointmentCalendar)
-  {
-    boolean wasAdded = false;
-    if (appointmentCalendars.contains(aAppointmentCalendar)) { return false; }
-    CarShopModel existingCarShopModel = aAppointmentCalendar.getCarShopModel();
-    boolean isNewCarShopModel = existingCarShopModel != null && !this.equals(existingCarShopModel);
-    if (isNewCarShopModel)
-    {
-      aAppointmentCalendar.setCarShopModel(this);
-    }
-    else
-    {
-      appointmentCalendars.add(aAppointmentCalendar);
-    }
-    wasAdded = true;
-    return wasAdded;
-  }
-
-  public boolean removeAppointmentCalendar(AppointmentCalendar aAppointmentCalendar)
-  {
-    boolean wasRemoved = false;
-    //Unable to remove aAppointmentCalendar, as it must always have a carShopModel
-    if (!this.equals(aAppointmentCalendar.getCarShopModel()))
-    {
-      appointmentCalendars.remove(aAppointmentCalendar);
-      wasRemoved = true;
-    }
-    return wasRemoved;
-  }
-  /* Code from template association_AddIndexControlFunctions */
-  public boolean addAppointmentCalendarAt(AppointmentCalendar aAppointmentCalendar, int index)
-  {  
-    boolean wasAdded = false;
-    if(addAppointmentCalendar(aAppointmentCalendar))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfAppointmentCalendars()) { index = numberOfAppointmentCalendars() - 1; }
-      appointmentCalendars.remove(aAppointmentCalendar);
-      appointmentCalendars.add(index, aAppointmentCalendar);
-      wasAdded = true;
-    }
-    return wasAdded;
-  }
-
-  public boolean addOrMoveAppointmentCalendarAt(AppointmentCalendar aAppointmentCalendar, int index)
-  {
-    boolean wasAdded = false;
-    if(appointmentCalendars.contains(aAppointmentCalendar))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfAppointmentCalendars()) { index = numberOfAppointmentCalendars() - 1; }
-      appointmentCalendars.remove(aAppointmentCalendar);
-      appointmentCalendars.add(index, aAppointmentCalendar);
-      wasAdded = true;
-    } 
-    else 
-    {
-      wasAdded = addAppointmentCalendarAt(aAppointmentCalendar, index);
     }
     return wasAdded;
   }
@@ -797,24 +693,6 @@ public class CarShopModel
       schedules.remove(aSchedule);
     }
     
-    while (appointmentCalendars.size() > 0)
-    {
-      AppointmentCalendar aAppointmentCalendar = appointmentCalendars.get(appointmentCalendars.size() - 1);
-      aAppointmentCalendar.delete();
-      appointmentCalendars.remove(aAppointmentCalendar);
-    }
-    
-  }
-
-  // line 13 "../../../../../CarShopModel.ump"
-   public java.util.Date getCurrentDate(){
-    java.util.Calendar cal = java.util.Calendar.getInstance();
-    cal.set(Calendar.HOUR_OF_DAY, 0);
-    cal.set(Calendar.MINUTE, 0);
-    cal.set(Calendar.SECOND, 0);
-    cal.set(Calendar.MILLISECOND, 0);
-    java.util.Date date = cal.getTime();
-    return date;
   }
 
 }

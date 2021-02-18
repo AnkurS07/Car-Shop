@@ -4,9 +4,8 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 import java.sql.Date;
-import java.sql.Time;
 
-// line 45 "../../../../../CarShopModel.ump"
+// line 34 "../../../../../CarShopModel.ump"
 public class Client extends UserRole
 {
 
@@ -21,9 +20,9 @@ public class Client extends UserRole
   // CONSTRUCTOR
   //------------------------
 
-  public Client(CarShopModel aCarShopModel)
+  public Client(CarShopSystem aCarShopSystem)
   {
-    super(aCarShopModel);
+    super(aCarShopSystem);
     appointments = new ArrayList<Appointment>();
   }
 
@@ -66,9 +65,9 @@ public class Client extends UserRole
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Appointment addAppointment(Date aDate, Time aTime, AppointmentCalendar aAppointmentCalendar)
+  public Appointment addAppointment(Date aDate, AppointmentCalendar aAppointmentCalendar)
   {
-    return new Appointment(aDate, aTime, this, aAppointmentCalendar);
+    return new Appointment(aDate, this, aAppointmentCalendar);
   }
 
   public boolean addAppointment(Appointment aAppointment)

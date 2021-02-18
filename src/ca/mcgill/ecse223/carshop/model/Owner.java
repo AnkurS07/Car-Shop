@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 
-// line 34 "../../../../../CarShopModel.ump"
+// line 23 "../../../../../CarShopModel.ump"
 public class Owner extends UserRole
 {
 
@@ -19,9 +19,9 @@ public class Owner extends UserRole
   // CONSTRUCTOR
   //------------------------
 
-  public Owner(CarShopModel aCarShopModel, Business... allBusiness)
+  public Owner(CarShopSystem aCarShopSystem, Business... allBusiness)
   {
-    super(aCarShopModel);
+    super(aCarShopSystem);
     business = new ArrayList<Business>();
     boolean didAddBusiness = setBusiness(allBusiness);
     if (!didAddBusiness)
