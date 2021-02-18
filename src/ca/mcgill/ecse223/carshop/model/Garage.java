@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 import java.sql.Time;
 
-// line 108 "../../../../../CarShopModel.ump"
+// line 97 "../../../../../CarShopModel.ump"
 public class Garage
 {
 
@@ -17,14 +17,14 @@ public class Garage
   private Technician technician;
   private List<ServiceTemplate> serviceTemplate;
   private List<DailySchedule> schedules;
-  private CarShopModel carShopModel;
+  private CarShopSystem carShopSystem;
   private Business business;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Garage(Technician aTechnician, CarShopModel aCarShopModel, Business aBusiness)
+  public Garage(Technician aTechnician, CarShopSystem aCarShopSystem, Business aBusiness)
   {
     boolean didAddTechnician = setTechnician(aTechnician);
     if (!didAddTechnician)
@@ -33,10 +33,10 @@ public class Garage
     }
     serviceTemplate = new ArrayList<ServiceTemplate>();
     schedules = new ArrayList<DailySchedule>();
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create garage due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create garage due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
     boolean didAddBusiness = setBusiness(aBusiness);
     if (!didAddBusiness)
@@ -114,9 +114,9 @@ public class Garage
     return index;
   }
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
+  public CarShopSystem getCarShopSystem()
   {
-    return carShopModel;
+    return carShopSystem;
   }
   /* Code from template association_GetOne */
   public Business getBusiness()
@@ -313,21 +313,21 @@ public class Garage
     return wasAdded;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
+  public boolean setCarShopSystem(CarShopSystem aCarShopSystem)
   {
     boolean wasSet = false;
-    if (aCarShopModel == null)
+    if (aCarShopSystem == null)
     {
       return wasSet;
     }
 
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
+    CarShopSystem existingCarShopSystem = carShopSystem;
+    carShopSystem = aCarShopSystem;
+    if (existingCarShopSystem != null && !existingCarShopSystem.equals(aCarShopSystem))
     {
-      existingCarShopModel.removeGarage(this);
+      existingCarShopSystem.removeGarage(this);
     }
-    carShopModel.addGarage(this);
+    carShopSystem.addGarage(this);
     wasSet = true;
     return wasSet;
   }
@@ -376,11 +376,11 @@ public class Garage
       aServiceTemplate.delete();
     }
     schedules.clear();
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
+    CarShopSystem placeholderCarShopSystem = carShopSystem;
+    this.carShopSystem = null;
+    if(placeholderCarShopSystem != null)
     {
-      placeholderCarShopModel.removeGarage(this);
+      placeholderCarShopSystem.removeGarage(this);
     }
     Business placeholderBusiness = business;
     this.business = null;

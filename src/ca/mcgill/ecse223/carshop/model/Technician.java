@@ -3,7 +3,7 @@
 
 package ca.mcgill.ecse223.carshop.model;
 
-// line 39 "../../../../../CarShopModel.ump"
+// line 28 "../../../../../CarShopModel.ump"
 public class Technician extends UserRole
 {
 
@@ -27,9 +27,9 @@ public class Technician extends UserRole
   // CONSTRUCTOR
   //------------------------
 
-  public Technician(CarShopModel aCarShopModel, TechnicianType aTechnicianType)
+  public Technician(CarShopSystem aCarShopSystem, TechnicianType aTechnicianType)
   {
-    super(aCarShopModel);
+    super(aCarShopSystem);
     technicianType = aTechnicianType;
   }
 

@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 
-// line 24 "../../../../../CarShopModel.ump"
+// line 13 "../../../../../CarShopModel.ump"
 public class UserAccount
 {
 
@@ -24,23 +24,23 @@ public class UserAccount
 
   //UserAccount Associations
   private UserRole userRole;
-  private CarShopModel carShopModel;
+  private CarShopSystem carShopSystem;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public UserAccount(String aUserName, String aPassword, CarShopModel aCarShopModel)
+  public UserAccount(String aUserName, String aPassword, CarShopSystem aCarShopSystem)
   {
     password = aPassword;
     if (!setUserName(aUserName))
     {
       throw new RuntimeException("Cannot create due to duplicate userName. See http://manual.umple.org?RE003ViolationofUniqueness.html");
     }
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create account due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create account due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -106,9 +106,9 @@ public class UserAccount
     return has;
   }
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
+  public CarShopSystem getCarShopSystem()
   {
-    return carShopModel;
+    return carShopSystem;
   }
   /* Code from template association_SetOptionalOneToOptionalOne */
   public boolean setUserRole(UserRole aNewUserRole)
@@ -144,21 +144,21 @@ public class UserAccount
     return wasSet;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
+  public boolean setCarShopSystem(CarShopSystem aCarShopSystem)
   {
     boolean wasSet = false;
-    if (aCarShopModel == null)
+    if (aCarShopSystem == null)
     {
       return wasSet;
     }
 
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
+    CarShopSystem existingCarShopSystem = carShopSystem;
+    carShopSystem = aCarShopSystem;
+    if (existingCarShopSystem != null && !existingCarShopSystem.equals(aCarShopSystem))
     {
-      existingCarShopModel.removeAccount(this);
+      existingCarShopSystem.removeAccount(this);
     }
-    carShopModel.addAccount(this);
+    carShopSystem.addAccount(this);
     wasSet = true;
     return wasSet;
   }
@@ -170,11 +170,11 @@ public class UserAccount
     {
       userRole.setUserAccount(null);
     }
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
+    CarShopSystem placeholderCarShopSystem = carShopSystem;
+    this.carShopSystem = null;
+    if(placeholderCarShopSystem != null)
     {
-      placeholderCarShopModel.removeAccount(this);
+      placeholderCarShopSystem.removeAccount(this);
     }
   }
 
@@ -185,6 +185,6 @@ public class UserAccount
             "userName" + ":" + getUserName()+ "," +
             "password" + ":" + getPassword()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "userRole = "+(getUserRole()!=null?Integer.toHexString(System.identityHashCode(getUserRole())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "carShopModel = "+(getCarShopModel()!=null?Integer.toHexString(System.identityHashCode(getCarShopModel())):"null");
+            "  " + "carShopSystem = "+(getCarShopSystem()!=null?Integer.toHexString(System.identityHashCode(getCarShopSystem())):"null");
   }
 }

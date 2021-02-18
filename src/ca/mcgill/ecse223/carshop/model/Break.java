@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.sql.Time;
 
-// line 77 "../../../../../CarShopModel.ump"
+// line 66 "../../../../../CarShopModel.ump"
 public class Break
 {
 

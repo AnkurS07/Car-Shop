@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 import java.sql.Time;
 
-// line 50 "../../../../../CarShopModel.ump"
+// line 39 "../../../../../CarShopModel.ump"
 public class Business
 {
 
@@ -26,13 +26,13 @@ public class Business
   private List<ServiceTemplate> serviceTemplate;
   private List<ServiceComboTemplate> comboTemplate;
   private AppointmentCalendar appointmentCalendar;
-  private CarShopModel carShopModel;
+  private CarShopSystem carShopSystem;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, AppointmentCalendar aAppointmentCalendar, CarShopModel aCarShopModel)
+  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, AppointmentCalendar aAppointmentCalendar, CarShopSystem aCarShopSystem)
   {
     address = aAddress;
     phoneNumber = aPhoneNumber;
@@ -48,14 +48,14 @@ public class Business
       throw new RuntimeException("Unable to create Business due to aAppointmentCalendar. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
     appointmentCalendar = aAppointmentCalendar;
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create business due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create business due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
-  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, CarShopModel aCarShopModelForAppointmentCalendar, CarShopModel aCarShopModel)
+  public Business(String aAddress, String aPhoneNumber, String aEmailAddress, CarShopSystem aCarShopSystem)
   {
     address = aAddress;
     phoneNumber = aPhoneNumber;
@@ -66,11 +66,11 @@ public class Business
     garages = new ArrayList<Garage>();
     serviceTemplate = new ArrayList<ServiceTemplate>();
     comboTemplate = new ArrayList<ServiceComboTemplate>();
-    appointmentCalendar = new AppointmentCalendar(aCarShopModelForAppointmentCalendar, this);
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    appointmentCalendar = new AppointmentCalendar(this);
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create business due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create business due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -302,9 +302,9 @@ public class Business
     return appointmentCalendar;
   }
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
+  public CarShopSystem getCarShopSystem()
   {
-    return carShopModel;
+    return carShopSystem;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfOwner()
@@ -546,9 +546,9 @@ public class Business
     return 1;
   }
   /* Code from template association_AddMandatoryManyToOne */
-  public Garage addGarage(Technician aTechnician, CarShopModel aCarShopModel)
+  public Garage addGarage(Technician aTechnician, CarShopSystem aCarShopSystem)
   {
-    Garage aNewGarage = new Garage(aTechnician, aCarShopModel, this);
+    Garage aNewGarage = new Garage(aTechnician, aCarShopSystem, this);
     return aNewGarage;
   }
 
@@ -771,21 +771,21 @@ public class Business
     return wasAdded;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
+  public boolean setCarShopSystem(CarShopSystem aCarShopSystem)
   {
     boolean wasSet = false;
-    if (aCarShopModel == null)
+    if (aCarShopSystem == null)
     {
       return wasSet;
     }
 
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
+    CarShopSystem existingCarShopSystem = carShopSystem;
+    carShopSystem = aCarShopSystem;
+    if (existingCarShopSystem != null && !existingCarShopSystem.equals(aCarShopSystem))
     {
-      existingCarShopModel.removeBusiness(this);
+      existingCarShopSystem.removeBusiness(this);
     }
-    carShopModel.addBusiness(this);
+    carShopSystem.addBusiness(this);
     wasSet = true;
     return wasSet;
   }
@@ -832,11 +832,11 @@ public class Business
     {
       existingAppointmentCalendar.delete();
     }
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
+    CarShopSystem placeholderCarShopSystem = carShopSystem;
+    this.carShopSystem = null;
+    if(placeholderCarShopSystem != null)
     {
-      placeholderCarShopModel.removeBusiness(this);
+      placeholderCarShopSystem.removeBusiness(this);
     }
   }
 
@@ -848,6 +848,6 @@ public class Business
             "phoneNumber" + ":" + getPhoneNumber()+ "," +
             "emailAddress" + ":" + getEmailAddress()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "appointmentCalendar = "+(getAppointmentCalendar()!=null?Integer.toHexString(System.identityHashCode(getAppointmentCalendar())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "carShopModel = "+(getCarShopModel()!=null?Integer.toHexString(System.identityHashCode(getCarShopModel())):"null");
+            "  " + "carShopSystem = "+(getCarShopSystem()!=null?Integer.toHexString(System.identityHashCode(getCarShopSystem())):"null");
   }
 }

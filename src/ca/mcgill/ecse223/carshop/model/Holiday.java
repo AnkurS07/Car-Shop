@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.sql.Date;
 
-// line 64 "../../../../../CarShopModel.ump"
+// line 53 "../../../../../CarShopModel.ump"
 public class Holiday
 {
 
@@ -16,19 +16,19 @@ public class Holiday
   private Date date;
 
   //Holiday Associations
-  private CarShopModel carShopModel;
+  private CarShopSystem carShopSystem;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Holiday(Date aDate, CarShopModel aCarShopModel)
+  public Holiday(Date aDate, CarShopSystem aCarShopSystem)
   {
     date = aDate;
-    boolean didAddCarShopModel = setCarShopModel(aCarShopModel);
-    if (!didAddCarShopModel)
+    boolean didAddCarShopSystem = setCarShopSystem(aCarShopSystem);
+    if (!didAddCarShopSystem)
     {
-      throw new RuntimeException("Unable to create holiday due to carShopModel. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create holiday due to carShopSystem. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -49,37 +49,37 @@ public class Holiday
     return date;
   }
   /* Code from template association_GetOne */
-  public CarShopModel getCarShopModel()
+  public CarShopSystem getCarShopSystem()
   {
-    return carShopModel;
+    return carShopSystem;
   }
   /* Code from template association_SetOneToMany */
-  public boolean setCarShopModel(CarShopModel aCarShopModel)
+  public boolean setCarShopSystem(CarShopSystem aCarShopSystem)
   {
     boolean wasSet = false;
-    if (aCarShopModel == null)
+    if (aCarShopSystem == null)
     {
       return wasSet;
     }
 
-    CarShopModel existingCarShopModel = carShopModel;
-    carShopModel = aCarShopModel;
-    if (existingCarShopModel != null && !existingCarShopModel.equals(aCarShopModel))
+    CarShopSystem existingCarShopSystem = carShopSystem;
+    carShopSystem = aCarShopSystem;
+    if (existingCarShopSystem != null && !existingCarShopSystem.equals(aCarShopSystem))
     {
-      existingCarShopModel.removeHoliday(this);
+      existingCarShopSystem.removeHoliday(this);
     }
-    carShopModel.addHoliday(this);
+    carShopSystem.addHoliday(this);
     wasSet = true;
     return wasSet;
   }
 
   public void delete()
   {
-    CarShopModel placeholderCarShopModel = carShopModel;
-    this.carShopModel = null;
-    if(placeholderCarShopModel != null)
+    CarShopSystem placeholderCarShopSystem = carShopSystem;
+    this.carShopSystem = null;
+    if(placeholderCarShopSystem != null)
     {
-      placeholderCarShopModel.removeHoliday(this);
+      placeholderCarShopSystem.removeHoliday(this);
     }
   }
 
@@ -88,6 +88,6 @@ public class Holiday
   {
     return super.toString() + "["+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "date" + "=" + (getDate() != null ? !getDate().equals(this)  ? getDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "carShopModel = "+(getCarShopModel()!=null?Integer.toHexString(System.identityHashCode(getCarShopModel())):"null");
+            "  " + "carShopSystem = "+(getCarShopSystem()!=null?Integer.toHexString(System.identityHashCode(getCarShopSystem())):"null");
   }
 }
