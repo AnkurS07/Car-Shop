@@ -331,17 +331,11 @@ public class Garage
     wasSet = true;
     return wasSet;
   }
-  /* Code from template association_SetOneToMandatoryMany */
+  /* Code from template association_SetOneToMany */
   public boolean setBusiness(Business aBusiness)
   {
     boolean wasSet = false;
-    //Must provide business to garage
     if (aBusiness == null)
-    {
-      return wasSet;
-    }
-
-    if (business != null && business.numberOfGarages() <= Business.minimumNumberOfGarages())
     {
       return wasSet;
     }
@@ -350,12 +344,7 @@ public class Garage
     business = aBusiness;
     if (existingBusiness != null && !existingBusiness.equals(aBusiness))
     {
-      boolean didRemove = existingBusiness.removeGarage(this);
-      if (!didRemove)
-      {
-        business = existingBusiness;
-        return wasSet;
-      }
+      existingBusiness.removeGarage(this);
     }
     business.addGarage(this);
     wasSet = true;
