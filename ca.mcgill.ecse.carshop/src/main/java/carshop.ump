@@ -9,6 +9,7 @@ class CarShop  {
   1 <@>- * Appointment appointments;
   1 <@>- * TimeSlot timeSlots;
   1 <@>- * BookableService bookableServices;
+  1 <@>- * Customer customers; 					// *****Not in common model ******
 }
 
 class User {

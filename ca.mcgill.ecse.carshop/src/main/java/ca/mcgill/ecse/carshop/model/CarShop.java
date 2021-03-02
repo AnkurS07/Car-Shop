@@ -23,6 +23,7 @@ public class CarShop
   private List<Appointment> appointments;
   private List<TimeSlot> timeSlots;
   private List<BookableService> bookableServices;
+  private List<Customer> customers;
 
   //------------------------
   // CONSTRUCTOR
@@ -36,6 +37,7 @@ public class CarShop
     appointments = new ArrayList<Appointment>();
     timeSlots = new ArrayList<TimeSlot>();
     bookableServices = new ArrayList<BookableService>();
+    customers = new ArrayList<Customer>();
   }
 
   //------------------------
@@ -241,6 +243,39 @@ public class CarShop
   public int indexOfBookableService(BookableService aBookableService)
   {
     int index = bookableServices.indexOf(aBookableService);
+    return index;
+  }
+  /* Code from template association_GetMany */
+  public Customer getCustomer(int index)
+  {
+    Customer aCustomer = customers.get(index);
+    return aCustomer;
+  }
+
+  /**
+   * Not in common model ******
+   */
+  public List<Customer> getCustomers()
+  {
+    List<Customer> newCustomers = Collections.unmodifiableList(customers);
+    return newCustomers;
+  }
+
+  public int numberOfCustomers()
+  {
+    int number = customers.size();
+    return number;
+  }
+
+  public boolean hasCustomers()
+  {
+    boolean has = customers.size() > 0;
+    return has;
+  }
+
+  public int indexOfCustomer(Customer aCustomer)
+  {
+    int index = customers.indexOf(aCustomer);
     return index;
   }
   /* Code from template association_SetOptionalOneToOne */
@@ -760,6 +795,78 @@ public class CarShop
     }
     return wasAdded;
   }
+  /* Code from template association_MinimumNumberOfMethod */
+  public static int minimumNumberOfCustomers()
+  {
+    return 0;
+  }
+  /* Code from template association_AddManyToOne */
+  public Customer addCustomer(String aUsername, String aPassword)
+  {
+    return new Customer(aUsername, aPassword, this);
+  }
+
+  public boolean addCustomer(Customer aCustomer)
+  {
+    boolean wasAdded = false;
+    if (customers.contains(aCustomer)) { return false; }
+    CarShop existingCarShop = aCustomer.getCarShop();
+    boolean isNewCarShop = existingCarShop != null && !this.equals(existingCarShop);
+    if (isNewCarShop)
+    {
+      aCustomer.setCarShop(this);
+    }
+    else
+    {
+      customers.add(aCustomer);
+    }
+    wasAdded = true;
+    return wasAdded;
+  }
+
+  public boolean removeCustomer(Customer aCustomer)
+  {
+    boolean wasRemoved = false;
+    //Unable to remove aCustomer, as it must always have a carShop
+    if (!this.equals(aCustomer.getCarShop()))
+    {
+      customers.remove(aCustomer);
+      wasRemoved = true;
+    }
+    return wasRemoved;
+  }
+  /* Code from template association_AddIndexControlFunctions */
+  public boolean addCustomerAt(Customer aCustomer, int index)
+  {  
+    boolean wasAdded = false;
+    if(addCustomer(aCustomer))
+    {
+      if(index < 0 ) { index = 0; }
+      if(index > numberOfCustomers()) { index = numberOfCustomers() - 1; }
+      customers.remove(aCustomer);
+      customers.add(index, aCustomer);
+      wasAdded = true;
+    }
+    return wasAdded;
+  }
+
+  public boolean addOrMoveCustomerAt(Customer aCustomer, int index)
+  {
+    boolean wasAdded = false;
+    if(customers.contains(aCustomer))
+    {
+      if(index < 0 ) { index = 0; }
+      if(index > numberOfCustomers()) { index = numberOfCustomers() - 1; }
+      customers.remove(aCustomer);
+      customers.add(index, aCustomer);
+      wasAdded = true;
+    } 
+    else 
+    {
+      wasAdded = addCustomerAt(aCustomer, index);
+    }
+    return wasAdded;
+  }
 
   public void delete()
   {
@@ -817,6 +924,13 @@ public class CarShop
       BookableService aBookableService = bookableServices.get(bookableServices.size() - 1);
       aBookableService.delete();
       bookableServices.remove(aBookableService);
+    }
+    
+    while (customers.size() > 0)
+    {
+      Customer aCustomer = customers.get(customers.size() - 1);
+      aCustomer.delete();
+      customers.remove(aCustomer);
     }
     
   }

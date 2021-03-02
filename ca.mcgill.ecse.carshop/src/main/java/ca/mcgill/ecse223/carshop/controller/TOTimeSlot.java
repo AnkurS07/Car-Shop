@@ -1,42 +1,34 @@
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
-package ca.mcgill.ecse.carshop.model;
+package ca.mcgill.ecse223.carshop.controller;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 62 "../../../../../carshop.ump"
-public class TimeSlot
+// line 10 "../../../../../CarshopTransferObjects.ump"
+public class TOTimeSlot
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
 
-  //TimeSlot Attributes
+  //TOTimeSlot Attributes
   private Date startDate;
   private Time startTime;
   private Date endDate;
   private Time endTime;
 
-  //TimeSlot Associations
-  private CarShop carShop;
-
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TimeSlot(Date aStartDate, Time aStartTime, Date aEndDate, Time aEndTime, CarShop aCarShop)
+  public TOTimeSlot(Date aStartDate, Time aStartTime, Date aEndDate, Time aEndTime)
   {
     startDate = aStartDate;
     startTime = aStartTime;
     endDate = aEndDate;
     endTime = aEndTime;
-    boolean didAddCarShop = setCarShop(aCarShop);
-    if (!didAddCarShop)
-    {
-      throw new RuntimeException("Unable to create timeSlot due to carShop. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-    }
   }
 
   //------------------------
@@ -94,40 +86,9 @@ public class TimeSlot
   {
     return endTime;
   }
-  /* Code from template association_GetOne */
-  public CarShop getCarShop()
-  {
-    return carShop;
-  }
-  /* Code from template association_SetOneToMany */
-  public boolean setCarShop(CarShop aCarShop)
-  {
-    boolean wasSet = false;
-    if (aCarShop == null)
-    {
-      return wasSet;
-    }
-
-    CarShop existingCarShop = carShop;
-    carShop = aCarShop;
-    if (existingCarShop != null && !existingCarShop.equals(aCarShop))
-    {
-      existingCarShop.removeTimeSlot(this);
-    }
-    carShop.addTimeSlot(this);
-    wasSet = true;
-    return wasSet;
-  }
 
   public void delete()
-  {
-    CarShop placeholderCarShop = carShop;
-    this.carShop = null;
-    if(placeholderCarShop != null)
-    {
-      placeholderCarShop.removeTimeSlot(this);
-    }
-  }
+  {}
 
 
   public String toString()
@@ -136,7 +97,6 @@ public class TimeSlot
             "  " + "startDate" + "=" + (getStartDate() != null ? !getStartDate().equals(this)  ? getStartDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "endDate" + "=" + (getEndDate() != null ? !getEndDate().equals(this)  ? getEndDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
+            "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null");
   }
 }

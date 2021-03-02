@@ -1,0 +1,15 @@
+namespace ca.mcgill.ecse223.carshop.controller;
+
+class TOBusiness {
+	String name;
+	String address;
+	String phoneNumber;
+	String email;
+}
+
+class TOTimeSlot {
+	Date startDate;
+	Time startTime;
+	Date endDate;
+	Time endTime;
+}
