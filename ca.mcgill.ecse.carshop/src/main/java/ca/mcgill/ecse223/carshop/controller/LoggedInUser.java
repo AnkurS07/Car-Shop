@@ -1,5 +1,10 @@
 package ca.mcgill.ecse223.carshop.controller;
 
+/**
+ * Singleton class used to persist the user name of the currently logged in user. This is only temporary, the log in feature should not be implemented with this. 
+ * @author maxbo
+ *
+ */
 public class LoggedInUser {
 	
 	private String userName;

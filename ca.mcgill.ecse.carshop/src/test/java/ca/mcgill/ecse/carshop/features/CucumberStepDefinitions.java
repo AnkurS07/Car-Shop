@@ -29,6 +29,13 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+/**
+ * Steps definitions for the cucumber scenarios. These steps should not call the model directly and instead always pass through the controller.
+ * Implement the code here to do the actions described in the test scenarios and implement the functionality in the controller.
+ * Include extensive assertions to make there are no bugs in the system. Do not duplicate methods.
+ * @author maxbo
+ *
+ */
 public class CucumberStepDefinitions {
 	
 	private CarShop carShop;
@@ -37,6 +44,7 @@ public class CucumberStepDefinitions {
     
     @After 
     public void tearDown() {
+    	// Delete the car shop instance between each scenario to avoid information being carried over.
     	carShop.delete();
     }
     
@@ -59,6 +67,7 @@ public class CucumberStepDefinitions {
     
     @Given("the following customers exist in the system:")
     public void customerExists(DataTable table) {
+    	// In the background section, the data are mapped to Data tables.
     	try {
     		List<Map<String, String>> rows = table.asMaps();
     		for (Map<String, String> columns : rows) {
@@ -72,6 +81,7 @@ public class CucumberStepDefinitions {
     
     @Given("the following technicians exist in the system:")
     public void technicianExists(DataTable table) {
+    	// In the background section, the data are mapped to Data tables.
     	try {
     		List<Map<String, String>> rows = table.asMaps();
     		for (Map<String, String> columns : rows) {
@@ -100,7 +110,9 @@ public class CucumberStepDefinitions {
     
     @Given("the system's time and date is {string}")
     public void systemTimeAndDateIs(String date) {
+    	// Uses the current singleton class to persist the date. Should be revisited later.
     	try {
+    		// Changes string format to date.
     		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd+hh:mm");
     		java.util.Date d = sdf.parse(date);
     		CarShopController.setCurrentDate(d);
@@ -114,7 +126,9 @@ public class CucumberStepDefinitions {
     
     @Given("the user is logged in to an account with username {string}")
     public void userIsLoggedIn(String userName) {
+    	// Should be revisited when the log in feature has been implemented.
     	LoggedInUser user = LoggedInUser.getInstance();
+    	// Make sure it worked.
     	assertTrue(user.setUserName(userName));
     	assertEquals(userName, user.getUserName());
     }
@@ -132,8 +146,10 @@ public class CucumberStepDefinitions {
     @Then("a new business with new {string} and {string} and {string} and {string} shall {string} created")
     public void theBusinessHasBeenCreated(String name, String address, String phoneNumber, String email, String result) {
     	if(errorCntr != 0) {
+    		// If the business could not be created, no need to check anything.
     		assertEquals(result,"not be");
     	} else {
+    		// If the business is created verify its information.
     		assertEquals(result,"be");
         	assertNotNull(CarShopController.getBusiness());
         	assertEquals(name, CarShopController.getBusiness().getName());
@@ -147,8 +163,10 @@ public class CucumberStepDefinitions {
     public void anErrorMessageIsRaised(String errorMsg, String resultError) {
     	assertTrue(error.contains(errorMsg));
     	if(errorCntr != 0) {
+    		// There were errors
     		assertEquals(resultError, "be");
     	} else {
+    		// There was no error
     		assertEquals(resultError, "not be");
     	}
     	
@@ -160,9 +178,11 @@ public class CucumberStepDefinitions {
     		List<Map<String, String>> rows = table.asMaps();
     		for (Map<String, String> columns : rows) {
     			// Set the logged in user to owner to be able to add the given business hour.
-        		// Will be overwritten by the next step in the scenario
+        		// Will be overwritten right after
+    			String userName = LoggedInUser.getInstance().getUserName();
         		LoggedInUser.getInstance().setUserName("owner"); 
     			CarShopController.SetUpBusinessInformation(columns.get("name"), columns.get("address"), columns.get("phone number"), columns.get("email"));
+    			LoggedInUser.getInstance().setUserName(userName); 
     		}
     	} catch (Exception e) {
     		error += e.getMessage();
@@ -189,6 +209,7 @@ public class CucumberStepDefinitions {
     @When("the user tries to add a new business hour on {string} with start time {string} and end time {string}")
     public void userTriesToAddBusinessHour(String day, String startTime, String endTime) {
     	try {
+    		// Changes string format to time.
     		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
     		CarShopController.addBusinessHour(DayOfWeek.valueOf(day), new Time(sdf.parse(startTime).getTime()), new Time(sdf.parse(endTime).getTime()));
     	} catch (Exception e) {
@@ -200,8 +221,10 @@ public class CucumberStepDefinitions {
     @Then("a new business hour shall {string} created")
     public void aNewBusinessHourCreated(String result) {
     	if(errorCntr != 0) {
+    		// There were errors
     		assertEquals(result, "not be");
     	} else {
+    		// There was no error
     		assertEquals(result, "be");
     	}
     }
@@ -209,11 +232,13 @@ public class CucumberStepDefinitions {
     @When("the user tries to access the business information")
     public void userTriesToAccessBusinessInformation() {
     	CarShopController.getBusiness();
+    	// If the business is returned, the user can access the information.
     	assertNotNull(CarShopController.getBusiness());
     }
     
     @Then("the {string} and {string} and {string} and {string} shall be provided to the user")
     public void theInformationShallBeProvided(String name, String address, String phoneNumber, String email) {
+    	// Verify the right information is provided.
     	assertEquals(name, CarShopController.getBusiness().getName());
     	assertEquals(address, CarShopController.getBusiness().getAddress());
     	assertEquals(phoneNumber, CarShopController.getBusiness().getPhoneNumber());
@@ -224,9 +249,11 @@ public class CucumberStepDefinitions {
     public void aTimeSlotExists(String type, String startDate, String startTime, String endDate, String endTime) {
     	// Set the logged in user to owner to be able to add the given business hour.
 		// Will be overwritten by the next step in the scenario
+    	String userName = LoggedInUser.getInstance().getUserName();
 		LoggedInUser.getInstance().setUserName("owner"); 
 		
 		try {
+			// Changes string format to date and time.
 			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
 			CarShopController.addTimeSlot(type, 
@@ -234,6 +261,7 @@ public class CucumberStepDefinitions {
 					new Time (sdfTime.parse(startTime).getTime()), 
 					new Date (sdfDate.parse(endDate).getTime()), 
 					new Time (sdfTime.parse(endTime).getTime()));
+			LoggedInUser.getInstance().setUserName(userName); 
 		} catch (Exception e) {
     		error += e.getMessage();
     		errorCntr ++;
@@ -243,6 +271,7 @@ public class CucumberStepDefinitions {
     @When("the user tries to add a new {string} with start date {string} at {string} and end date {string} at {string}")
     public void userTriesAddNewTimeSlot(String type, String startDate, String startTime, String endDate, String endTime) {
     	try {
+    		// Changes string format to date and time.
 			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
 			CarShopController.addTimeSlot(type, 
@@ -264,6 +293,7 @@ public class CucumberStepDefinitions {
     		}
     		else {
     			boolean foundMatch = false;
+    			// Changes string format to date and time.
     			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
     			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
     			for(TOTimeSlot t: CarShopController.getTimeSlots(type)) {
@@ -275,6 +305,7 @@ public class CucumberStepDefinitions {
     					break;
     				}
     			}
+    			// Check that a match was found.
     			assertTrue(foundMatch);
     			assertEquals(result,"be");
     		}
@@ -297,8 +328,10 @@ public class CucumberStepDefinitions {
     @Then("the business information shall {string} updated with new {string} and {string} and {string} and {string}")
     public void businessInfoUpdatedWith(String result, String name, String address, String phoneNumber, String email) {
     	if(errorCntr != 0) {
+    		// The business information could not be updated
     		assertEquals(result,"not be");
     	} else {
+    		// The business has been updated. Verify the new information.
     		assertEquals(result,"be");
         	assertNotNull(CarShopController.getBusiness());
         	assertEquals(name, CarShopController.getBusiness().getName());
@@ -311,6 +344,7 @@ public class CucumberStepDefinitions {
     @When("the user tries to change the business hour {string} at {string} to be on {string} starting at {string} and ending at {string}")
     public void userTriesToChangeBusinessHour(String currentDay, String currentStartTime, String newDay, String newStartTime, String newEndTime) {
     	try {
+    		// Cast string to time
     		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
     		CarShopController.updateBusinessHour(DayOfWeek.valueOf(currentDay), new Time(sdf.parse(currentStartTime).getTime()), DayOfWeek.valueOf(newDay), new Time(sdf.parse(newStartTime).getTime()), new Time(sdf.parse(newEndTime).getTime()));
     	} catch (Exception e) {
@@ -322,8 +356,10 @@ public class CucumberStepDefinitions {
     @Then("the business hour shall {string} be updated")
     public void businessHourUpdated(String result) {
     	if(errorCntr != 0) {
+    		// There were errors
     		assertEquals(result, "not be");
     	} else {
+    		// There was no error
     		assertEquals(result, "be");
     	}
     }
@@ -331,6 +367,7 @@ public class CucumberStepDefinitions {
     @When("the user tries to remove the business hour starting {string} at {string}")
     public void userTriesRemoveBusinessHour(String day, String startTime) {
     	try {
+    		// Cast string to time
     		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
     		CarShopController.removeBusinessHour(DayOfWeek.valueOf(day), new Time(sdf.parse(startTime).getTime()));
     	} catch (Exception e) {
@@ -341,16 +378,18 @@ public class CucumberStepDefinitions {
     
     @Then("the business hour starting {string} at {string} shall {string} exist")
     public void businessHourShallExist(String day, String startTime, String result) {
+    	// Cast string to time
     	SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
     	boolean exists;
 		try {
 			exists = CarShopController.businessHourExists(DayOfWeek.valueOf(day), new Time(sdf.parse(startTime).getTime()));
 			if(result.equals("not")) {
+				// The hour was removed. It doesn't exist anymore.
 				assertTrue(!exists);
 			} else {
+				// The hour was not remove. It still exists.
 				assertTrue(exists);
 			}
-			
 		} catch (Exception e) {
     		error += e.getMessage();
     		errorCntr ++;
@@ -361,9 +400,11 @@ public class CucumberStepDefinitions {
     @Then("an error message {string} shall {string} be raised")
     public void anErrorMessageShallBeRaised(String errorMsg, String resultError) {
     	if(errorCntr != 0) {
+    		// There were errors. Verify the right errors were thrown with the error message.
     		assertEquals(resultError, "");
     		assertTrue(error.contains(errorMsg));
     	} else {
+    		// There was no error.
     		assertEquals(resultError, "not");
     	}
     }
@@ -371,6 +412,7 @@ public class CucumberStepDefinitions {
     @When("the user tries to change the {string} on {string} at {string} to be with start date {string} at {string} and end date {string} at {string}")
     public void userChangesTimeSlot(String type, String oldStartDate, String oldStartTime, String newStartDate, String newStartTime, String newEndDate, String newEndTime) {
     	try {
+    		// Cast String to Time and Date.
     		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
 			CarShopController.updateTimeSlot(type, 
@@ -389,6 +431,7 @@ public class CucumberStepDefinitions {
     
     @Then("the {string} shall {string} updated with start date {string} at {string} and end date {string} at {string}")
     public void timeSlotUpdated(String type, String result, String startDate, String startTime, String endDate, String endTime) {
+    	// Cast String to Time and Date.
     	SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
     	TOTimeSlot toTimeSlot;
@@ -398,8 +441,10 @@ public class CucumberStepDefinitions {
 					new Time (sdfTime.parse(startTime).getTime()));
 			
 			if(errorCntr != 0) {
+				// There were errors.
 	    		assertEquals(result,"not be");
 	    	} else {
+	    		// There was not error. Verify the updated information.
 	    		assertEquals(result,"be");
 	        	assertNotNull(toTimeSlot);
 	        	assertEquals(new Date (sdfDate.parse(startDate).getTime()), toTimeSlot.getStartDate());
@@ -415,6 +460,7 @@ public class CucumberStepDefinitions {
     
     @When("the user tries to remove an existing {string} with start date {string} at {string} and end date {string} at {string}")
     public void userRemovesTimeSlot(String type, String startDate, String startTime, String endDate, String endTime) {
+    	// Cast String to Time and Date.
     	SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
 		try {
@@ -431,6 +477,7 @@ public class CucumberStepDefinitions {
     
     @Then("the {string} with start date {string} at {string} shall {string} exist")
     public void timeSlotShallExist(String type, String startDate, String startTime, String result) {
+    	// Cast String to Time and Date.
     	SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
     	TOTimeSlot toTimeSlot;
@@ -440,9 +487,11 @@ public class CucumberStepDefinitions {
 					new Time (sdfTime.parse(startTime).getTime()));
 			
 			if(errorCntr != 0) {
+				// There were errors.
 	    		assertEquals(result,"");
 	    		assertNotNull(toTimeSlot);
 	    	} else {
+	    		// There was no error. The time slot was removed successfully.
 	    		assertEquals(result,"not");
 	        	assertNull(toTimeSlot);
 	    	}

@@ -2,6 +2,11 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.util.Date;
 
+/**
+ * Singleton class to persist a system date set by a user.
+ * @author maxbo
+ *
+ */
 public class SystemDate {
 
 	private Date date;
