@@ -19,7 +19,6 @@ import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
-import ca.mcgill.ecse223.carshop.controller.LoggedInUser;
 import ca.mcgill.ecse223.carshop.controller.TOBusiness;
 import ca.mcgill.ecse223.carshop.controller.TOTimeSlot;
 import io.cucumber.datatable.DataTable;
@@ -115,8 +114,8 @@ public class CucumberStepDefinitions {
     		// Changes string format to date.
     		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd+hh:mm");
     		java.util.Date d = sdf.parse(date);
-    		CarShopController.setCurrentDate(d);
-    		assertEquals(d,CarShopController.getCurrentDate());
+    		CarShopController.setSystemDate(d);
+    		assertEquals(d,CarShopController.getSystemDate());
     	}
 	    catch (Exception e) {
 			error += e.getMessage();
@@ -125,12 +124,15 @@ public class CucumberStepDefinitions {
     }
     
     @Given("the user is logged in to an account with username {string}")
-    public void userIsLoggedIn(String userName) {
-    	// Should be revisited when the log in feature has been implemented.
-    	LoggedInUser user = LoggedInUser.getInstance();
-    	// Make sure it worked.
-    	assertTrue(user.setUserName(userName));
-    	assertEquals(userName, user.getUserName());
+    public void userIsLoggedIn(String userName) throws Exception {
+    	try {
+        	CarShopController.setLoggedInUser(userName);
+        	// Make sure it worked.
+        	assertEquals(userName, CarShopController.getLoggedInUser());
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
     }
     
     @When("the user tries to set up the business information with new {string} and {string} and {string} and {string}")
@@ -179,10 +181,10 @@ public class CucumberStepDefinitions {
     		for (Map<String, String> columns : rows) {
     			// Set the logged in user to owner to be able to add the given business hour.
         		// Will be overwritten right after
-    			String userName = LoggedInUser.getInstance().getUserName();
-        		LoggedInUser.getInstance().setUserName("owner"); 
+    			String userName = CarShopController.getLoggedInUser();
+    			CarShopController.setLoggedInUser("owner"); 
     			CarShopController.SetUpBusinessInformation(columns.get("name"), columns.get("address"), columns.get("phone number"), columns.get("email"));
-    			LoggedInUser.getInstance().setUserName(userName); 
+    			CarShopController.setLoggedInUser(userName); 
     		}
     	} catch (Exception e) {
     		error += e.getMessage();
@@ -195,11 +197,11 @@ public class CucumberStepDefinitions {
     	try {
     		// Set the logged in user to owner to be able to add the given business hour.
     		// Will be overwritten by the next step in the scenario
-    		String userName = LoggedInUser.getInstance().getUserName();
-    		LoggedInUser.getInstance().setUserName("owner"); 
+    		String userName = CarShopController.getLoggedInUser();
+    		CarShopController.setLoggedInUser("owner"); 
     		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
     		CarShopController.addBusinessHour(DayOfWeek.valueOf(day), new Time(sdf.parse(startTime).getTime()), new Time(sdf.parse(endTime).getTime()));
-    		LoggedInUser.getInstance().setUserName(userName); 
+    		CarShopController.setLoggedInUser(userName); 
     	} catch (Exception e) {
     		error += e.getMessage();
     		errorCntr ++;
@@ -247,12 +249,12 @@ public class CucumberStepDefinitions {
     
     @Given("a {string} time slot exists with start time {string} at {string} and end time {string} at {string}")
     public void aTimeSlotExists(String type, String startDate, String startTime, String endDate, String endTime) {
-    	// Set the logged in user to owner to be able to add the given business hour.
-		// Will be overwritten by the next step in the scenario
-    	String userName = LoggedInUser.getInstance().getUserName();
-		LoggedInUser.getInstance().setUserName("owner"); 
 		
 		try {
+	    	// Set the logged in user to owner to be able to add the given business hour.
+			// Will be overwritten by the next step in the scenario
+	    	String userName = CarShopController.getLoggedInUser();
+	    	CarShopController.setLoggedInUser("owner"); 
 			// Changes string format to date and time.
 			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
@@ -261,7 +263,7 @@ public class CucumberStepDefinitions {
 					new Time (sdfTime.parse(startTime).getTime()), 
 					new Date (sdfDate.parse(endDate).getTime()), 
 					new Time (sdfTime.parse(endTime).getTime()));
-			LoggedInUser.getInstance().setUserName(userName); 
+			CarShopController.setLoggedInUser(userName); 
 		} catch (Exception e) {
     		error += e.getMessage();
     		errorCntr ++;
