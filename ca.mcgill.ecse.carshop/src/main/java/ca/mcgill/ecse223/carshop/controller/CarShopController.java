@@ -2,6 +2,7 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,37 +27,11 @@ import ca.mcgill.ecse.carshop.model.TimeSlot;
 public class CarShopController {
 	
 	private static final String regexEmail = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$";
+	private static java.util.Date systemDate;
+	private static String loggedInUser;
 	
 	public CarShopController() {
 		// Empty constructor. All public methods are static so it won't actually be used.
-	}
-	
-	/**
-	 * Sets the current date of the system. Uses a Singleton class to persist information.
-	 * @param date Date to be set.
-	 * @throws Exception
-	 */
-	public static void setCurrentDate(java.util.Date date) throws Exception {
-		try {
-			SystemDate.getInstance().setCurrentDate(date);
-		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Gets the current date of the system. Be careful, this uses java.util.date unlike the Date in the Umple models that is of type java.sql.Date
-	 * @return The current date of the system.
-	 * @throws Exception
-	 */
-	public static java.util.Date getCurrentDate() throws Exception {
-		try {
-			return SystemDate.getInstance().getCurrentDate();
-		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
-		}
 	}
 	
 	/**
@@ -352,8 +327,14 @@ public class CarShopController {
 	 * @return
 	 */
 	private static boolean userCanUpdateBusinessInformation() {
-		LoggedInUser user = LoggedInUser.getInstance();
-		return user.getUserName() != null && user.getUserName().equals("owner");
+		String user = null;
+		try {
+			user = getLoggedInUser();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return user != null && user.equals("owner");
 	}
 	
 	/**
@@ -377,9 +358,9 @@ public class CarShopController {
 			}
 			
 			@SuppressWarnings("deprecation")
-			Date currentDay = new Date(getCurrentDate().getYear(), getCurrentDate().getMonth(), getCurrentDate().getDay());
+			Date currentDay = new Date(getSystemDate().getYear(), getSystemDate().getMonth(), getSystemDate().getDay());
 			@SuppressWarnings("deprecation")
-			Time currentTime = new Time(getCurrentDate().getHours(), getCurrentDate().getMinutes(), 0);
+			Time currentTime = new Time(getSystemDate().getHours(), getSystemDate().getMinutes(), 0);
 			
 			if(startDate.compareTo(currentDay) < 0
 				|| (startDate.compareTo(currentDay) == 0 && startTime.compareTo(currentTime) < 0)) {
@@ -513,9 +494,9 @@ public class CarShopController {
 			}
 			
 			@SuppressWarnings("deprecation")
-			Date currentDay = new Date(getCurrentDate().getYear(), getCurrentDate().getMonth(), getCurrentDate().getDay());
+			Date currentDay = new Date(getSystemDate().getYear(), getSystemDate().getMonth(), getSystemDate().getDay());
 			@SuppressWarnings("deprecation")
-			Time currentTime = new Time(getCurrentDate().getHours(), getCurrentDate().getMinutes(), 0);
+			Time currentTime = new Time(getSystemDate().getHours(), getSystemDate().getMinutes(), 0);
 			
 			if(newStartDate.compareTo(currentDay) < 0
 				|| (newStartDate.compareTo(currentDay) == 0 && newStartTime.compareTo(currentTime) < 0)) {
@@ -625,6 +606,62 @@ public class CarShopController {
 					carShop.getBusiness().removeHoliday(timeSlotToRemove);
 				}
 			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	/**
+	 * Gets the current logged in user of the system.
+	 * @return The current logged in user of the system.
+	 * @throws Exception
+	 */
+	public static String getLoggedInUser() throws Exception {
+		try {
+			return loggedInUser;
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	/**
+	 * Sets the current logged in user of the system.
+	 * @return 
+	 * @throws Exception
+	 */	
+	public static void setLoggedInUser(String loggedInUser) throws Exception {
+		try {
+			CarShopController.loggedInUser = loggedInUser;
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Gets the current date of the system. Be careful, this uses java.util.date unlike the Date in the Umple models that is of type java.sql.Date
+	 * @return The current date of the system.
+	 * @throws Exception
+	 */
+	public static java.util.Date getSystemDate() throws Exception {
+		try {
+			return systemDate;
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sets the current date of the system. Uses a Singleton class to persist information.
+	 * @param date Date to be set.
+	 * @throws Exception
+	 */
+	public static void setSystemDate(java.util.Date date) throws Exception {
+		try {
+			CarShopController.systemDate = date;
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
