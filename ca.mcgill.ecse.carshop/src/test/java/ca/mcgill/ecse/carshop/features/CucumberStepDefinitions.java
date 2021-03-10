@@ -1,6 +1,7 @@
 package ca.mcgill.ecse.carshop.features;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -45,6 +46,12 @@ public class CucumberStepDefinitions {
     public void tearDown() {
     	// Delete the car shop instance between each scenario to avoid information being carried over.
     	carShop.delete();
+    	try {
+			CarShopApplication.setLoggedInUser(null);	// Set the logged in user to null to avoid information being carried over.
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     @Given("a Carshop system exists")
@@ -501,5 +508,57 @@ public class CucumberStepDefinitions {
     		error += e.getMessage();
     		errorCntr ++;
 		}
+    }
+    
+    // Sign Up for Customer Account Steps
+    
+    @Given("there is no existing username {string}")
+    public void there_is_no_existing_username(String string) {
+        assertFalse(CarShopController.hasUserWithUsername(string));
+    }
+
+    @When("the user provides a new username {string} and a password {string}")
+    public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
+    	try {
+    		CarShopController.createCustomer(string, string2);
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
+    }
+
+    @Then("a new customer account shall be created")
+    public void a_new_customer_account_shall_be_created() {
+        assertTrue(errorCntr == 0);
+        assertTrue(carShop.hasCustomers());
+    }
+
+    @Then("the account shall have username {string} and password {string}")
+    public void the_account_shall_have_username_and_password(String string, String string2) {
+        assertTrue(carShop.getCustomer(0).getUsername().equals(string));
+        assertTrue(carShop.getCustomer(0).getPassword().equals(string2));
+    }
+
+    @Then("no new account shall be created")
+    public void no_new_account_shall_be_created() {
+    	assertTrue(errorCntr > 0);
+        assertFalse(carShop.numberOfCustomers() > 1);
+    }
+
+    @Then("an error message {string} shall be raised")
+    public void an_error_message_shall_be_raised(String string) {
+    	assertTrue(error.contains(string));
+    }
+
+    @Given("there is an existing username {string}")
+    public void there_is_an_existing_username(String string) {
+    	try {
+    		CarShopController.createCustomer(string, "testPassword");
+    		// Verify if it worked
+    		assertTrue(CarShopController.hasUserWithUsername(string));
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
     }
 }

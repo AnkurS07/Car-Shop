@@ -13,6 +13,7 @@ import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
@@ -72,12 +73,14 @@ public class CarShopController {
 	 */
 	public static void createCustomer(String userName, String password) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
-		try {
-			carShop.addCustomer(userName, password);
-		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
-		}
+		checkValidityOfCustomerCreation(userName, password);
+			try {
+				carShop.addCustomer(userName, password);
+			}
+			catch (RuntimeException e) {
+				throw new Exception(e.getMessage());
+			}
+		
 	}
 	
 	/**
@@ -328,7 +331,6 @@ public class CarShopController {
 		try {
 			user = CarShopApplication.getLoggedInUser();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return user != null && user.equals("owner");
@@ -606,6 +608,68 @@ public class CarShopController {
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static boolean hasUserWithUsername(String username) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		if (carShop.hasOwner()) {
+			if (carShop.getOwner().getUsername().equals(username)) {
+				return true;
+			}
+		}
+		if (carShop.hasTechnicians()) {
+			for (Technician tech : carShop.getTechnicians()) {
+				if (tech.getUsername().equals(username)) {
+					return true;
+				}
+			}
+		}
+		if (carShop.hasCustomers()) {
+			for (Customer customer : carShop.getCustomers()) {
+				if (customer.getUsername().equals(username)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static boolean userIsOwner() {
+		String user = null;
+		try {
+			user = CarShopApplication.getLoggedInUser();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user != null && user.equals("owner");
+	}
+	
+	private static boolean userIsTechnician() {
+		String user = null;
+		try {
+			user = CarShopApplication.getLoggedInUser();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user != null && user.contains("Technician");
+	}
+	
+	private static void checkValidityOfCustomerCreation(String userName, String password) throws Exception{
+		if (hasUserWithUsername(userName)) {
+			throw new Exception("The username already exists");
+		}
+		if (userName == null || userName.equals("")) {
+			throw new Exception("The user name cannot be empty");
+		}
+		if (password == null || password.equals("")) {
+			throw new Exception("The password cannot be empty");
+		}
+		if (userIsOwner()) {
+			throw new Exception("You must log out of the owner account before creating a customer account");
+		}
+		if (userIsTechnician()) {
+			throw new Exception("You must log out of the technician account before creating a customer account");
 		}
 	}
 }
