@@ -510,16 +510,17 @@ public class CucumberStepDefinitions {
 		}
     }
     
-    // Sign Up for Customer Account Steps
-    
     @Given("there is no existing username {string}")
     public void there_is_no_existing_username(String string) {
+    	// The carShop is deleted in the tearDown, so there is no users
+    	// Verify if it's true
         assertFalse(CarShopController.hasUserWithUsername(string));
     }
 
     @When("the user provides a new username {string} and a password {string}")
     public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
     	try {
+    		// Try to create a customer account
     		CarShopController.createCustomer(string, string2);
     	} catch (Exception e) {
     		error += e.getMessage();
@@ -529,19 +530,24 @@ public class CucumberStepDefinitions {
 
     @Then("a new customer account shall be created")
     public void a_new_customer_account_shall_be_created() {
+    	// If no errors were thrown, it means the account was created
         assertTrue(errorCntr == 0);
+        // Verify if the account has been added
         assertTrue(carShop.hasCustomers());
     }
 
     @Then("the account shall have username {string} and password {string}")
     public void the_account_shall_have_username_and_password(String string, String string2) {
+    	// There is only 1 customer, so check if the credentials correspond
         assertTrue(carShop.getCustomer(0).getUsername().equals(string));
         assertTrue(carShop.getCustomer(0).getPassword().equals(string2));
     }
 
     @Then("no new account shall be created")
     public void no_new_account_shall_be_created() {
+    	// If an errors was thrown, it means the account was not created
     	assertTrue(errorCntr > 0);
+    	// Verify that the number of customer has not increased 
         assertFalse(carShop.numberOfCustomers() > 1);
     }
 
@@ -553,6 +559,7 @@ public class CucumberStepDefinitions {
     @Given("there is an existing username {string}")
     public void there_is_an_existing_username(String string) {
     	try {
+    		// Create a customer with the specified user name
     		CarShopController.createCustomer(string, "testPassword");
     		// Verify if it worked
     		assertTrue(CarShopController.hasUserWithUsername(string));

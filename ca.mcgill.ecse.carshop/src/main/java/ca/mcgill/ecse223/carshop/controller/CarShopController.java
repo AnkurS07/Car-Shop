@@ -327,13 +327,7 @@ public class CarShopController {
 	 * @return
 	 */
 	private static boolean userCanUpdateBusinessInformation() {
-		String user = null;
-		try {
-			user = CarShopApplication.getLoggedInUser();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return user != null && user.equals("owner");
+		return userIsOwner();
 	}
 	
 	/**
@@ -611,6 +605,11 @@ public class CarShopController {
 		}
 	}
 	
+	/**
+	 * Checks in all of the users if any of them has the specified userName
+	 * @param username
+	 * @return a boolean indicating if there is a user with that userName
+	 */
 	public static boolean hasUserWithUsername(String username) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		if (carShop.hasOwner()) {
@@ -635,6 +634,10 @@ public class CarShopController {
 		return false;
 	}
 	
+	/**
+	 * Helper method to look if the logged in user is the owner.
+	 * @return a boolean indicating if the user is owner.
+	 */
 	private static boolean userIsOwner() {
 		String user = null;
 		try {
@@ -645,6 +648,10 @@ public class CarShopController {
 		return user != null && user.equals("owner");
 	}
 	
+	/**
+	 * Helper method to look if the logged in user is technician.
+	 * @return a boolean indicating if the user is technician.
+	 */
 	private static boolean userIsTechnician() {
 		String user = null;
 		try {
@@ -655,6 +662,12 @@ public class CarShopController {
 		return user != null && user.contains("Technician");
 	}
 	
+	/**
+	 * Helper method to check the validity of the inputs to create a customer Account
+	 * @param userName
+	 * @param password
+	 * @throws Exception
+	 */
 	private static void checkValidityOfCustomerCreation(String userName, String password) throws Exception{
 		if (hasUserWithUsername(userName)) {
 			throw new Exception("The username already exists");
