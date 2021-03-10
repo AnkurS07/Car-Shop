@@ -1,6 +1,7 @@
 package ca.mcgill.ecse.carshop.features;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -17,6 +18,7 @@ import java.util.Map;
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOBusiness;
@@ -33,6 +35,7 @@ import io.cucumber.java.en.When;
  * Implement the code here to do the actions described in the test scenarios and implement the functionality in the controller.
  * Include extensive assertions to make there are no bugs in the system. Do not duplicate methods.
  * @author maxbo
+ * @author Julien Lefebvre
  *
  */
 public class CucumberStepDefinitions {
@@ -45,6 +48,12 @@ public class CucumberStepDefinitions {
     public void tearDown() {
     	// Delete the car shop instance between each scenario to avoid information being carried over.
     	carShop.delete();
+    	try {
+			CarShopApplication.setLoggedInUser(null);	// Set the logged in user to null to avoid information being carried over.
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     @Given("a Carshop system exists")
@@ -502,4 +511,83 @@ public class CucumberStepDefinitions {
     		errorCntr ++;
 		}
     }
+    
+    @Given("there is no existing username {string}")
+    public void there_is_no_existing_username(String string) {
+    	// The carShop is deleted in the tearDown, so there is no users
+    	// Verify if it's true
+        assertFalse(CarShopController.hasUserWithUsername(string));
+    }
+
+    @When("the user provides a new username {string} and a password {string}")
+    public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
+    	try {
+    		// Try to create a customer account
+    		CarShopController.createCustomer(string, string2);
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
+    }
+
+    @Then("a new customer account shall be created")
+    public void a_new_customer_account_shall_be_created() {
+    	// If no errors were thrown, it means the account was created
+        assertTrue(errorCntr == 0);
+        // Verify if the account has been added
+        assertTrue(carShop.hasCustomers());
+    }
+
+    @Then("the account shall have username {string} and password {string}")
+    public void the_account_shall_have_username_and_password(String string, String string2) {
+    	for (Customer customer : carShop.getCustomers()) {
+    		if (customer.getUsername().equals(string)) {
+    			assertTrue(customer.getPassword().equals(string2));
+    		}
+    	}
+    }
+
+    @Then("no new account shall be created")
+    public void no_new_account_shall_be_created() {
+    	// If an errors was thrown, it means the account was not created
+    	assertTrue(errorCntr > 0);
+    	// Verify that the number of customer has not increased 
+        assertFalse(carShop.numberOfCustomers() > 1);
+    }
+
+    @Then("an error message {string} shall be raised")
+    public void an_error_message_shall_be_raised(String string) {
+    	assertTrue(error.contains(string));
+    }
+
+    @Given("there is an existing username {string}")
+    public void there_is_an_existing_username(String string) {
+    	try {
+    		// Create a customer with the specified user name
+    		CarShopController.createCustomer(string, "testPassword");
+    		// Verify if it worked
+    		assertTrue(CarShopController.hasUserWithUsername(string));
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
+    }
+    
+    @When("the user tries to update account with a new username {string} and password {string}")
+    public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {
+    	try {
+    		// Try to update customer account
+    		CarShopController.updateCustomer(string, string2);
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
+    }
+
+    @Then("the account shall not be updated")
+    public void the_account_shall_not_be_updated() {
+    	// If an errors was thrown, it means the account was not updated
+    	assertTrue(errorCntr > 0);
+    }
+
 }
