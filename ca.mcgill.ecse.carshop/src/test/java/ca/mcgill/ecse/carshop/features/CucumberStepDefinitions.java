@@ -18,6 +18,7 @@ import java.util.Map;
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOBusiness;
@@ -34,6 +35,7 @@ import io.cucumber.java.en.When;
  * Implement the code here to do the actions described in the test scenarios and implement the functionality in the controller.
  * Include extensive assertions to make there are no bugs in the system. Do not duplicate methods.
  * @author maxbo
+ * @author Julien Lefebvre
  *
  */
 public class CucumberStepDefinitions {
@@ -538,9 +540,11 @@ public class CucumberStepDefinitions {
 
     @Then("the account shall have username {string} and password {string}")
     public void the_account_shall_have_username_and_password(String string, String string2) {
-    	// There is only 1 customer, so check if the credentials correspond
-        assertTrue(carShop.getCustomer(0).getUsername().equals(string));
-        assertTrue(carShop.getCustomer(0).getPassword().equals(string2));
+    	for (Customer customer : carShop.getCustomers()) {
+    		if (customer.getUsername().equals(string)) {
+    			assertTrue(customer.getPassword().equals(string2));
+    		}
+    	}
     }
 
     @Then("no new account shall be created")
@@ -568,4 +572,22 @@ public class CucumberStepDefinitions {
     		errorCntr ++;
     	}
     }
+    
+    @When("the user tries to update account with a new username {string} and password {string}")
+    public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {
+    	try {
+    		// Try to update customer account
+    		CarShopController.updateCustomer(string, string2);
+    	} catch (Exception e) {
+    		error += e.getMessage();
+    		errorCntr ++;
+    	}
+    }
+
+    @Then("the account shall not be updated")
+    public void the_account_shall_not_be_updated() {
+    	// If an errors was thrown, it means the account was not updated
+    	assertTrue(errorCntr > 0);
+    }
+
 }

@@ -22,7 +22,7 @@ import ca.mcgill.ecse.carshop.model.TimeSlot;
 /**
  * Controller class. Implements all controller methods as static methods. The controller should be stateless. It interacts with the View and the Model.
  * @author maxbo
- *
+ * @author Julien Lefebvre
  */
 public class CarShopController {
 	
@@ -639,12 +639,7 @@ public class CarShopController {
 	 * @return a boolean indicating if the user is owner.
 	 */
 	private static boolean userIsOwner() {
-		String user = null;
-		try {
-			user = CarShopApplication.getLoggedInUser();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String user = getLoggedInUser();
 		return user != null && user.equals("owner");
 	}
 	
@@ -653,13 +648,8 @@ public class CarShopController {
 	 * @return a boolean indicating if the user is technician.
 	 */
 	private static boolean userIsTechnician() {
-		String user = null;
-		try {
-			user = CarShopApplication.getLoggedInUser();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return user != null && user.contains("Technician");
+		String user = getLoggedInUser();
+		return user != null && user.contains("-Technician");
 	}
 	
 	/**
@@ -669,20 +659,93 @@ public class CarShopController {
 	 * @throws Exception
 	 */
 	private static void checkValidityOfCustomerCreation(String userName, String password) throws Exception{
+		// If userName is already picked
 		if (hasUserWithUsername(userName)) {
 			throw new Exception("The username already exists");
 		}
+		// Can't enter empty userName or password
 		if (userName == null || userName.equals("")) {
 			throw new Exception("The user name cannot be empty");
 		}
 		if (password == null || password.equals("")) {
 			throw new Exception("The password cannot be empty");
 		}
+		// Can't create a customer account while logged in as a technician or owner
 		if (userIsOwner()) {
 			throw new Exception("You must log out of the owner account before creating a customer account");
 		}
 		if (userIsTechnician()) {
 			throw new Exception("You must log out of the technician account before creating a customer account");
 		}
+	}
+	
+	/**
+	 * Helper method to get the logged in user
+	 * @throws Exception
+	 * @return the logged in user (String userName)
+	 */
+	private static String getLoggedInUser() {
+		String user = null;
+		try {
+			user = CarShopApplication.getLoggedInUser();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
+	
+	/**
+	 * Helper method to check the validity of the inputs to update a customer Account
+	 * @param newUserName
+	 * @param newPassword
+	 * @throws Exception
+	 */
+	private static void checkValidityOfCustomerUpdate(String newUserName, String newPassword) throws Exception{
+		// If the user is owner, he can only change password
+		if (userIsOwner()) {
+			if (!getLoggedInUser().equals(newUserName)) {
+				throw new Exception("Changing username of owner is not allowed");
+			}
+		}
+		// If the user is technician, he can only change password
+		if (userIsTechnician()) {
+			if (!getLoggedInUser().equals(newUserName)) {
+				throw new Exception("Changing username of technician is not allowed");
+			}		
+		}
+		// If the userName already exists, and it is not his own account, userName already picked
+		if (hasUserWithUsername(newUserName) && !getLoggedInUser().equals(newUserName)) {
+			throw new Exception("Username not available");
+		}
+		// Can't enter empty userName or password
+		if (newUserName == null || newUserName.equals("")) {
+			throw new Exception("The user name cannot be empty");
+		}
+		if (newPassword == null || newPassword.equals("")) {
+			throw new Exception("The password cannot be empty");
+		}
+	}
+	
+	/**
+	 * Updates the customer account.
+	 * @param newUserName
+	 * @param newPassword
+	 * @throws Exception
+	 */
+	public static void updateCustomer(String newUserName, String newPassword) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		String currentUserName = getLoggedInUser();
+		checkValidityOfCustomerUpdate(newUserName, newPassword);
+			try {
+				for (Customer customer : carShop.getCustomers()) {
+					if (customer.getUsername().equals(currentUserName)) {
+						customer.setUsername(newUserName);
+						customer.setPassword(newPassword);
+					}
+				}
+			}
+			catch (RuntimeException e) {
+				throw new Exception(e.getMessage());
+			}
 	}
 }
