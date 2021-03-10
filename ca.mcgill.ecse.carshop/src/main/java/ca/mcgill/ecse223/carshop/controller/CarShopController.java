@@ -21,7 +21,7 @@ import ca.mcgill.ecse.carshop.model.TimeSlot;
 
 /**
  * Controller class. Implements all controller methods as static methods. The controller should be stateless. It interacts with the View and the Model.
- * @author maxbo
+ * @author Maxime Bourassa
  * @author Julien Lefebvre
  */
 public class CarShopController {
@@ -127,7 +127,7 @@ public class CarShopController {
 		//Move input validation to model
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to set up business information");
 			}
 			
@@ -161,7 +161,7 @@ public class CarShopController {
 	 */
 	public static void updateBusinessInformation(String name, String address, String phoneNumber, String email) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
-		if(!userCanUpdateBusinessInformation()) {
+		if(!userIsOwner()) {
 			throw new Exception("No permission to update business information");
 		}
 		
@@ -188,7 +188,7 @@ public class CarShopController {
 	public static void addBusinessHour(DayOfWeek day, Time startTime, Time endTime) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
 			
@@ -219,7 +219,7 @@ public class CarShopController {
 	public static void updateBusinessHour(DayOfWeek currentDay, Time currentStartTime, DayOfWeek newDay, Time newStartTime, Time newEndTime) throws Exception {
 		BusinessHour currentHour = findBusinessHour(currentDay, currentStartTime);
 		try {
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
 			
@@ -252,7 +252,7 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
 			
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
 			
@@ -321,15 +321,6 @@ public class CarShopController {
 		return isOverlapping;
 	}
 	
-	
-	/**
-	 * Helper method to look if a user has the permission to update the business information.
-	 * @return
-	 */
-	private static boolean userCanUpdateBusinessInformation() {
-		return userIsOwner();
-	}
-	
 	/**
 	 * Adds a new time slot to a model and associates it to a business either as a vacation or a holiday. Includes input and permission validation.
 	 * @param type
@@ -342,7 +333,7 @@ public class CarShopController {
 	public static void addTimeSlot(String type, Date startDate, Time startTime, Date endDate, Time endTime) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
 			
@@ -478,7 +469,7 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TimeSlot targetTimeSlot = null;
 		try {
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
 			
@@ -573,7 +564,7 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
 			
-			if(!userCanUpdateBusinessInformation()) {
+			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
 			
