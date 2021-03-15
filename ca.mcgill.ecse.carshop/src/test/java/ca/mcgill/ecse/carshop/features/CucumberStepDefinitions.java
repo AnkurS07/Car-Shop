@@ -52,13 +52,25 @@ public class CucumberStepDefinitions {
 	private CarShop carShop;
 	private String error;
 	private int errorCntr;
-	
+	private Integer appointmentCntr = 0;
+	private Integer prevAppointmentCntr = 0;
+	private String updateAppointmentSuccess = null;
+	private Date systemDate;
+	private Time systemTime;
+	private boolean exception;
 	private static Business business;
 	private static Owner owner;
-
+	private static User currentUser;
+	private static Service currService; 
 
 	private static List<Map<String, String>> preservedProperties;
-
+	private static List<Map<String, String>> existingServices;
+	private static List<Map<String, String>> unavailableTS;
+	private static List<Map<String, String>> availableTS;
+	private static List<ComboItem> combosInService;
+	private static int numCombos = 0;;
+	private static int numServices = 0;
+	private static List<BookableService> allBookableServices = null;
 	int numberOfAccounts=0;
 
 	@After 
@@ -607,6 +619,23 @@ public class CucumberStepDefinitions {
 		assertTrue(errorCntr > 0);
 	}
 
+	@Given("an owner account exists in the system")
+	public void an_owner_account_exists_in_the_system() {
+		// Write code here that turns the phrase above into concrete actions
+		try {
+			carShop.setOwner(owner);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+		}
+	}
+
+	@Given("a business exists in the system")
+	public void a_business_exists_in_the_system() {
+		// Write code here that turns the phrase above into concrete actions
+		carShop.setBusiness(business);
+	}
+
 	@Given("the Owner with username {string} is logged in")
 	public void the_owner_with_username_is_logged_in(String string) {
 		// Write code here that turns the phrase above into concrete actions
@@ -633,7 +662,7 @@ public class CucumberStepDefinitions {
 				if(t.getType().name().equals(string4)){
 					Garage g = t.getGarage();
 					CarShopController.addService(string2, Integer.parseInt(string3), g);
-					Service currService = (Service) Service.getWithName(string2);
+					currService = (Service) Service.getWithName(string2);
 				}
 			}
 		}
