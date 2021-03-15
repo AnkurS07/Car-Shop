@@ -9,15 +9,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
+import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Customer;
+import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
+import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
+import ca.mcgill.ecse.carshop.model.User;
 
 /**
  * Controller class. Implements all controller methods as static methods. The controller should be stateless. It interacts with the View and the Model.
@@ -25,13 +29,13 @@ import ca.mcgill.ecse.carshop.model.TimeSlot;
  * @author Julien Lefebvre
  */
 public class CarShopController {
-	
+
 	private static final String regexEmail = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$";
-	
+
 	public CarShopController() {
 		// Empty constructor. All public methods are static so it won't actually be used.
 	}
-	
+
 	/**
 	 * Creates the owner account. Used in the background step.
 	 * @param userName
@@ -47,7 +51,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Creates the technician account. Used in the background step.
 	 * @param userName
@@ -64,7 +68,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Creates the customer account. Used in the background step.
 	 * @param userName
@@ -74,15 +78,14 @@ public class CarShopController {
 	public static void createCustomer(String userName, String password) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		checkValidityOfCustomerCreation(userName, password);
-			try {
-				carShop.addCustomer(userName, password);
-			}
-			catch (RuntimeException e) {
-				throw new Exception(e.getMessage());
-			}
-		
+		try {
+			carShop.addCustomer(userName, password);
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
-	
+
 	/**
 	 * Assigns all technicians that do not have a garage to a new garage.
 	 * @throws Exception
@@ -100,7 +103,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Gets the business as a transfer object. Contains basic business information, but no association to other classes. To be used by the view.
 	 * @return
@@ -114,7 +117,7 @@ public class CarShopController {
 		}
 		return toBusiness;
 	}
-	
+
 	/**
 	 * Method used to set up a new business. Input and permission validation is taken care of in here.
 	 * @param name
@@ -130,27 +133,27 @@ public class CarShopController {
 			if(!userIsOwner()) {
 				throw new Exception("No permission to set up business information");
 			}
-			
+
 			Pattern patternEmail = Pattern.compile(regexEmail);
 			Matcher matcherEmail = patternEmail.matcher(email);
 			if(!matcherEmail.matches()) {
 				throw new Exception("Invalid email");
 			}
-			
+
 			/*Pattern patternPhone = Pattern.compile(regexPhoneNumber);
 			Matcher matcherPhone = patternPhone.matcher(phoneNumber);
 			if(!matcherPhone.matches()) {
 				throw new InvalidInputException("Invalid phone number", "be");
 			}*/
-			
+
 			new Business(name, address, phoneNumber, email, carShop);
-			
+
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Method used to update an existing business. Includes input and permission validation.
 	 * @param name
@@ -164,20 +167,20 @@ public class CarShopController {
 		if(!userIsOwner()) {
 			throw new Exception("No permission to update business information");
 		}
-		
+
 		Pattern patternEmail = Pattern.compile(regexEmail);
 		Matcher matcherEmail = patternEmail.matcher(email);
 		if(!matcherEmail.matches()) {
 			throw new Exception("Invalid email");
 		}
-		
+
 		carShop.getBusiness().setName(name);
 		carShop.getBusiness().setAddress(address);
 		carShop.getBusiness().setPhoneNumber(phoneNumber);
 		carShop.getBusiness().setEmail(email);
-		
+
 	}
-	
+
 	/**
 	 * Adds a new business hour and assigns it to a business. Includes input and permission validation.
 	 * @param day
@@ -191,22 +194,22 @@ public class CarShopController {
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
-			
+
 			if(startTime.compareTo(endTime) > 0) {
 				throw new Exception("Start time must be before end time");
 			}
-			
+
 			if(businessHoursOverlap(day, startTime, endTime, null)) {
 				throw new Exception("The business hours cannot overlap");
 			}
-			
+
 			carShop.getBusiness().addBusinessHour(new BusinessHour(day, startTime, endTime, carShop));
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Updates existing business hours. Includes input and permission validation.
 	 * @param currentDay
@@ -222,11 +225,11 @@ public class CarShopController {
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
-			
+
 			if(newStartTime.compareTo(newEndTime) > 0) {
 				throw new Exception("Start time must be before end time");
 			}
-			
+
 			if(businessHoursOverlap(newDay, newStartTime, newEndTime, currentHour != null ? Arrays.asList(currentHour) : null)) {
 				throw new Exception("The business hours cannot overlap");
 			}
@@ -241,7 +244,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}	
 	}
-	
+
 	/**
 	 * Removes a business hour from the model.
 	 * @param day
@@ -251,11 +254,11 @@ public class CarShopController {
 	public static void removeBusinessHour(DayOfWeek day, Time startTime) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
-			
+
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
-			
+
 			BusinessHour hourToRemove = findBusinessHour(day, startTime);
 			if(hourToRemove != null) {
 				carShop.getBusiness().removeBusinessHour(hourToRemove);
@@ -265,7 +268,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Queries if a given business hour exists or not. 
 	 * @param day
@@ -275,7 +278,7 @@ public class CarShopController {
 	public static boolean businessHourExists(DayOfWeek day, Time startTime) {
 		return findBusinessHour(day, startTime) == null ? false: true;
 	}
-	
+
 	/**
 	 * Helper method used to find a given business hour. Returns null if the business hour is not found.
 	 * @param day
@@ -292,7 +295,7 @@ public class CarShopController {
 		}
 		return businessHour;
 	}
-	
+
 	/**
 	 * Helper method used as part of input validation to make sure new business hours do not overlap with existing ones.
 	 * @param day
@@ -304,7 +307,7 @@ public class CarShopController {
 	private static boolean businessHoursOverlap(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> exclude) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean isOverlapping = false;
-		
+
 		for(BusinessHour h: carShop.getBusiness().getBusinessHours()) {
 			if(exclude != null && exclude.contains(h)) {
 				continue;
@@ -317,10 +320,10 @@ public class CarShopController {
 				break;
 			}
 		}
-		
+
 		return isOverlapping;
 	}
-	
+
 	/**
 	 * Adds a new time slot to a model and associates it to a business either as a vacation or a holiday. Includes input and permission validation.
 	 * @param type
@@ -336,18 +339,18 @@ public class CarShopController {
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
-			
+
 			if(startDate.compareTo(endDate)>0 || (startDate.compareTo(endDate) == 0 && startTime.compareTo(endTime)>0)) {
 				throw new Exception("Start time must be before end time");
 			}
-			
+
 			@SuppressWarnings("deprecation")
 			Date currentDay = new Date(CarShopApplication.getSystemDate().getYear(), CarShopApplication.getSystemDate().getMonth(), CarShopApplication.getSystemDate().getDay());
 			@SuppressWarnings("deprecation")
 			Time currentTime = new Time(CarShopApplication.getSystemDate().getHours(), CarShopApplication.getSystemDate().getMinutes(), 0);
-			
+
 			if(startDate.compareTo(currentDay) < 0
-				|| (startDate.compareTo(currentDay) == 0 && startTime.compareTo(currentTime) < 0)) {
+					|| (startDate.compareTo(currentDay) == 0 && startTime.compareTo(currentTime) < 0)) {
 				if(type.equals("vacation")) {
 					throw new Exception("Vacation cannot start in the past");
 				}
@@ -355,7 +358,7 @@ public class CarShopController {
 					throw new Exception("Holiday cannot start in the past");
 				}
 			}
-			
+
 			String overlapType = timeSlotsOverlap(startDate, startTime, endDate, endTime, null);
 			if(overlapType != null) {
 				if(type.equals("vacation") && overlapType.equals("vacation")) {
@@ -368,7 +371,7 @@ public class CarShopController {
 					throw new Exception("Holiday and vacation times cannot overlap");
 				}
 			}
-			
+
 			TimeSlot newTimeSlot = carShop.addTimeSlot(startDate, startTime, endDate, endTime);
 			if(type.equals("vacation")) {
 				carShop.getBusiness().addVacation(newTimeSlot);
@@ -380,7 +383,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Helper method to verify if a new time slot overlaps with an existing one. Used as part of input validation.
 	 * @param startDate
@@ -393,7 +396,7 @@ public class CarShopController {
 	private static String timeSlotsOverlap(Date startDate, Time startTime, Date endDate, Time endTime, List<TimeSlot> exclude) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		String overlapppingType = null;
-		
+
 		for(TimeSlot t: carShop.getBusiness().getVacations()) {
 			if(exclude != null && exclude.contains(t)) {
 				continue;
@@ -408,7 +411,7 @@ public class CarShopController {
 				break;
 			}
 		}
-			
+
 		for(TimeSlot t: carShop.getBusiness().getHolidays()) {
 			if(exclude != null && exclude.contains(t)) {
 				continue;
@@ -423,10 +426,10 @@ public class CarShopController {
 				break;
 			}
 		}
-		
+
 		return overlapppingType;
 	}
-	
+
 	/**
 	 * Gets a list of transfer objects corresponding to the existing time slots. To be used by the view.
 	 * @param type
@@ -437,7 +440,7 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
 			List<TOTimeSlot> timeSlots = new ArrayList<TOTimeSlot>();
-			
+
 			if(type.equals("vacation")) {
 				for(TimeSlot t: carShop.getBusiness().getVacations()) {
 					timeSlots.add(new TOTimeSlot(t.getStartDate(), t.getStartTime(), t.getEndDate(), t.getEndTime()));
@@ -453,7 +456,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Updates an existing time slot. Includes input and permission validation.
 	 * @param type
@@ -472,18 +475,18 @@ public class CarShopController {
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
-			
+
 			if(newStartDate.compareTo(newEndDate)>0 || (newStartDate.compareTo(newEndDate) == 0 && newStartTime.compareTo(newEndTime)>0)) {
 				throw new Exception("Start time must be before end time");
 			}
-			
+
 			@SuppressWarnings("deprecation")
 			Date currentDay = new Date(CarShopApplication.getSystemDate().getYear(), CarShopApplication.getSystemDate().getMonth(), CarShopApplication.getSystemDate().getDay());
 			@SuppressWarnings("deprecation")
 			Time currentTime = new Time(CarShopApplication.getSystemDate().getHours(), CarShopApplication.getSystemDate().getMinutes(), 0);
-			
+
 			if(newStartDate.compareTo(currentDay) < 0
-				|| (newStartDate.compareTo(currentDay) == 0 && newStartTime.compareTo(currentTime) < 0)) {
+					|| (newStartDate.compareTo(currentDay) == 0 && newStartTime.compareTo(currentTime) < 0)) {
 				if(type.equals("vacation")) {
 					throw new Exception("Vacation cannot start in the past");
 				}
@@ -491,7 +494,7 @@ public class CarShopController {
 					throw new Exception("Holiday cannot start in the past");
 				}
 			}
-			
+
 			if(type.equals("vacation")) {
 				for(TimeSlot t: carShop.getBusiness().getVacations()) {
 					if(t.getStartDate().equals(oldStartDate) && t.getStartTime().equals(oldStartTime)) {
@@ -507,7 +510,7 @@ public class CarShopController {
 					}
 				}
 			}
-			
+
 			String overlapType = timeSlotsOverlap(newStartDate, newStartTime, newEndDate, newEndTime, targetTimeSlot == null ? null : Arrays.asList(targetTimeSlot));
 			if(overlapType != null) {
 				if(type.equals("vacation") && overlapType.equals("vacation")) {
@@ -520,7 +523,7 @@ public class CarShopController {
 					throw new Exception("Holiday and vacation times cannot overlap");
 				}
 			}
-			
+
 			targetTimeSlot.setStartDate(newStartDate);
 			targetTimeSlot.setStartTime(newStartTime);
 			targetTimeSlot.setEndDate(newEndDate);
@@ -530,7 +533,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Finds and returns a given time slot as a transfer object. If the time slot doesn't exist, return null.
 	 * @param type
@@ -550,7 +553,7 @@ public class CarShopController {
 		}
 		return timeSlot;
 	}
-	
+
 	/**
 	 * Removes a given time slot from the model. Includes input and permission validation.
 	 * @param type
@@ -563,11 +566,11 @@ public class CarShopController {
 	public static void removeTimeSlot(String type, Date startDate, Time startTime, Date endDate, Time endTime) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
-			
+
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
 			}
-			
+
 			TimeSlot timeSlotToRemove = null;
 			if(type.equals("vacation")) {
 				for(TimeSlot t: carShop.getBusiness().getVacations()) {
@@ -595,7 +598,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Checks in all of the users if any of them has the specified userName
 	 * @param username
@@ -624,7 +627,7 @@ public class CarShopController {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Helper method to look if the logged in user is the owner.
 	 * @return a boolean indicating if the user is owner.
@@ -633,7 +636,7 @@ public class CarShopController {
 		String user = getLoggedInUser();
 		return user != null && user.equals("owner");
 	}
-	
+
 	/**
 	 * Helper method to look if the logged in user is technician.
 	 * @return a boolean indicating if the user is technician.
@@ -642,7 +645,7 @@ public class CarShopController {
 		String user = getLoggedInUser();
 		return user != null && user.contains("-Technician");
 	}
-	
+
 	/**
 	 * Helper method to check the validity of the inputs to create a customer Account
 	 * @param userName
@@ -669,7 +672,7 @@ public class CarShopController {
 			throw new Exception("You must log out of the technician account before creating a customer account");
 		}
 	}
-	
+
 	/**
 	 * Helper method to get the logged in user
 	 * @throws Exception
@@ -684,7 +687,7 @@ public class CarShopController {
 		}
 		return user;
 	}
-	
+
 	/**
 	 * Helper method to check the validity of the inputs to update a customer Account
 	 * @param newUserName
@@ -716,7 +719,7 @@ public class CarShopController {
 			throw new Exception("The password cannot be empty");
 		}
 	}
-	
+
 	/**
 	 * Updates the customer account.
 	 * @param newUserName
@@ -727,16 +730,144 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		String currentUserName = getLoggedInUser();
 		checkValidityOfCustomerUpdate(newUserName, newPassword);
-			try {
-				for (Customer customer : carShop.getCustomers()) {
-					if (customer.getUsername().equals(currentUserName)) {
-						customer.setUsername(newUserName);
-						customer.setPassword(newPassword);
+		try {
+			for (Customer customer : carShop.getCustomers()) {
+				if (customer.getUsername().equals(currentUserName)) {
+					customer.setUsername(newUserName);
+					customer.setPassword(newPassword);
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+
+	
+
+//	public static ArrayList<TOService> getExistingServices() {
+//
+//		ArrayList<TOService> existingServices = new ArrayList<TOService>(); 
+//		for (BookableService service : CarShopApplication.getCarShop().getBookableServices()) {
+//			if (service instanceof Service) {
+//			TOService toService = new TOService(service.getName(), ((Service) service).getDuration(), ((Service) service).getGarage());
+//			existingServices.add(toService);
+//			}
+//		}
+//		return existingServices;
+//	}
+
+
+
+	public static void addService(String name, int duration, Garage garage) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		if(!userIsOwner()) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+		try {
+		
+			if(checkServiceParameters(duration) && (!addExistingServices(name, garage))) {
+				garage.addService(name, carShop, duration);
+				
+			}
+		}
+			
+			
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	public static boolean addExistingServices(String name, Garage garage) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean serviceExists = false;
+		
+		
+		for(Garage g: carShop.getGarages()) {
+			if(g.equals(garage)) {
+				for(Service s: g.getServices()) {
+					if(s.getName().equals(name)) {
+						serviceExists = true;
+						throw new Exception("Service " + name + " already exists");
 					}
 				}
 			}
-			catch (RuntimeException e) {
-				throw new Exception(e.getMessage());
-			}
+		}
+
+		return serviceExists;
+
 	}
+
+	
+	public static boolean checkServiceParameters(int duration) throws Exception {
+		boolean parameters = true;
+		if(duration<=0) {
+			parameters = false;
+			 throw new Exception("Duration must be positive");
+					
+		}
+		
+		return parameters;
+	}
+
+	
+	
+	public static void updateService(String name,String changedname, int duration, Garage garage) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service serviceUpdate = null;
+		
+		if(!userIsOwner()) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+	
+			for(int i=0; i < carShop.getBookableServices().size();i++) {
+				if(carShop.getBookableService(i) instanceof Service) {
+					serviceUpdate = (Service) carShop.getBookableService(i);
+					if(serviceUpdate.getName().equals(name)) {
+						break;
+					}
+					else {
+						throw new Exception("This service cannot be added");
+					}
+				}
+			}
+	
+			try {
+				
+				if(!updateExistingServices(serviceUpdate, changedname, duration) && checkServiceParameters(duration)){
+					serviceUpdate.setName(changedname);
+					serviceUpdate.setDuration(duration);
+					serviceUpdate.setGarage(garage);
+				}
+			}
+		catch (RuntimeException e){
+			throw new Exception(e.getMessage());
+
+		}
+
+	}
+	
+	
+	public static boolean updateExistingServices(Service serviceUpdate, String changedName, int duration) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean serviceUpdate1 = false;
+		for(BookableService s: carShop.getBookableServices()) {
+			if(s instanceof Service) {
+				if(!serviceUpdate.getName().equals(changedName) && s.getName().equals(changedName)) {
+					throw new Exception("Service " + changedName + " already exists");
+				}
+			}
+			
+		}
+		
+		return serviceUpdate1;
+	}
+		
+	
 }
+	
+	
+
+
+
