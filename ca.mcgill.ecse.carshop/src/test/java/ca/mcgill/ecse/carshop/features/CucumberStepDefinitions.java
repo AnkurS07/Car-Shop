@@ -46,6 +46,8 @@ import io.cucumber.java.en.When;
  * Include extensive assertions to make there are no bugs in the system. Do not duplicate methods.
  * @author maxbo
  * @author Julien Lefebvre
+ * @author Ankur
+ * @author Debopriyo
  *
  */
 public class CucumberStepDefinitions {
@@ -53,25 +55,14 @@ public class CucumberStepDefinitions {
 	private CarShop carShop;
 	private String error;
 	private int errorCntr;
-	private Integer appointmentCntr = 0;
-	private Integer prevAppointmentCntr = 0;
-	private String updateAppointmentSuccess = null;
-	private Date systemDate;
-	private Time systemTime;
-	private boolean exception;
+	
 	private static Business business;
 	private static Owner owner;
-	private static User currentUser;
-	private static Service currService; 
+	
 
 	private static List<Map<String, String>> preservedProperties;
-	private static List<Map<String, String>> existingServices;
-	private static List<Map<String, String>> unavailableTS;
-	private static List<Map<String, String>> availableTS;
-	private static List<ComboItem> combosInService;
-	private static int numCombos = 0;;
-	private static int numServices = 0;
 	private static List<BookableService> allBookableServices = null;
+	
 	int numberOfAccounts=0;
 
 	@After 
@@ -593,9 +584,9 @@ public class CucumberStepDefinitions {
 	@Given("there is an existing username {string}")
 	public void there_is_an_existing_username(String string) {
 		try {
-			// Create a customer with the specified user name
+			
 			CarShopController.createCustomer(string, "testPassword");
-			// Verify if it worked
+			
 			assertTrue(CarShopController.hasUserWithUsername(string));
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -606,7 +597,7 @@ public class CucumberStepDefinitions {
 	@When("the user tries to update account with a new username {string} and password {string}")
 	public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {
 		try {
-			// Try to update customer account
+		
 			CarShopController.updateCustomer(string, string2);
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -616,13 +607,13 @@ public class CucumberStepDefinitions {
 
 	@Then("the account shall not be updated")
 	public void the_account_shall_not_be_updated() {
-		// If an errors was thrown, it means the account was not updated
+		
 		assertTrue(errorCntr > 0);
 	}
 
 	@Given("an owner account exists in the system")
 	public void an_owner_account_exists_in_the_system() {
-		// Write code here that turns the phrase above into concrete actions
+		
 		try {
 			carShop.setOwner(owner);
 		} catch (Exception e) {
@@ -633,16 +624,16 @@ public class CucumberStepDefinitions {
 
 	@Given("a business exists in the system")
 	public void a_business_exists_in_the_system() {
-		// Write code here that turns the phrase above into concrete actions
+		
 		carShop.setBusiness(business);
 	}
 
 	@Given("the Owner with username {string} is logged in")
 	public void the_owner_with_username_is_logged_in(String string) {
-		// Write code here that turns the phrase above into concrete actions
+		
 		try {
 			CarShopApplication.setLoggedInUser(string);
-			// Make sure it worked.
+			
 			assertEquals(string, CarShopApplication.getLoggedInUser());
 		}
 		catch(Exception e) {
@@ -656,14 +647,14 @@ public class CucumberStepDefinitions {
 
 	@When("{string} initiates the addition of the service {string} with duration {string} belonging to the garage of {string} technician")
 	public void initiates_the_addition_of_the_service_with_duration_belonging_to_the_garage_of_technician(String string, String string2, String string3, String string4) {
-		// Write code here that turns the phrase above into concrete actions
+	
 
 		try {
 			for(Technician t: carShop.getTechnicians()) {
 				if(t.getType().name().equals(string4)){
 					Garage g = t.getGarage();
 					CarShopController.addService(string2, Integer.parseInt(string3), g);
-					currService = (Service) Service.getWithName(string2);
+					
 				}
 			}
 		}
@@ -677,8 +668,7 @@ public class CucumberStepDefinitions {
 
 	@Then("the service {string} shall exist in the system")
 	public void the_service_shall_exist_in_the_system(String string) {
-		// Write code here that turns the phrase above into concrete actions
-
+	
 		boolean exists = false;
 		for(int i=0; i<carShop.getBookableServices().size() ; i++) {
 			if(carShop.getBookableService(i).getName().equals(string)) {
@@ -691,7 +681,7 @@ public class CucumberStepDefinitions {
 
 	@Then("the service {string} shall belong to the garage of {string} technician")
 	public void the_service_shall_belong_to_the_garage_of_technician(String string, String string2) {
-		// Write code here that turns the phrase above into concrete actions
+		
 		boolean c = false;
 		for(Technician t: carShop.getTechnicians()) {
 			if(t.getType().name().equals(string2)){
@@ -708,7 +698,6 @@ public class CucumberStepDefinitions {
 
 	@Then("the number of services in the system shall be {string}")
 	public void the_number_of_services_in_the_system_shall_be(String string) {
-		////        // Write code here that turns the phrase above into concrete actions
 		int services = 0;
 
 		for(BookableService b : carShop.getBookableServices()) {
@@ -722,24 +711,19 @@ public class CucumberStepDefinitions {
 
 	@Then("an error message with content {string} shall be raised")
 	public void an_error_message_with_content_shall_be_raised(String string) {
-		// Write code here that turns the phrase above into concrete actions
+		
 		assertTrue(error.contains(string));
 	}
 
 	@Then("the service {string} shall not exist in the system")
 	public void the_service_shall_not_exist_in_the_system(String string) {
-		// Write code here that turns the phrase above into concrete actions
+		
 		assertNull(Service.getWithName(string));
 	}
 
 	@Given("the following services exist in the system:")
 	public void the_following_services_exist_in_the_system(io.cucumber.datatable.DataTable dataTable) {
-		// Write code here that turns the phrase above into concrete actions
-		// For automatic transformation, change DataTable to one of
-		// E, List<E>, List<List<E>>, List<Map<K,V>>, Map<K,V> or
-		// Map<K, List<V>>. E,K,V must be a String, Integer, Float,
-		// Double, Byte, Short, Long, BigInteger or BigDecimal.
-
+		
 		try {
 			List<Map<String, String>> rows = dataTable.asMaps();
 			for (Map<String, String> columns : rows) {
@@ -750,8 +734,7 @@ public class CucumberStepDefinitions {
 
 					}
 				}
-				// Set the logged in user to owner to be able to add the given business hour.
-				// Will be overwritten right after
+				
 				String userName = CarShopApplication.getLoggedInUser();
 				CarShopApplication.setLoggedInUser("owner"); 
 				CarShopController.addService(columns.get("name"), Integer.parseInt(columns.get("duration")), g);
@@ -762,34 +745,24 @@ public class CucumberStepDefinitions {
 			error += e.getMessage();
 			errorCntr ++;
 		}
-
-		//
-		// For other transformations you can register a DataTableType.
-
 	}
 
 	@Then("the service {string} shall still preserve the following properties:")
 	public void the_service_shall_still_preserve_the_following_properties(String string, io.cucumber.datatable.DataTable dataTable) {
-		// Write code here that turns the phrase above into concrete actions
-		// For automatic transformation, change DataTable to one of
-		// E, List<E>, List<List<E>>, List<Map<K,V>>, Map<K,V> or
-		// Map<K, List<V>>. E,K,V must be a String, Integer, Float,
-		// Double, Byte, Short, Long, BigInteger or BigDecimal.
-		//
+	
 		preservedProperties = dataTable.asMaps(String.class, String.class);
 		assertEquals(Service.getWithName(string).getName(), preservedProperties.get(0).get("name"));
 		assertEquals(((Service)Service.getWithName(string)).getDuration(), Integer.parseInt(preservedProperties.get(0).get("duration")));
 		assertEquals(((Service)Service.getWithName(string)).getGarage().getTechnician().getType().name(), preservedProperties.get(0).get("garage"));
-		//        // For other transformations you can register a DataTableType.
-		//        throw new io.cucumber.java.PendingException();
+		
 	}
 
 	@Given("the user with username {string} is logged in")
 	public void the_user_with_username_is_logged_in(String string) {
-		// Write code here that turns the phrase above into concrete actions
+		
 		try {
 			CarShopApplication.setLoggedInUser(string);
-			// Make sure it worked.
+			
 			assertEquals(string, CarShopApplication.getLoggedInUser());
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -799,7 +772,7 @@ public class CucumberStepDefinitions {
 
 	@When("{string} initiates the update of the service {string} to name {string}, duration {string}, belonging to the garage of {string} technician")
 	public void initiates_the_update_of_the_service_to_name_duration_belonging_to_the_garage_of_technician(String string, String string2, String string3, String string4, String string5) {
-		// Write code here that turns the phrase above into concrete actions
+		
 
 		try {
 			if(string3.equals("<name>")) {
@@ -821,13 +794,7 @@ public class CucumberStepDefinitions {
 
 	@Then("the service {string} shall be updated to name {string}, duration {string}")
 	public void the_service_shall_be_updated_to_name_duration(String string, String string2, String string3) {
-		// Write code here that turns the phrase above into concrete actions
-		//			if(carShop.hasBookableServices()) {
-		//				int i = carShop.indexOfBookableService(Service.getWithName(string));
-		//				assertEquals(string2, carShop.getBookableService(i).getName());
-		//				assertEquals(Integer.parseInt(string3),((Service)carShop.getBookableService(i)).getDuration());
-		//			}
-
+		
 		Service service = (Service) BookableService.getWithName(string2);
 		assertEquals(string2, service.getName());
 		assertEquals(Integer.parseInt(string3),service.getDuration());
