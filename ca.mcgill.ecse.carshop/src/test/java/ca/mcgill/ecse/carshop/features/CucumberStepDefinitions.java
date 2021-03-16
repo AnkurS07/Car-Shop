@@ -61,6 +61,7 @@ public class CucumberStepDefinitions {
 	
 
 	private static List<Map<String, String>> preservedProperties;
+	private static List<BookableService> allBookableServices = null;
 	
 	int numberOfAccounts=0;
 
