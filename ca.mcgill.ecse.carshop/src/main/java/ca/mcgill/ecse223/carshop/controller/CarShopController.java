@@ -14,10 +14,12 @@ import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ComboItem;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
+import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
@@ -863,8 +865,172 @@ public class CarShopController {
 		
 		return serviceUpdate1;
 	}
-		
+
+	/**
+	 * Allows the owner to define a service combo
+	 * @param user
+	 * @param name
+	 * @param service
+	 * @param mandatory
+	 * @param mainService
+	 * @throws Exception
+	 */
 	
+	public static void defineServiceCombo(String user, String name, String services, String mandatory, String mainService) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service service;
+		boolean mandatoryToSet;
+		ComboItem Item;
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(name))!=null) {
+			throw new Exception ("Service combo "+name+" already exists");
+		}
+
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}
+		}
+		if(!(services.contains(mainService))) {
+			throw new Exception("Main service must be included in the services");
+		}
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceList[i].equals(mainService)) {
+				if(!(Boolean.parseBoolean(mandatoryList[i]))) {
+					throw new Exception ("Main service must be mandatory");
+				}
+			}
+		}
+		if(serviceList.length<2) {
+			throw new Exception("A service Combo must contain at least 2 services");
+		}
+		if((serviceCheck(mainService))==null) {
+			throw new Exception ("Service " + mainService + " does not exist");
+		}
+
+		ServiceCombo combo = new ServiceCombo(name, carShop);
+		for(int i=0; i<serviceList.length; i++) {
+			service = serviceCheck(serviceList[i]);
+			mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+			Item = new ComboItem(mandatoryToSet, service, combo);
+			if(Item.getService().getName().equals(mainService)) {
+				combo.setMainService(Item);
+			}
+			combo.addService(Item);
+		}
+	}
+	
+	/**
+	 * Allows the owner to update an existing service combo
+	 * @param user
+	 * @param existingCombo
+	 * @param name
+	 * @param service
+	 * @param mandatory
+	 * @param mainService
+	 * @throws Exception
+	 */
+	
+	public static void updateServiceCombo(String user, String existingCombo, String name, String services, String mandatory, String mainService) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service service;
+		boolean mandatoryToSet;
+		ComboItem Item;
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(name))!=null && !name.equals(existingCombo)) {
+			throw new Exception ("Service "+name+" already exists");
+		}
+		if((serviceCheck(mainService))==null) {
+			throw new Exception ("Service " + mainService + " does not exist");
+		}
+		if(!(services.contains(mainService))) {
+			throw new Exception("Main service must be included in the services");
+		}
+		/*for(int i=0; i<serviceList.length; i++) {
+			if(!(BookableService.hasWithName(serviceList[i]))) {
+				throw new Exception ("Service" + serviceList[i] + "does not exist");
+			}
+		}*/
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}		
+		}
+		if(serviceList.length<2) {
+			throw new Exception("A service Combo must contain at least 2 services");
+		}
+		for(int j=0; j<serviceList.length; j++) {
+			if(serviceList[j].equals(mainService)) {
+				if(!(Boolean.parseBoolean(mandatoryList[j]))) {
+					throw new Exception ("Main service must be mandatory");
+				}
+			}
+		}
+		
+		ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
+		combo.setName(name);
+		for (int i = 0; i < serviceList.length; i++) {
+			service = serviceCheck(serviceList[i]);
+			mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+			Item = new ComboItem(mandatoryToSet, service, combo);
+
+			combo.addService(Item);
+			if (Item.getService().getName().equals(mainService)) {
+				combo.setMainService(Item);
+
+			}
+		}
+	}
+	
+	
+
+	/**
+	 * Helper method to find a service 
+	 * @param name
+	 * @return the service that is searched for
+	 */
+	private static Service serviceCheck(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		BookableService specificService = null;
+		for (BookableService service : carShop.getBookableServices()) {
+			if (service instanceof Service) {
+				if (service.getName().equals(name)) {
+					specificService = service;
+
+				}
+			}
+		}
+		return (Service) specificService;
+	}
+	
+	/**
+	 * Helper method to find a service combo
+	 * @param name
+	 * @return the service combo that is searched for
+	 */
+	private static ServiceCombo serviceComboDuplicateCheck(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		BookableService specificServiceCombo = null;
+		for (BookableService serviceCombo : carShop.getBookableServices()) {
+			if (serviceCombo instanceof ServiceCombo) {
+				if (serviceCombo.getName().equals(name)) {
+					specificServiceCombo = serviceCombo;
+				}
+			}
+		}
+		return (ServiceCombo) specificServiceCombo;
+	}
+
 }
 	
 	

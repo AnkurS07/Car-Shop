@@ -25,6 +25,7 @@ import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
+import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.User;
@@ -833,5 +834,207 @@ public class CucumberStepDefinitions {
 
 
 	}
+
+	
+	@When("{string} initiates the definition of a service combo {string} with main service {string}, services {string} and mandatory setting {string}")
+	public void initiates_the_definition_of_a_service_combo_with_main_service_services_and_mandatory_setting(String userName, String name, String mainService, String service, String mandatory) {
+		// Write code here that turns the phrase above into concrete actions
+		try {
+			CarShopController.defineServiceCombo(userName, name, service, mandatory, mainService);
+		}
+		catch(Exception e){
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+
+	@Then("the service combo {string} shall exist in the system")
+		public void the_service_combo_shall_exist_in_the_system(String string) {
+		    // Write code here that turns the phrase above into concrete actions
+		boolean comboExists = false;
+		if(BookableService.getWithName(string) !=null && BookableService.getWithName(string) instanceof ServiceCombo) {
+			comboExists = true;
+		}
+		assertTrue(comboExists);
+	}
+	
+	@Then("the service combo {string} shall contain the services {string} with mandatory setting {string}")
+	public void the_service_combo_shall_contain_the_services_with_mandatory_setting(String string, String string2, String string3) {
+		    // Write code here that turns the phrase above into concrete actions
+		ServiceCombo serviceCombo = (ServiceCombo) ServiceCombo.getWithName(string);
+
+		String[] services = string2.split(",");
+		String[] mandatory = string3.split(",");
+
+		for (int i = 0; i < services.length; i++) {
+			Service service1 = (Service) Service.getWithName(services[i]);
+			boolean mandatory1 = Boolean.parseBoolean(mandatory[i]);
+			ComboItem comboItem = new ComboItem(mandatory1, service1, serviceCombo);
+
+			assertEquals(true, serviceCombo.getServices().contains(comboItem));
+			assertEquals(true, serviceCombo.getServices().contains(comboItem));
+		}	
+	}
+		
+	@Then("the main service of the service combo {string} shall be {string}")
+	public void the_main_service_of_the_service_combo_shall_be(String string, String string2) {
+		    // Write code here that turns the phrase above into concrete actions
+		assertEquals(((ServiceCombo) BookableService.getWithName(string)).getMainService().getService().getName(),string2);
+	}
+		
+	@Then("the service {string} in service combo {string} shall be mandatory")
+	public void the_service_in_service_combo_shall_be_mandatory(String string, String string2) {
+		    // Write code here that turns the phrase above into concrete actions
+		for (int i = 0; i < carShop.getBookableServices().size(); i++) {
+			if (carShop.getBookableServices().get(i) instanceof ServiceCombo
+					&& carShop.getBookableServices().get(i).getName().equals(string)) {
+				ServiceCombo serviceC = (ServiceCombo) carShop.getBookableServices().get(i);
+				for (ComboItem comboItem : serviceC.getServices()) {
+					if (comboItem.getService().getName().equals(string2)) {
+						assertEquals(true, comboItem.getMandatory());
+					}
+				}
+			}
+		}
+	}
+	
+	@Then("the service combo {string} shall not exist in the system")
+	public void the_service_combo_shall_not_exist_in_the_system(String string) {
+		    // Write code here that turns the phrase above into concrete actions
+		assertNull(ServiceCombo.getWithName(string));
+	}
+
+	@Then("the number of service combos in the system shall be {string}")
+	public void the_number_of_service_combos_in_the_system_shall_be(String string) {
+		    // Write code here that turns the phrase above into concrete actions
+		allBookableServices = carShop.getBookableServices();
+		int numCombos = 0;
+		for (int i = 0; i < allBookableServices.size(); i++) {
+			if (allBookableServices.get(i) instanceof ServiceCombo) {
+				numCombos++;
+			}
+		}
+
+		assertEquals(Integer.parseInt(string), numCombos);
+	}
+
+	@Given("the following service combos exist in the system:")
+	public void the_following_service_combos_exist_in_the_system(io.cucumber.datatable.DataTable dataTable) {
+		    // Write code here that turns the phrase above into concrete actions
+		    // For automatic transformation, change DataTable to one of
+		    // E, List<E>, List<List<E>>, List<Map<K,V>>, Map<K,V> or
+		    // Map<K, List<V>>. E,K,V must be a String, Integer, Float,
+		    // Double, Byte, Short, Long, BigInteger or BigDecimal.
+		    //
+		    // For other transformations you can register a DataTableType.
+		List<Map<String, String>> subContent = dataTable.asMaps(String.class, String.class);
+		for (Map<String, String> content : subContent) {
+			ServiceCombo combo = new ServiceCombo(content.get("name"), carShop);
+			carShop.addBookableService(combo);
+			Service main = (Service) findServiceByName(content.get("mainService"));
+
+			// extract the combo items
+			String itemList = content.get("services");
+			String[] items = itemList.split(",");
+			String mandatoryList = content.get("mandatory");
+			String[] mandatory = mandatoryList.split(",");
+
+			for (int i = 0; i < items.length; i++) {
+
+				BookableService thisService = findServiceByName(items[i]);
+				boolean thisMandatory = Boolean.parseBoolean(mandatory[i]);
+				if (thisService.getClass().equals(Service.class)) {
+					Service serviceItem = (Service) thisService;
+					if (items[i].equals(main.getName())) {
+						combo.setMainService(new ComboItem(true, serviceItem, combo));
+					} else {
+						combo.addService(thisMandatory, serviceItem);
+					}
+				}
+
+			}
+			
+
+		}
+	}
+
+	@Then("the service combo {string} shall preserve the following properties:")
+	public void the_service_combo_shall_preserve_the_following_properties(String string, io.cucumber.datatable.DataTable dataTable) {
+		    // Write code here that turns the phrase above into concrete actions
+		    // For automatic transformation, change DataTable to one of
+		    // E, List<E>, List<List<E>>, List<Map<K,V>>, Map<K,V> or
+		    // Map<K, List<V>>. E,K,V must be a String, Integer, Float,
+		    // Double, Byte, Short, Long, BigInteger or BigDecimal.
+		    //
+		    // For other transformations you can register a DataTableType.
+		String services = "";
+		String mandatory = "";
+		List<Map<String, String>> list = dataTable.asMaps(String.class, String.class);
+		for (int i = 0; i < list.size(); i++) {
+
+			if (list.get(i).get("name").contains(string)) {
+				ServiceCombo serviceCombo = (ServiceCombo) BookableService.getWithName(string);
+				assertEquals(serviceCombo.getMainService().getService().getName(), list.get(i).get("mainService"));
+
+				for (int j = 0; j < serviceCombo.getServices().size(); j++) {
+					if (j == serviceCombo.getServices().size() - 1) {
+						mandatory += serviceCombo.getServices().get(j).getMandatory();
+						services += serviceCombo.getServices().get(j).getService().getName();
+					} else {
+						services += serviceCombo.getServices().get(j).getService().getName() + ",";
+						mandatory += serviceCombo.getServices().get(j).getMandatory() + ",";
+					}
+				}
+				assertEquals(services, list.get(i).get("services"));
+				assertEquals(mandatory, list.get(i).get("mandatory"));
+
+			}
+
+		}
+	}
+	
+	@When("{string} initiates the update of service combo {string} to name {string}, main service {string} and services {string} and mandatory setting {string}")
+	public void initiates_the_update_of_service_combo_to_name_main_service_and_services_and_mandatory_setting(
+			String username, String name, String newName, String mainService, String servicesString, String mandatoryString) {
+		try {
+			CarShopController.updateServiceCombo(username, name, newName, servicesString, mandatoryString, mainService);
+		} 
+		catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+		
+	@Then("the service combo {string} shall be updated to name {string}")
+	public void the_service_combo_shall_be_updated_to_name(String string, String string2) {
+		    // Write code here that turns the phrase above into concrete actions
+		for (int i = 0; i < carShop.getBookableServices().size(); i++) {
+			if (carShop.getBookableServices().get(i) instanceof ServiceCombo
+					&& carShop.getBookableServices().get(i).getName().equals(string)) {
+
+				assertEquals(string2, carShop.getBookableService(i).getName());
+
+			}
+		}
+	}
+
+
+
+
+	
+	private BookableService findServiceByName(String serviceName) {
+		BookableService thisService = null;
+
+		List<BookableService> serviceList = carShop.getBookableServices();
+		for (int i = 0; i < serviceList.size(); i++) {
+			thisService = serviceList.get(i);
+			if (thisService.getName().equals(serviceName)) {
+				return thisService;
+			}
+		}
+
+		return thisService;
+	}
+
 
 }
