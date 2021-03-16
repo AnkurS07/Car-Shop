@@ -13,3 +13,9 @@ class TOTimeSlot {
 	Date endDate;
 	Time endTime;
 }
+
+
+class TOService {
+  isA BookableService;
+  int duration;
+}

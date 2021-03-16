@@ -29,6 +29,8 @@ import ca.mcgill.ecse.carshop.model.User;
  * Controller class. Implements all controller methods as static methods. The controller should be stateless. It interacts with the View and the Model.
  * @author Maxime Bourassa
  * @author Julien Lefebvre
+ * @author Ankur
+ * @author Debopriyo
  */
 public class CarShopController {
 
@@ -746,46 +748,44 @@ public class CarShopController {
 	}
 
 
-	
-
-//	public static ArrayList<TOService> getExistingServices() {
-//
-//		ArrayList<TOService> existingServices = new ArrayList<TOService>(); 
-//		for (BookableService service : CarShopApplication.getCarShop().getBookableServices()) {
-//			if (service instanceof Service) {
-//			TOService toService = new TOService(service.getName(), ((Service) service).getDuration(), ((Service) service).getGarage());
-//			existingServices.add(toService);
-//			}
-//		}
-//		return existingServices;
-//	}
-
-
-
+	/**
+	 * Used to add services
+	 * @param name
+	 * @param duration
+	 * @param garage
+	 * @throws Exception
+	 */
 	public static void addService(String name, int duration, Garage garage) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
+		// checks if the user logged in is the owner 
 		if(!userIsOwner()) {
 			throw new Exception("You are not authorized to perform this operation");
 		}
 		try {
-		
+			// checks if the parameters passed are true and then adds the service
 			if(checkServiceParameters(duration) && (!addExistingServices(name, garage))) {
 				garage.addService(name, carShop, duration);
 				
 			}
 		}
 			
-			
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
 
-	public static boolean addExistingServices(String name, Garage garage) throws Exception{
+	/**
+	 * Helper method to check if the service that has to be added is already in the model or not 
+	 * @param name
+	 * @param garage
+	 * @return
+	 * @throws Exception
+	 */
+	private static boolean addExistingServices(String name, Garage garage) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean serviceExists = false;
 		
-		
+		// checks if service that has to be added already exists
 		for(Garage g: carShop.getGarages()) {
 			if(g.equals(garage)) {
 				for(Service s: g.getServices()) {
@@ -796,33 +796,47 @@ public class CarShopController {
 				}
 			}
 		}
-
+		// returns true if the service already exists else returns false
 		return serviceExists;
 
 	}
 
-	
-	public static boolean checkServiceParameters(int duration) throws Exception {
+	/**
+	 * Helper method to check if the duration for a service has a positive value
+	 * @param duration
+	 * @return
+	 * @throws Exception
+	 */
+	private static boolean checkServiceParameters(int duration) throws Exception {
 		boolean parameters = true;
 		if(duration<=0) {
 			parameters = false;
 			 throw new Exception("Duration must be positive");
 					
 		}
-		
+		// returns true if the duration passed is positive else returns false
 		return parameters;
 	}
 
 	
-	
+	/**
+	 * Method used to update services in the model
+	 * @param name
+	 * @param changedname
+	 * @param duration
+	 * @param garage
+	 * @throws Exception
+	 */
 	public static void updateService(String name,String changedname, int duration, Garage garage) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service serviceUpdate = null;
 		
+		//checks if the user logged is the owner 
 		if(!userIsOwner()) {
 			throw new Exception("You are not authorized to perform this operation");
 		}
-	
+			
+		// checks if the service to be added exists in the system
 			for(int i=0; i < carShop.getBookableServices().size();i++) {
 				if(carShop.getBookableService(i) instanceof Service) {
 					serviceUpdate = (Service) carShop.getBookableService(i);
@@ -836,7 +850,7 @@ public class CarShopController {
 			}
 	
 			try {
-				
+			
 				if(!updateExistingServices(serviceUpdate, changedname, duration) && checkServiceParameters(duration)){
 					serviceUpdate.setName(changedname);
 					serviceUpdate.setDuration(duration);
@@ -850,10 +864,19 @@ public class CarShopController {
 
 	}
 	
-	
-	public static boolean updateExistingServices(Service serviceUpdate, String changedName, int duration) throws Exception {
+	/**
+	 * Helper method to check is the service that has to be updated already exists 
+	 * @param serviceUpdate
+	 * @param changedName
+	 * @param duration
+	 * @return
+	 * @throws Exception
+	 */
+	private static boolean updateExistingServices(Service serviceUpdate, String changedName, int duration) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
-		boolean serviceUpdate1 = false;
+		boolean serviceUpdate1 = false; 
+		
+		// checks for service to be update already exists or not
 		for(BookableService s: carShop.getBookableServices()) {
 			if(s instanceof Service) {
 				if(!serviceUpdate.getName().equals(changedName) && s.getName().equals(changedName)) {
@@ -862,7 +885,7 @@ public class CarShopController {
 			}
 			
 		}
-		
+		// returns true if the service already exists else returns false
 		return serviceUpdate1;
 	}
 
