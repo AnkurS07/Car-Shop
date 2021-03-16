@@ -868,6 +868,7 @@ public class CarShopController {
 
 	/**
 	 * Allows the owner to define a service combo
+	 * @param user
 	 * @param name
 	 * @param service
 	 * @param mandatory
@@ -875,22 +876,29 @@ public class CarShopController {
 	 * @throws Exception
 	 */
 	
-	public static void defineServiceCombo(String name, String services, String mandatory, String mainService) throws Exception{
+	public static void defineServiceCombo(String user, String name, String services, String mandatory, String mainService) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service service;
 		boolean mandatoryToSet;
 		ComboItem Item;
-		
 		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(name))!=null) {
+			throw new Exception ("Service combo "+name+" already exists");
+		}
+
 		for(int i=0; i<serviceList.length; i++) {
-			if(!BookableService.hasWithName(serviceList[i])) {
-				throw new Exception ("Service" + serviceList[i] + "does not exist");
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
 			}
 		}
-		if(!services.contains(mainService)) {
+		if(!(services.contains(mainService))) {
 			throw new Exception("Main service must be included in the services");
 		}
-		String[] mandatoryList = mandatory.split(",");
 		for(int i=0; i<serviceList.length; i++) {
 			if(serviceList[i].equals(mainService)) {
 				if(!(Boolean.parseBoolean(mandatoryList[i]))) {
@@ -901,18 +909,13 @@ public class CarShopController {
 		if(serviceList.length<2) {
 			throw new Exception("A service Combo must contain at least 2 services");
 		}
-		if(!serviceCheck(mainService)) {
-			throw new Exception ("Service" + mainService + "does not exist");
+		if((serviceCheck(mainService))==null) {
+			throw new Exception ("Service " + mainService + " does not exist");
 		}
-		if(serviceComboDuplicateCheck(name)) {
-			throw new Exception ("Service combo"+name+"already exists");
-		}
-		if(!userIsOwner()) {
-			throw new Exception ("You are not authorized to perform this operation");
-		}
+
 		ServiceCombo combo = new ServiceCombo(name, carShop);
 		for(int i=0; i<serviceList.length; i++) {
-			service = findService(serviceList[i]);
+			service = serviceCheck(serviceList[i]);
 			mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
 			Item = new ComboItem(mandatoryToSet, service, combo);
 			if(Item.getService().getName().equals(mainService)) {
@@ -924,6 +927,7 @@ public class CarShopController {
 	
 	/**
 	 * Allows the owner to update an existing service combo
+	 * @param user
 	 * @param existingCombo
 	 * @param name
 	 * @param service
@@ -932,42 +936,51 @@ public class CarShopController {
 	 * @throws Exception
 	 */
 	
-	public static void updateServiceCombo(String existingCombo, String name, String services, String mandatory, String mainService) throws Exception{
+	public static void updateServiceCombo(String user, String existingCombo, String name, String services, String mandatory, String mainService) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service service;
 		boolean mandatoryToSet;
 		ComboItem Item;
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
 		
-		if(!serviceCheck(mainService)) {
-			throw new Exception ("Service" + mainService + "does not exist");
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
 		}
-		if(!services.contains(mainService)) {
+		if((serviceComboDuplicateCheck(name))!=null && !name.equals(existingCombo)) {
+			throw new Exception ("Service "+name+" already exists");
+		}
+		if((serviceCheck(mainService))==null) {
+			throw new Exception ("Service " + mainService + " does not exist");
+		}
+		if(!(services.contains(mainService))) {
 			throw new Exception("Main service must be included in the services");
 		}
-		String []serviceList = services.split(",");
-		for(int i=0; i<serviceList.length; i++) {
-			if(!BookableService.hasWithName(serviceList[i])) {
+		/*for(int i=0; i<serviceList.length; i++) {
+			if(!(BookableService.hasWithName(serviceList[i]))) {
 				throw new Exception ("Service" + serviceList[i] + "does not exist");
 			}
+		}*/
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}		
 		}
 		if(serviceList.length<2) {
 			throw new Exception("A service Combo must contain at least 2 services");
 		}
-		String[] mandatoryList = mandatory.split(",");
-		for(int i=0; i<serviceList.length; i++) {
-			if(serviceList[i].equals(mainService)) {
-				if(!(Boolean.parseBoolean(mandatoryList[i]))) {
+		for(int j=0; j<serviceList.length; j++) {
+			if(serviceList[j].equals(mainService)) {
+				if(!(Boolean.parseBoolean(mandatoryList[j]))) {
 					throw new Exception ("Main service must be mandatory");
 				}
 			}
 		}
-		if(serviceComboDuplicateCheck(name) && !name.equals(existingCombo)) {
-			throw new Exception ("Service combo"+name+"already exists");
-		}
-		ServiceCombo combo = findServiceCombo(existingCombo);
+		
+		ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
 		combo.setName(name);
 		for (int i = 0; i < serviceList.length; i++) {
-			service = findService(serviceList[i]);
+			service = serviceCheck(serviceList[i]);
 			mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
 			Item = new ComboItem(mandatoryToSet, service, combo);
 
@@ -980,48 +993,12 @@ public class CarShopController {
 	}
 	
 	/**
-	 * Helper method to check whether a service exists
-	 * @param name
-	 * @return boolean
-	 */
-	
-	private static boolean serviceCheck(String name) {
-		CarShop carShop = CarShopApplication.getCarShop();
-		for (BookableService service : carShop.getBookableServices()) {
-			if(service instanceof Service) {
-				if(service.getName().equals(name)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * Helper method to check whether a combo already exists
-	 * @param comboName
-	 * @return boolean
-	 */
-	
-	private static boolean serviceComboDuplicateCheck(String comboName) {
-		CarShop carShop = CarShopApplication.getCarShop();
-		for (BookableService service : carShop.getBookableServices()) {
-			if(service instanceof ServiceCombo) {
-				if(service.getName().equals(comboName)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Helper method to find a service 
 	 * @param name
 	 * @return the service that is searched for
 	 */
 	
-	private static Service findService(String name) {
+	private static Service serviceCheck(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		BookableService specificService = null;
 		for (BookableService service : carShop.getBookableServices()) {
@@ -1041,18 +1018,17 @@ public class CarShopController {
 	 * @return the service combo that is searched for
 	 */
 	
-	private static ServiceCombo findServiceCombo(String name) {
+	private static ServiceCombo serviceComboDuplicateCheck(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
-		BookableService specificService = null;
-		for (BookableService service : carShop.getBookableServices()) {
-			if (service instanceof ServiceCombo) {
-				if (service.getName().equals(name)) {
-					specificService = service;
-
+		BookableService specificServiceCombo = null;
+		for (BookableService serviceCombo : carShop.getBookableServices()) {
+			if (serviceCombo instanceof ServiceCombo) {
+				if (serviceCombo.getName().equals(name)) {
+					specificServiceCombo = serviceCombo;
 				}
 			}
 		}
-		return (ServiceCombo) specificService;
+		return (ServiceCombo) specificServiceCombo;
 	}
 
 }
