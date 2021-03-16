@@ -992,12 +992,13 @@ public class CarShopController {
 		}
 	}
 	
+	
+
 	/**
 	 * Helper method to find a service 
 	 * @param name
 	 * @return the service that is searched for
 	 */
-	
 	private static Service serviceCheck(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		BookableService specificService = null;
@@ -1017,7 +1018,6 @@ public class CarShopController {
 	 * @param name
 	 * @return the service combo that is searched for
 	 */
-	
 	private static ServiceCombo serviceComboDuplicateCheck(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		BookableService specificServiceCombo = null;
