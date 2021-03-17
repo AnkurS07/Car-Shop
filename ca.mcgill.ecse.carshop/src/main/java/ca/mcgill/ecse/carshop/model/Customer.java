@@ -3,6 +3,8 @@
 
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
+import java.sql.Date;
+import java.sql.Time;
 
 // line 25 "../../../../../carshop.ump"
 public class Customer extends User
@@ -94,9 +96,9 @@ public class Customer extends User
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Appointment addAppointment(BookableService aBookableService, CarShop aCarShop)
+  public Appointment addAppointment(Date aDate, Time aTime, BookableService aBookableService, CarShop aCarShop)
   {
-    return new Appointment(this, aBookableService, aCarShop);
+    return new Appointment(aDate, aTime, this, aBookableService, aCarShop);
   }
 
   public boolean addAppointment(Appointment aAppointment)

@@ -2,6 +2,7 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1052,6 +1053,221 @@ public class CarShopController {
 			}
 		}
 		return (ServiceCombo) specificServiceCombo;
+	}
+	
+	public static boolean logIn(String username, String password) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		User currentUser = null;
+		boolean isLoggedIn = false;
+
+		
+		List<User> users = new ArrayList<User>();
+		users.addAll(carShop.getTechnicians());
+		users.addAll(carShop.getCustomers());
+		users.add(carShop.getOwner());
+		
+		try {
+			if(User.hasWithUsername(username)) {
+				currentUser = User.getWithUsername(username);
+				if(currentUser.getPassword().equals(password)) {
+					CarShopApplication.setLoggedInUser(currentUser.getUsername());
+					isLoggedIn = true;
+				}
+			}
+			else if (username.equals("Owner")) {
+				createOwner(username, password);
+			}
+			else if (username.contains("Technician")) {
+				TechnicianType technicianType = null;
+				if (username.contains("Tire")) {
+					technicianType = Technician.TechnicianType.valueOf("Tire");
+				}
+				else if (username.contains("Engine")) {
+					technicianType = Technician.TechnicianType.valueOf("Engine");
+				}
+				else if (username.contains("Transmission")) {
+					technicianType = Technician.TechnicianType.valueOf("Transmission");
+				}
+				else if (username.contains("Electronics")) {
+					technicianType = Technician.TechnicianType.valueOf("Electronics");
+				}
+				else if (username.contains("Fluids")) {
+					technicianType = Technician.TechnicianType.valueOf("Fluids");
+				}
+    			createTechnician(username, password, technicianType);
+			}
+			else {
+				throw new Exception("Username/password not found");
+			}
+		} catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return isLoggedIn;
+	}
+	
+	public static boolean createdAccount() throws Exception {
+		boolean createdAccount = true;
+		try {
+			if (User.hasWithUsername(CarShopApplication.getLoggedInUser())) {
+				createdAccount = false;
+			}
+		} catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return createdAccount;
+	}
+	
+	public static boolean createdGarage() throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean garageAssociatedToNewTechnician = true;
+		
+		for(Technician t: carShop.getTechnicians()) {
+			if(!t.hasGarage()) {
+				garageAssociatedToNewTechnician = false;
+			}
+		}
+		return garageAssociatedToNewTechnician;
+	}
+
+	
+	public static boolean hasOpeningHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		List<BusinessHour>businessHours = garage.getBusinessHours();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		BusinessHour aBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		
+		boolean hasBusinessHour = false;
+		try {
+			for (BusinessHour b: businessHours) {
+				if (b == aBusinessHour) {
+					hasBusinessHour = true;
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return hasBusinessHour;
+	}
+	
+	public static void addHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		Business business = carShop.getBusiness();
+		List<BusinessHour>businessHours = business.getBusinessHours();
+				
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		
+		try {
+			if (CarShopApplication.getLoggedInUser().equals(type)) {
+				for (BusinessHour b: businessHours) {
+					if (b.getDayOfWeek() == dayOfWeek) {
+						if (start.before(end) && start.equals(b.getStartTime()) && end.before(b.getEndTime())) {
+							garage.addBusinessHour(newBusinessHour);
+						}
+					}
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static void removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		Business business = carShop.getBusiness();
+		List<BusinessHour>businessHours = business.getBusinessHours();
+				
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		BusinessHour oldBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		
+		try {
+			if (CarShopApplication.getLoggedInUser().equals(type)) {
+				for (BusinessHour b: businessHours) {
+					if (b == oldBusinessHour) {
+						garage.removeBusinessHour(oldBusinessHour);
+					}
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static boolean addedHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		Business business = carShop.getBusiness();
+		List<BusinessHour>businessHours = business.getBusinessHours();
+				
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		
+		boolean added = false;
+		try {
+			if (CarShopApplication.getLoggedInUser().equals(type)) {
+				for (BusinessHour b: businessHours) {
+					if (b.getDayOfWeek() == dayOfWeek) {
+						garage.addBusinessHour(newBusinessHour);
+						added = true;
+					}
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		return added;
+	}
+	
+	public static boolean removedHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		Business business = carShop.getBusiness();
+		List<BusinessHour>businessHours = business.getBusinessHours();
+				
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		BusinessHour oldBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		
+		boolean removed = false;
+		try {
+			if (CarShopApplication.getLoggedInUser().equals(type)) {
+				for (BusinessHour b: businessHours) {
+					if (b == oldBusinessHour) {
+						garage.addBusinessHour(oldBusinessHour);
+						removed = true;
+					}
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		return removed;
 	}
 
 }
