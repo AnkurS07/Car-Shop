@@ -1173,115 +1173,88 @@ public class CarShopController {
 	public static void addHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
-		Business business = carShop.getBusiness();
-		List<BusinessHour>businessHours = business.getBusinessHours();
-				
+		
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		Time start = new Time(sdf.parse(startTime).getTime());
 		Time end = new Time(sdf.parse(endTime).getTime());
-		BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
 		
-		try {
-			if (CarShopApplication.getLoggedInUser().equals(type)) {
-				for (BusinessHour b: businessHours) {
-					if (b.getDayOfWeek() == dayOfWeek) {
-						if (start.before(end) && start.equals(b.getStartTime()) && end.before(b.getEndTime())) {
-							garage.addBusinessHour(newBusinessHour);
-						}
-					}
-				}
-			}
+		//add checks
+		if(start.compareTo(end)>0) {
+			throw new Exception("Start time must be before end time");
 		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
+		
+		if(intersectsWithBusinessHour(dayOfWeek, start, end, garage.getBusinessHours())) {
+			throw new Exception("The opening hours cannot overlap");
 		}
+		
+		if(!overlapsWithBusinessHour(dayOfWeek, start, end, carShop.getBusiness().getBusinessHours())) {
+			throw new Exception("The opening hours are not within the opening hours of the business");
+		}
+		
+		if(!CarShopApplication.getLoggedInUser().equals(garage.getTechnician().getUsername())) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+		
+		BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		garage.addBusinessHour(newBusinessHour);
 	}
 	
 	public static void removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
-		Business business = carShop.getBusiness();
-		List<BusinessHour>businessHours = business.getBusinessHours();
 				
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		Time start = new Time(sdf.parse(startTime).getTime());
 		Time end = new Time(sdf.parse(endTime).getTime());
-		BusinessHour oldBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
 		
-		try {
-			if (CarShopApplication.getLoggedInUser().equals(type)) {
-				for (BusinessHour b: businessHours) {
-					if (b == oldBusinessHour) {
-						garage.removeBusinessHour(oldBusinessHour);
-					}
-				}
-			}
+		//add checks
+		if(!CarShopApplication.getLoggedInUser().equals(garage.getTechnician().getUsername())) {
+			throw new Exception("You are not authorized to perform this operation");
 		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
+		
+		for(BusinessHour h: garage.getBusinessHours()) {
+			if(h.getDayOfWeek().equals(dayOfWeek) && h.getStartTime().equals(start) && h.getEndTime().equals(end)) {
+				garage.removeBusinessHour(h);
+				h.delete();
+			}
 		}
 	}
 	
-	public static boolean addedHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
-		CarShop carShop = CarShopApplication.getCarShop();
-		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
-		Business business = carShop.getBusiness();
-		List<BusinessHour>businessHours = business.getBusinessHours();
-				
-		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
-		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
-		Time start = new Time(sdf.parse(startTime).getTime());
-		Time end = new Time(sdf.parse(endTime).getTime());
-		BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
-		
-		boolean added = false;
-		try {
-			if (CarShopApplication.getLoggedInUser().equals(type)) {
-				for (BusinessHour b: businessHours) {
-					if (b.getDayOfWeek() == dayOfWeek) {
-						garage.addBusinessHour(newBusinessHour);
-						added = true;
-					}
-				}
-			}
-		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
-		}
-		return added;
-	}
-	
-	public static boolean removedHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
-		CarShop carShop = CarShopApplication.getCarShop();
-		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
-		Business business = carShop.getBusiness();
-		List<BusinessHour>businessHours = business.getBusinessHours();
-				
-		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
-		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
-		Time start = new Time(sdf.parse(startTime).getTime());
-		Time end = new Time(sdf.parse(endTime).getTime());
-		BusinessHour oldBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
-		
-		boolean removed = false;
-		try {
-			if (CarShopApplication.getLoggedInUser().equals(type)) {
-				for (BusinessHour b: businessHours) {
-					if (b == oldBusinessHour) {
-						garage.addBusinessHour(oldBusinessHour);
-						removed = true;
-					}
-				}
-			}
-		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
-		}
-		return removed;
-	}
+	private static boolean overlapsWithBusinessHour(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> hours) {
+		  
+		  boolean contains = false;
 
+			for(BusinessHour h: hours) {
+				// For business hours on the same day we want
+				// The startime of the existing schedule to be after the endtime of the new schedule or
+				// The endtime of the existing schedule to be before the starttime of the new schedule
+				if(h.getDayOfWeek() == day && h.getStartTime().compareTo(startTime) <= 0 && h.getEndTime().compareTo(endTime) >= 0) {
+					contains = true;
+					break;
+				}
+			}
+
+			return contains;
+	  }
+	
+	private static boolean intersectsWithBusinessHour(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> hours) {
+		  
+		  boolean isOverlapping = false;
+
+			for(BusinessHour h: hours) {
+				// For business hours on the same day we want
+				// The startime of the existing schedule to be after the endtime of the new schedule or
+				// The endtime of the existing schedule to be before the starttime of the new schedule
+				if(h.getDayOfWeek() == day && !(h.getStartTime().compareTo(endTime) >= 0 || h.getEndTime().compareTo(startTime) <= 0)) {
+					isOverlapping = true;
+					break;
+				}
+			}
+
+			return isOverlapping;
+	  }
 }
 	
 	

@@ -4,6 +4,7 @@ import static ca.mcgill.ecse223.carshop.controller.AppointmentController.dateToT
 import static ca.mcgill.ecse223.carshop.controller.AppointmentController.parseDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1153,6 +1154,32 @@ public class CucumberStepDefinitions {
 	      business.addBusinessHour(hours);
 	    }
 	  }
+	  
+	  @Given("the business has the following opening hours:")
+	  public void theBusinessHasOpeningHours(
+	      io.cucumber.datatable.DataTable dataTable) {
+		
+		if(carShop.getBusiness() == null) {
+			carShop.setBusiness(new Business("TheCarShop", "8888 Rue Somewhere, Montreal, QC, Canada",
+		            "000-000-0000", "car@carshop.com", carShop));
+		}
+	    Business business = carShop.getBusiness();
+	    
+	    List<List<String>> rows = dataTable.asLists();
+
+	    for (int i = 1; i < rows.size(); i++) {
+	      List<String> columns = rows.get(i);
+
+	      DayOfWeek day = DayOfWeek.valueOf(columns.get(0));
+	      Time startTime = dateToTime(parseDate(columns.get(1), "HH:mm"));
+	      Time endTime = dateToTime(parseDate(columns.get(2), "HH:mm"));
+
+	      BusinessHour hours = new BusinessHour(day, startTime, endTime, carShop);
+	      business.addBusinessHour(hours);
+	    }
+	  }
+	  
+	  
 
 	  @Given("all garages has the following opening hours")
 	  public void all_garages_has_the_following_opening_hours(
@@ -1232,7 +1259,25 @@ public class CucumberStepDefinitions {
     @Then("the garage belonging to the technician with type {string} should have opening hours on {string} from {string} to {string}")
     public void garageOfTechnicianWithTypeShouldHaveOpeningHoursOnFromTo(String type, String day, String startTime, String endTime) {
     	try {
-    		assertTrue(CarShopController.addedHoursToGarageOfTechnicianType(day, startTime, endTime, day));
+    		Garage g = null;
+    		for(Technician t: carShop.getTechnicians()) {
+    			if(type.equals(t.getType().name())) {
+    				g = t.getGarage();
+    			}
+    		}
+    		Time st = dateToTime(parseDate(startTime, "HH:mm"));
+    		Time et = dateToTime(parseDate(endTime, "HH:mm"));
+    		assertNotNull(g);
+    		
+    		boolean foundHours = false;
+    		for(BusinessHour h: g.getBusinessHours()) {
+    			if(h.getDayOfWeek().name().equals(day)) {
+    				foundHours = true;
+    				assertEquals(st, h.getStartTime());
+    				assertEquals(et, h.getEndTime());
+    			}
+    		}
+    		assertTrue(foundHours);
     	} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr ++;
@@ -1243,7 +1288,14 @@ public class CucumberStepDefinitions {
     @Given("there are opening hours on {string} from {string} to {string} for garage belonging to the technician with type {string}")
     public void openingHoursForGarageOfTechnicianWithType(String day, String startTime, String endTime, String type) {
     	try {
-			CarShopController.hasOpeningHoursToGarageOfTechnicianType(day, startTime, endTime, type);
+    		String currentUser = CarShopApplication.getLoggedInUser();
+    		for(Technician t: carShop.getTechnicians()) {
+    			if(t.getType().name().equals(type)) {
+    				CarShopApplication.setLoggedInUser(t.getUsername());
+    			}
+    		}
+			CarShopController.addHoursToGarageOfTechnicianType(day, startTime, endTime, type);
+			CarShopApplication.setLoggedInUser(currentUser);
     	} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr ++;
@@ -1261,7 +1313,7 @@ public class CucumberStepDefinitions {
 	    Customer customer = (Customer) u;
 	    BookableService mainService = null;
 	    for (BookableService s : carshop.getBookableServices()) {
-	      if (s.getName().equals(mainService)) {
+	      if (s.getName().equals(mainServiceString)) {
 	        mainService = s;
 	      }
 	    }
@@ -1417,10 +1469,23 @@ public class CucumberStepDefinitions {
     @Then("the garage belonging to the technician with type {string} should not have opening hours on {string} from {string} to {string}")
     public void garageOfTechnicianWithTypeShouldNotHaveOpeningHours(String type, String day, String startTime, String endTime) {
     	try {
-    		if (!CarShopApplication.getLoggedInUser().equals(type))
-    			assertFalse(CarShopController.addedHoursToGarageOfTechnicianType(day, startTime, endTime, day));
-    		else if (CarShopApplication.getLoggedInUser().equals(type))
-    			assertTrue(CarShopController.removedHoursToGarageOfTechnicianType(day, startTime, endTime, day));
+    		Garage g = null;
+    		for(Technician t: carShop.getTechnicians()) {
+    			if(type.equals(t.getType().name())) {
+    				g = t.getGarage();
+    			}
+    		}
+    		Time st = dateToTime(parseDate(startTime, "HH:mm"));
+    		Time et = dateToTime(parseDate(endTime, "HH:mm"));
+    		assertNotNull(g);
+    		
+    		boolean foundHours = false;
+    		for(BusinessHour h: g.getBusinessHours()) {
+    			if(h.getDayOfWeek().name().equals(day) && h.getStartTime().equals(st) && h.getEndTime().equals(et)) {
+    				foundHours = true;
+    			}
+    		}
+    		assertFalse(foundHours);
     	} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr ++;
