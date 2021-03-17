@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -559,6 +560,7 @@ public class CucumberStepDefinitions {
 		assertTrue(carShop.hasCustomers());
 	}
 
+	/*
 	@Then("the account shall have username {string} and password {string}")
 	public void the_account_shall_have_username_and_password(String string, String string2) {
 		for (Customer customer : carShop.getCustomers()) {
@@ -567,6 +569,7 @@ public class CucumberStepDefinitions {
 			}
 		}
 	}
+	*/
 
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
@@ -1001,7 +1004,151 @@ public class CucumberStepDefinitions {
 		}
 
 		return thisService;
-	}
+	}    
+    
+	/* LogIn feature */
+	// done
+    @When("the user tries to log in with username {string} and password {string}")
+    public void attemptedLogInWithUsernameAndPassword(String username, String password) {
+    	try {
+			CarShopController.logIn(username, password);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+		}
+    }
+    
+    // done
+    @Then("the user should be successfully logged in")
+    public void userShouldBeLoggedIn() {
+    	assertFalse(error.contains("Username/password not found"));
+    }
+    
+    // done
+    @Then("the user should not be logged in")
+    public void userShouldNotBeLoggedIn() {
+    	assertTrue(error.contains("Username/password not found"));
+    }
+   
+   
+    @Then("a new account shall be created") //done
+    public void newAccountShallBeCreated() {
+    	try {
+        	assertTrue(CarShopController.createdAccount());
+    	} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+    	}
+    }
+    
 
+	@Then("the account shall have username {string} and password {string}") // done
+	public void theAccountShallHaveUsernameAndPassword(String string, String string2) {
+		List<User> users = new ArrayList<User>();
+		users.addAll(carShop.getTechnicians());
+		users.addAll(carShop.getCustomers());
+		users.add(carShop.getOwner());
+		User currentUser;
+		
+		if(User.hasWithUsername(string)) {
+			currentUser = User.getWithUsername(string);		
+			if (currentUser.getPassword().equals(string2)) {
+				assertTrue(currentUser.getPassword().equals(string2));
+			}		
+		}
+	}
+    
+    @Then("the account shall have username {string}, password {string} and technician type {string}") // done
+    public void theAccountShallHaveUsernameAndPasswordAndType(String username, String password, String type) {
+    	List<User> users = new ArrayList<User>();
+		users.addAll(carShop.getTechnicians());
+		users.addAll(carShop.getCustomers());
+		users.add(carShop.getOwner());
+		User currentUser;
+    	
+		TechnicianType technicianType = null;
+    	for(Technician t: carShop.getTechnicians()){
+    		if(t.getType().name().equals(type)) {
+    			technicianType = t.getType();
+    		}
+    	}
+    	
+    	if(User.hasWithUsername(username)) {
+			currentUser = User.getWithUsername(username);		
+			if (currentUser.getPassword().equals(password)) {
+				assertTrue(currentUser.getPassword().equals(password));
+				assertTrue(((Technician) currentUser).getType().equals(technicianType));
+			}
+		}
+    }
+    
+    @Then("the corresponding garage for the technician shall be created") // Done
+    public void garageForTechnicianShallBeCreated() {
+    	try {
+    		assertTrue(CarShopController.createdGarage());
+    	} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+    	}
+    }
+        
+    // done
+    @When("the user tries to add new business hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
+    public void userTriesToAddNewBusinessHoursToGarageOfTechnicianWithType(String day, String startTime, String endTime, String type) {
+    	try {
+			CarShopController.addHoursToGarageOfTechnicianType(day, startTime, endTime, type);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+		}
+    }
+    
+    // done
+    @Then("the garage belonging to the technician with type {string} should have opening hours on {string} from {string} to {string}")
+    public void garageOfTechnicianWithTypeShouldHaveOpeningHoursOnFromTo(String type, String day, String startTime, String endTime) {
+    	try {
+    		assertTrue(CarShopController.addedHoursToGarageOfTechnicianType(day, startTime, endTime, day));
+    	} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+    	}
+    }
+    
+    //Scenario Outline: Remove opening hours successfully
+    @Given("there are opening hours on {string} from {string} to {string} for garage belonging to the technician with type {string}")
+    public void openingHoursForGarageOfTechnicianWithType(String day, String startTime, String endTime, String type) {
+    	try {
+			CarShopController.hasOpeningHoursToGarageOfTechnicianType(day, startTime, endTime, type);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+		}
+    }
+    
+    // done
+    @When("the user tries to remove opening hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
+    public void userTriesToRemoveOpeningHoursToGarageOfTechnicianWithType(String day, String startTime, String endTime, String type) {
+    	try {
+    		if (!CarShopApplication.getLoggedInUser().equals(type))
+    			CarShopController.removeHoursToGarageOfTechnicianType(day, startTime, endTime, type);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+		}
+    }
+    
+    // done
+    @Then("the garage belonging to the technician with type {string} should not have opening hours on {string} from {string} to {string}")
+    public void garageOfTechnicianWithTypeShouldNotHaveOpeningHours(String type, String day, String startTime, String endTime) {
+    	try {
+    		if (!CarShopApplication.getLoggedInUser().equals(type))
+    			assertFalse(CarShopController.addedHoursToGarageOfTechnicianType(day, startTime, endTime, day));
+    		else if (CarShopApplication.getLoggedInUser().equals(type))
+    			assertTrue(CarShopController.removedHoursToGarageOfTechnicianType(day, startTime, endTime, day));
+    	} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr ++;
+    	}
+    }
 
 }
