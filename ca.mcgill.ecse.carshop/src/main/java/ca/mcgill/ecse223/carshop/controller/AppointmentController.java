@@ -216,7 +216,7 @@ public class AppointmentController {
     } else if (user instanceof Owner){
       throw new Exception("An owner cannot cancel an appointment");
     } else {
-      throw new Exception("A customer can only cancel their own appointments");
+      throw new Exception("A technician cannot cancel an appointment");
     }
     User u = User.getWithUsername(CarShopApplication.getLoggedInUser());
     
@@ -228,8 +228,13 @@ public class AppointmentController {
 
   public static boolean cancelAppointment(Customer customer, String mainServiceName, Date date,
       Time time) throws Exception {
-    
-    
+	
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	String sysDate = sdf.format(new Date(CarShopApplication.getSystemDate().getTime()));
+    if(sdf.format(date).equals(sysDate)) {
+    	
+    	throw new Exception("Cannot cancel an appointment on the appointment date");
+    }
     
     Appointment app = findAppointment(customer, mainServiceName, date, time);
 

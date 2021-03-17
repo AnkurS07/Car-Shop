@@ -629,6 +629,7 @@ public class CucumberStepDefinitions {
 	public void an_owner_account_exists_in_the_system() {
 		
 		try {
+			owner = new Owner("owner", "owner", carShop);
 			carShop.setOwner(owner);
 		} catch (Exception e) {
 			error += e.getMessage();
