@@ -99,8 +99,6 @@ class Appointment {
   * -- 1 Customer customer;
   * -- 1 BookableService bookableService;
   1 <@>- * ServiceBooking serviceBookings;
-  Date date;
-  Time time;
 }
 
 class ServiceBooking {

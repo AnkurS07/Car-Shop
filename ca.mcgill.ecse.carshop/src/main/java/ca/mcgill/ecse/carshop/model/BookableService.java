@@ -3,8 +3,6 @@
 
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
-import java.sql.Date;
-import java.sql.Time;
 
 // line 74 "../../../../../carshop.ump"
 public abstract class BookableService
@@ -142,9 +140,9 @@ public abstract class BookableService
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Appointment addAppointment(Date aDate, Time aTime, Customer aCustomer, CarShop aCarShop)
+  public Appointment addAppointment(Customer aCustomer, CarShop aCarShop)
   {
-    return new Appointment(aDate, aTime, aCustomer, this, aCarShop);
+    return new Appointment(aCustomer, this, aCarShop);
   }
 
   public boolean addAppointment(Appointment aAppointment)
