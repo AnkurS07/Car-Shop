@@ -1,4 +1,4 @@
-git Feature: Make appointment
+Feature: Make appointment
   As a customer, I wish to be able to make an appointment so that I can schedule a service
 
   Background: 

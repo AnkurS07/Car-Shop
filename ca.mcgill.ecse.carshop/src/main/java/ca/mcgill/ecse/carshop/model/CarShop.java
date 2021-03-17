@@ -657,9 +657,9 @@ public class CarShop
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Appointment addAppointment(Date aDate, Time aTime, Customer aCustomer, BookableService aBookableService)
+  public Appointment addAppointment(Customer aCustomer, BookableService aBookableService)
   {
-    return new Appointment(aDate, aTime, aCustomer, aBookableService, this);
+    return new Appointment(aCustomer, aBookableService, this);
   }
 
   public boolean addAppointment(Appointment aAppointment)

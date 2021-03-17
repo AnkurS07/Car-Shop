@@ -2,8 +2,6 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
-import java.sql.Date;
-import java.sql.Time;
 import java.util.*;
 
 // line 98 "../../../../../carshop.ump"
@@ -13,10 +11,6 @@ public class Appointment
   //------------------------
   // MEMBER VARIABLES
   //------------------------
-
-  //Appointment Attributes
-  private Date date;
-  private Time time;
 
   //Appointment Associations
   private Customer customer;
@@ -28,10 +22,8 @@ public class Appointment
   // CONSTRUCTOR
   //------------------------
 
-  public Appointment(Date aDate, Time aTime, Customer aCustomer, BookableService aBookableService, CarShop aCarShop)
+  public Appointment(Customer aCustomer, BookableService aBookableService, CarShop aCarShop)
   {
-    date = aDate;
-    time = aTime;
     boolean didAddCustomer = setCustomer(aCustomer);
     if (!didAddCustomer)
     {
@@ -53,32 +45,6 @@ public class Appointment
   //------------------------
   // INTERFACE
   //------------------------
-
-  public boolean setDate(Date aDate)
-  {
-    boolean wasSet = false;
-    date = aDate;
-    wasSet = true;
-    return wasSet;
-  }
-
-  public boolean setTime(Time aTime)
-  {
-    boolean wasSet = false;
-    time = aTime;
-    wasSet = true;
-    return wasSet;
-  }
-
-  public Date getDate()
-  {
-    return date;
-  }
-
-  public Time getTime()
-  {
-    return time;
-  }
   /* Code from template association_GetOne */
   public Customer getCustomer()
   {
@@ -283,14 +249,4 @@ public class Appointment
     }
   }
 
-
-  public String toString()
-  {
-    return super.toString() + "["+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "date" + "=" + (getDate() != null ? !getDate().equals(this)  ? getDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "time" + "=" + (getTime() != null ? !getTime().equals(this)  ? getTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "customer = "+(getCustomer()!=null?Integer.toHexString(System.identityHashCode(getCustomer())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "bookableService = "+(getBookableService()!=null?Integer.toHexString(System.identityHashCode(getBookableService())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
-  }
 }
