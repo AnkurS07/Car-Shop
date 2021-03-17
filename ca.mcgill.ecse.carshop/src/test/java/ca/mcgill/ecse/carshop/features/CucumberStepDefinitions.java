@@ -70,6 +70,7 @@ public class CucumberStepDefinitions {
 	
 	private static Business business;
 	private static Owner owner;
+	private static Garage garage;
 	
 
 	private static List<Map<String, String>> preservedProperties;
@@ -1036,6 +1037,11 @@ public class CucumberStepDefinitions {
     	assertFalse(error.contains("Username/password not found"));
     }
     
+    @Then("the user shall be successfully logged in")
+    public void userShallBeLoggedIn() {
+    	assertFalse(error.contains("Username/password not found"));
+    }
+    
     // done
     @Then("the user should not be logged in")
     public void userShouldNotBeLoggedIn() {
@@ -1091,7 +1097,13 @@ public class CucumberStepDefinitions {
 				assertTrue(currentUser.getPassword().equals(password));
 				assertTrue(((Technician) currentUser).getType().equals(technicianType));
 			}
+			if(currentUser instanceof Technician) {
+				garage = ((Technician) currentUser).getGarage();
+			}
 		}
+    	
+    	
+    	
     }
     
     @Then("the corresponding garage for the technician shall be created") // Done
@@ -1520,9 +1532,19 @@ public class CucumberStepDefinitions {
 			error += e.getMessage();
 			errorCntr ++;
 		}  
-		
-
-	    
+	  }
+	  
+	  @Then("the garage should have the same opening hours as the business")
+	  public void hasSameOpeningHoursAsBusiness() {
+		  Business b = carShop.getBusiness();
+		  if(b != null) {
+			  assertNotNull(garage);
+			  for(int i = 0; i< b.getBusinessHours().size();i++) {
+				  assertEquals(b.getBusinessHour(i).getDayOfWeek(), garage.getBusinessHour(i).getDayOfWeek());
+				  assertEquals(b.getBusinessHour(i).getStartTime(), garage.getBusinessHour(i).getStartTime());
+				  assertEquals(b.getBusinessHour(i).getEndTime(), garage.getBusinessHour(i).getEndTime());
+			  }
+		  }
 	  }
 
 }

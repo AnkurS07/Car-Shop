@@ -67,7 +67,16 @@ public class CarShopController {
 	public static void createTechnician(String userName, String password, TechnicianType type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
-			carShop.addTechnician(userName, password, type);
+			Technician t = new Technician(userName, password, type, carShop);
+			Garage g = new Garage(carShop, t);
+			
+			// set opening hours to the same as the business
+			if(carShop.hasBusiness()) {
+				for(BusinessHour h: carShop.getBusiness().getBusinessHours()) {
+					BusinessHour copy = new BusinessHour(h.getDayOfWeek(), h.getStartTime(), h.getEndTime(), carShop);
+				}
+			}
+			
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -1073,8 +1082,11 @@ public class CarShopController {
 					CarShopApplication.setLoggedInUser(currentUser.getUsername());
 					isLoggedIn = true;
 				}
+				else {
+					throw new Exception("Username/password not found");
+				}
 			}
-			else if (username.equals("Owner")) {
+			else if (username.equals("owner")) {
 				createOwner(username, password);
 			}
 			else if (username.contains("Technician")) {
