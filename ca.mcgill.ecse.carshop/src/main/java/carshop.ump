@@ -1,5 +1,7 @@
 namespace ca.mcgill.ecse.carshop.model;
 
+use CarShopStates.ump;
+
 class CarShop  {
   1 <@>- 0..1 Business business;
   1 <@>- 0..1 Owner owner;
@@ -24,6 +26,7 @@ class Owner {
 
 class Customer {
   isA User;
+  lazy Integer noShowCount;
 }
 
 class Technician {

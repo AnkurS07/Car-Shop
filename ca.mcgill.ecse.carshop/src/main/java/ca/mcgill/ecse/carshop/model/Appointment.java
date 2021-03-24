@@ -4,13 +4,18 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 98 "../../../../../carshop.ump"
+// line 2 "../../../../../CarShopStates.ump"
+// line 101 "../../../../../carshop.ump"
 public class Appointment
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
+
+  //Appointment State Machines
+  public enum AppStatus { Booked, InProgress, Done, Final }
+  private AppStatus appStatus;
 
   //Appointment Associations
   private Customer customer;
@@ -40,11 +45,202 @@ public class Appointment
     {
       throw new RuntimeException("Unable to create appointment due to carShop. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
+    setAppStatus(AppStatus.Booked);
   }
 
   //------------------------
   // INTERFACE
   //------------------------
+
+  public String getAppStatusFullName()
+  {
+    String answer = appStatus.toString();
+    return answer;
+  }
+
+  public AppStatus getAppStatus()
+  {
+    return appStatus;
+  }
+
+  public boolean noShow(Customer c)
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case Booked:
+        // line 6 "../../../../../CarShopStates.ump"
+        addNoShow(c);
+        setAppStatus(AppStatus.Done);
+        wasEventProcessed = true;
+        break;
+      case InProgress:
+        // line 20 "../../../../../CarShopStates.ump"
+        rejectNoShow(c);
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean cancel()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case Booked:
+        if (canCancel())
+        {
+          setAppStatus(AppStatus.Done);
+          wasEventProcessed = true;
+          break;
+        }
+        if (!(canCancel()))
+        {
+        // line 9 "../../../../../CarShopStates.ump"
+          rejectCancel();
+          setAppStatus(AppStatus.Booked);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      case InProgress:
+        // line 17 "../../../../../CarShopStates.ump"
+        rejectCancel();
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean update()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case Booked:
+        if (canUpdate())
+        {
+          setAppStatus(AppStatus.Booked);
+          wasEventProcessed = true;
+          break;
+        }
+        if (!(canUpdate()))
+        {
+        // line 10 "../../../../../CarShopStates.ump"
+          rejectUpdate();
+          setAppStatus(AppStatus.Booked);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      case InProgress:
+        if (!(canUpdate()))
+        {
+        // line 18 "../../../../../CarShopStates.ump"
+          rejectUpdate();
+          setAppStatus(AppStatus.Booked);
+          wasEventProcessed = true;
+          break;
+        }
+        if (canUpdate())
+        {
+          setAppStatus(AppStatus.InProgress);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean start()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case Booked:
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
+        break;
+      case InProgress:
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean end()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case InProgress:
+        setAppStatus(AppStatus.Done);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean destroy()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case Done:
+        setAppStatus(AppStatus.Final);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  private void setAppStatus(AppStatus aAppStatus)
+  {
+    appStatus = aAppStatus;
+
+    // entry actions and do activities
+    switch(appStatus)
+    {
+      case Final:
+        delete();
+        break;
+    }
+  }
   /* Code from template association_GetOne */
   public Customer getCustomer()
   {
@@ -247,6 +443,36 @@ public class Appointment
     {
       placeholderCarShop.removeAppointment(this);
     }
+  }
+
+  // line 31 "../../../../../CarShopStates.ump"
+   private void addNoShow(Customer c){
+    c.setNoShowCount(c.getNoShowCount() + 1);
+  }
+
+  // line 36 "../../../../../CarShopStates.ump"
+   private void rejectUpdate(){
+    
+  }
+
+  // line 40 "../../../../../CarShopStates.ump"
+   private void rejectCancel(){
+    
+  }
+
+  // line 44 "../../../../../CarShopStates.ump"
+   private void rejectNoShow(Customer c){
+    
+  }
+
+  // line 47 "../../../../../CarShopStates.ump"
+   private boolean canUpdate(){
+    return true;
+  }
+
+  // line 51 "../../../../../CarShopStates.ump"
+   private boolean canCancel(){
+    return true;
   }
 
 }

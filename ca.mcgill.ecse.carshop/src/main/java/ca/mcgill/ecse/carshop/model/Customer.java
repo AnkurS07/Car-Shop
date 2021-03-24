@@ -4,13 +4,16 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 25 "../../../../../carshop.ump"
+// line 27 "../../../../../carshop.ump"
 public class Customer extends User
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
+
+  //Customer Attributes
+  private int noShowCount;
 
   //Customer Associations
   private CarShop carShop;
@@ -23,6 +26,7 @@ public class Customer extends User
   public Customer(String aUsername, String aPassword, CarShop aCarShop)
   {
     super(aUsername, aPassword);
+    noShowCount = 0;
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
     {
@@ -34,6 +38,19 @@ public class Customer extends User
   //------------------------
   // INTERFACE
   //------------------------
+
+  public boolean setNoShowCount(int aNoShowCount)
+  {
+    boolean wasSet = false;
+    noShowCount = aNoShowCount;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public int getNoShowCount()
+  {
+    return noShowCount;
+  }
   /* Code from template association_GetOne */
   public CarShop getCarShop()
   {
@@ -177,4 +194,11 @@ public class Customer extends User
     super.delete();
   }
 
+
+  public String toString()
+  {
+    return super.toString() + "["+
+            "noShowCount" + ":" + getNoShowCount()+ "]" + System.getProperties().getProperty("line.separator") +
+            "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
+  }
 }

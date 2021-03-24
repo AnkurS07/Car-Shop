@@ -1,0 +1,53 @@
+
+class Appointment {
+    
+	AppStatus {
+		Booked {
+				noShow(Customer c) / {addNoShow(c);} -> Done;
+				cancel [canCancel()] -> Done;
+				update [canUpdate()] -> Booked;
+				cancel [!canCancel()] / {rejectCancel();} -> Booked;
+				update [!canUpdate()] / {rejectUpdate();} -> Booked;
+				start -> InProgress;
+		}
+		
+		InProgress {
+		
+			start -> InProgress;
+			cancel / {rejectCancel();} -> InProgress;
+			update [!canUpdate()] / {rejectUpdate();} -> Booked;
+            update [canUpdate()] -> InProgress;
+			noShow(Customer c) / {rejectNoShow(c);} -> InProgress;
+			end -> Done;
+		}
+		
+		Done {
+			
+			destroy -> Final;
+		}
+	}
+
+	private void addNoShow(Customer c) {
+		c.setNoShowCount(c.getNoShowCount() + 1);
+	}
+	
+	private void rejectUpdate() {
+      
+	}
+  
+	private void rejectCancel() {
+	    
+	}
+	
+	private void rejectNoShow(Customer c) {
+	
+	}
+	
+	private boolean canUpdate() {
+	  return true;
+	}
+	  
+	private boolean canCancel() {
+	  return true; 
+	}
+}

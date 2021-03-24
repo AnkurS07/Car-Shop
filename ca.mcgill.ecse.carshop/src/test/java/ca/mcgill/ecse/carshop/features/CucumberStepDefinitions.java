@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.Appointment;
+import ca.mcgill.ecse.carshop.model.Appointment.AppStatus;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
@@ -68,6 +69,11 @@ public class CucumberStepDefinitions {
 
 	private static List<Map<String, String>> preservedProperties;
 	private static List<BookableService> allBookableServices = null;
+	
+	// Specific to AppointmentStepDefinitions
+	public static int appointmentCount = 0;
+	
+	private Appointment currentApp;
 
 	int numberOfAccounts = 0;
 
@@ -76,6 +82,7 @@ public class CucumberStepDefinitions {
 		// Delete the car shop instance between each scenario to avoid information being
 		// carried over.
 		carShop.delete();
+		currentApp = null;
 		try {
 			CarShopApplication.setLoggedInUser(null); // Set the logged in user to null to avoid information being
 														// carried over.
@@ -1299,7 +1306,7 @@ public class CucumberStepDefinitions {
 			List<Time> times = Arrays.stream(startTimeStrings.split("\\,"))
 					.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
 
-			Service mainService = AppointmentController.findService(mainServiceString);
+			BookableService main = AppointmentController.getBookableService(mainServiceString);
 
 			List<Service> optionalServices;
 			List<TimeSlot> timeSlots;
@@ -1311,7 +1318,7 @@ public class CucumberStepDefinitions {
 				java.util.Date d = df.parse(startTimeStrings);
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(d);
-				cal.add(Calendar.MINUTE, mainService.getDuration());
+				cal.add(Calendar.MINUTE, ((Service) main).getDuration());
 				Date dd = new java.sql.Date(cal.getTime().getTime());
 				Time end = new Time(dd.getTime());
 
@@ -1320,12 +1327,12 @@ public class CucumberStepDefinitions {
 
 			} else {
 				optionalServices = AppointmentController.findServices(Arrays.asList(optServiceStrings.split("\\,")));
-				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, mainService,
+				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)main).getMainService().getService(),
 						optionalServices.toArray(new Service[optionalServices.size()]));
 			}
 
 			AppointmentController.makeAppointment(false, AppointmentController.findCustomer(customer),
-					mainServiceString, date, times.get(0), timeSlots, mainService, optionalServices);
+					mainServiceString, date, times.get(0), timeSlots, main, optionalServices);
 
 		} catch (Exception e) {
 			errorReportMessage = e.getMessage();
@@ -1384,9 +1391,6 @@ public class CucumberStepDefinitions {
 	public void the_system_shall_report(String string) {
 		assertEquals(string, errorReportMessage);
 	}
-
-	// Specific to AppointmentStepDefinitions
-	public static int appointmentCount = 0;
 
 	/**
 	 * 
@@ -1598,5 +1602,195 @@ public class CucumberStepDefinitions {
 			}
 		}
 	}
+	
+	@When("{string} makes a {string} appointment with service {string} for the date {string} and start time {string} at {string}")
+	public void userMakesAnAppointment(String customerName, String mainServiceString, String serviceStrings, String stringDate, String startTimes, String currentTime) {
+		try {
+			CarShopApplication.setLoggedInUser(customerName);
+			// Write code here that turns the phrase above into concrete actions
+			Customer c = AppointmentController.findCustomer(customerName);
+			Date date = parseDate(stringDate, "yyyy-MM-dd");
+			Service mainService = AppointmentController.findService(mainServiceString);
+
+			List<Time> times = Arrays.stream(startTimes.split("\\,"))
+					.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
+			List<Service> services = new ArrayList<Service>();
+			for(String str: Arrays.asList(serviceStrings.split("\\,"))) {
+				services.add(AppointmentController.findService(str));
+			}
+			
+			
+			List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, mainService, services.toArray(new Service[services.size()]));
+					
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
+			appointmentCount += 1;
+
+			
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+	
+	@When("the owner starts the appointment at {string}") 
+	public void ownerStartsAppointment (String startTime) {
+		try {
+			String currentUser = CarShopApplication.getLoggedInUser();
+			CarShopApplication.setLoggedInUser("owner");
+			
+			Date date = parseDate(startTime, "yyyy-MM-dd+HH:mm");
+			
+			AppointmentController.startAppointment(date, currentApp);
+
+			CarShopApplication.setLoggedInUser(currentUser);
+			
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+		
+	}
+	
+	@Then("the appointment shall be in progress")
+	public void appInProgress() {
+		assertNotNull(currentApp);
+		assertEquals(AppStatus.InProgress, currentApp.getAppStatus());
+	}
+	
+	@Then("the service combo in the appointment shall be {string}")
+	public void serviceComboShallBe(String name) {
+		assertTrue(currentApp.getBookableService() instanceof ServiceCombo);
+		assertEquals(name, currentApp.getBookableService().getName());
+	}
+	
+	@Then("the service combo shall have {string} selected services")
+	public void serviceComboHasSelectedService(String serviceNames) {
+		List<Service> services = new ArrayList<Service>();
+		for(String str: Arrays.asList(serviceNames.split("\\,"))) {
+			services.add(AppointmentController.findService(str));
+		}
+		
+		ServiceCombo combo = (ServiceCombo) currentApp.getBookableService();
+		assertEquals(services.size(), combo.getServices().size());
+		for(int i =0 ; i < services.size(); i++) {
+			assertTrue(combo.getService(i).getService().equals(services.get(i)));
+		}
+	}
+	
+	@Then("the appointment shall be for the date {string} with start time {string} and end time {string}")
+	public void appointmentShallBeFor(String dateString, String startTimesString, String endTimesString) {
+		//need start date, first time and format the times
+		List<String> st = Arrays.asList(startTimesString.split("\\,"));
+		List<String> et = Arrays.asList(startTimesString.split("\\,"));
+		
+		String[] timeSlotsString = new String[st.size()];
+		for(int i=0;i<st.size();i++) {
+			timeSlotsString[i] = (st.get(i)+"-"+et.get(i));
+		}
+		
+		Time first = new Time((parseDate(st.get(0), "HH:mm")).getTime());
+		Date date = parseDate(dateString,"yyyy-MM-dd");
+		
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlots(date, first, timeSlotsString);
+		
+		Appointment a = AppointmentController.findAppointment(timeSlots);
+		
+		assertNotNull(a);
+	}
+	
+	
+	@Then("the username associated with the appointment shall be {string}")
+	public void usernameAssociatedWithAppointmentIs(String username) {
+		assertEquals(username, currentApp.getCustomer().getUsername());
+	}
+	
+	
+	@Then("Then the user {string} shall have 0 no-show records")
+	public void userShallHaveNoShow(String username) {
+		try {
+			Customer c = AppointmentController.findCustomer(username);
+			assertTrue(c.getNoShowCount() == 0);
+		} catch(Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+		
+	}
+	
+	@Then("Then the system shall have {string} appointments")
+	public void systemShallHaveAppointments(String stringCount) {
+		int count = Integer.parseInt(stringCount);
+		assertTrue(count == appointmentCount);
+	}
+	
+	@Given("{string} has {int} no-show records")
+	public void hasXNoShow(String username, int count) {
+		try {
+			Customer c = AppointmentController.findCustomer(username);
+			c.setNoShowCount(count);
+		} catch(Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+	
+	@When("{string} attempts to add the optional service {string} to the service combo with start time {string} in the appointment at {string}")
+	public void attemptsToAddOPtionalService(String username, String serviceName, String startTime, String currentDate) {
+		
+		List<Service> services = new ArrayList<Service>();
+		services.add(AppointmentController.findService(serviceName));
+		
+		Date date = parseDate(currentDate, "yyyy-MM-dd+HH:mm");
+
+		List<Time> times = new ArrayList<Time>();
+		times.add(new Time((parseDate(startTime, "HH:mm")).getTime()));
+		
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, 
+				services.toArray(new Service[services.size()]));
+		
+		try {
+			AppointmentController.updateAppointment(AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+	
+	@Then("the appointment shall be booked")
+	public void appointmentShallBeBooked() {
+		assertNotNull(currentApp);
+		assertEquals(AppStatus.InProgress, currentApp.getAppStatus());
+	}
+	
+	@When("{string} attempts to update the date to {string} and start time to {string} at {string}")
+	public void attemptsToUpdateAppDate(String username, String newDate, String startTimeStrings, String currentDate) {
+		
+		Date date = parseDate(currentDate, "yyyy-MM-dd+HH:mm");
+		
+		// Used a stream
+		List<Time> times = Arrays.stream(startTimeStrings.split("\\,"))
+				.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
+
+		List<Service> services = new ArrayList<Service>();
+		assertNotNull(currentApp);
+		for(ServiceBooking sb:currentApp.getServiceBookings()) {
+			services.add(sb.getService());
+		}
+		
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, 
+				services.toArray(new Service[services.size()]));
+		
+		try {
+			AppointmentController.updateAppointment(AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+	
+	
+	
+	
+	
 
 }
