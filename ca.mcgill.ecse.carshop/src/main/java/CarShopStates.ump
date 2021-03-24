@@ -3,27 +3,30 @@ class Appointment {
     
 	AppStatus {
 		Booked {
-				noShow(Customer c) / {addNoShow(c);} -> Done;
-				cancel [canCancel()] -> Done;
-				update [canUpdate()] -> Booked;
+				noShow(Customer c) / {addNoShow(c);} -> Final;
+				
+				cancel [canCancel()] -> Final;
 				cancel [!canCancel()] / {rejectCancel();} -> Booked;
+				
+				update [canUpdate()] {updateApp();}-> Booked;
 				update [!canUpdate()] / {rejectUpdate();} -> Booked;
+				
 				start -> InProgress;
 		}
 		
 		InProgress {
 		
 			start -> InProgress;
+			
 			cancel / {rejectCancel();} -> InProgress;
+			cancel / {!rejectCancel();} -> Final;
+			
 			update [!canUpdate()] / {rejectUpdate();} -> Booked;
             update [canUpdate()] -> InProgress;
+            
 			noShow(Customer c) / {rejectNoShow(c);} -> InProgress;
-			end -> Done;
-		}
-		
-		Done {
 			
-			destroy -> Final;
+			end -> Final;
 		}
 	}
 
@@ -32,7 +35,7 @@ class Appointment {
 	}
 	
 	private void rejectUpdate() {
-      
+
 	}
   
 	private void rejectCancel() {
@@ -49,5 +52,9 @@ class Appointment {
 	  
 	private boolean canCancel() {
 	  return true; 
+	}
+	
+	private boolean updateApp() {
+	 return true;
 	}
 }

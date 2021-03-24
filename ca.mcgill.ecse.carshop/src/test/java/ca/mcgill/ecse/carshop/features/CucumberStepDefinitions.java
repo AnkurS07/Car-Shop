@@ -1306,7 +1306,7 @@ public class CucumberStepDefinitions {
 			List<Time> times = Arrays.stream(startTimeStrings.split("\\,"))
 					.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
 
-			BookableService main = AppointmentController.getBookableService(mainServiceString);
+			BookableService main = AppointmentController.findBookableService(mainServiceString);
 
 			List<Service> optionalServices;
 			List<TimeSlot> timeSlots;
@@ -1610,7 +1610,7 @@ public class CucumberStepDefinitions {
 			// Write code here that turns the phrase above into concrete actions
 			Customer c = AppointmentController.findCustomer(customerName);
 			Date date = parseDate(stringDate, "yyyy-MM-dd");
-			Service mainService = AppointmentController.findService(mainServiceString);
+			BookableService mainService = AppointmentController.findBookableService(mainServiceString);
 
 			List<Time> times = Arrays.stream(startTimes.split("\\,"))
 					.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
@@ -1619,12 +1619,15 @@ public class CucumberStepDefinitions {
 				services.add(AppointmentController.findService(str));
 			}
 			
-			
-			List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, mainService, services.toArray(new Service[services.size()]));
-					
-			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
-			appointmentCount += 1;
 
+			List<TimeSlot> timeSlots = new ArrayList<TimeSlot>();
+			if(mainService instanceof Service) {
+				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, (Service)mainService, services.toArray(new Service[services.size()]));
+			} else {
+				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)mainService).getMainService().getService(), services.toArray(new Service[services.size()]));
+			}
+			
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
 			
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -1670,32 +1673,36 @@ public class CucumberStepDefinitions {
 			services.add(AppointmentController.findService(str));
 		}
 		
-		ServiceCombo combo = (ServiceCombo) currentApp.getBookableService();
-		assertEquals(services.size(), combo.getServices().size());
+		assertEquals(services.size(), currentApp.getServiceBookings().size());
 		for(int i =0 ; i < services.size(); i++) {
-			assertTrue(combo.getService(i).getService().equals(services.get(i)));
+			assertTrue(currentApp.getServiceBooking(i).getService().getName().equals(services.get(i).getName()));
 		}
 	}
 	
 	@Then("the appointment shall be for the date {string} with start time {string} and end time {string}")
 	public void appointmentShallBeFor(String dateString, String startTimesString, String endTimesString) {
-		//need start date, first time and format the times
-		List<String> st = Arrays.asList(startTimesString.split("\\,"));
-		List<String> et = Arrays.asList(startTimesString.split("\\,"));
 		
-		String[] timeSlotsString = new String[st.size()];
-		for(int i=0;i<st.size();i++) {
-			timeSlotsString[i] = (st.get(i)+"-"+et.get(i));
+		List<Time> st = new ArrayList<Time>();
+		for(String str: Arrays.asList(startTimesString.split("\\,"))) {
+			st.add(new Time((parseDate(str, "HH:mm")).getTime()));
 		}
 		
-		Time first = new Time((parseDate(st.get(0), "HH:mm")).getTime());
+		List<Time> et = new ArrayList<Time>();
+		for(String str: Arrays.asList(endTimesString.split("\\,"))) {
+			et.add(new Time((parseDate(str, "HH:mm")).getTime()));
+		}
+		
 		Date date = parseDate(dateString,"yyyy-MM-dd");
+		// Check date
+		assertEquals(date, currentApp.getServiceBooking(0).getTimeSlot().getStartDate());
 		
-		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlots(date, first, timeSlotsString);
+		// Check times
+		for(int i = 0; i < st.size();i++) {
+			assertEquals(st.get(i), currentApp.getServiceBooking(i).getTimeSlot().getStartTime());
+			assertEquals(et.get(i), currentApp.getServiceBooking(i).getTimeSlot().getEndTime());
+		}
 		
-		Appointment a = AppointmentController.findAppointment(timeSlots);
-		
-		assertNotNull(a);
+
 	}
 	
 	
@@ -1705,11 +1712,11 @@ public class CucumberStepDefinitions {
 	}
 	
 	
-	@Then("Then the user {string} shall have 0 no-show records")
-	public void userShallHaveNoShow(String username) {
+	@Then("the user {string} shall have {int} no-show records")
+	public void userShallHaveNoShow(String username, int count) {
 		try {
 			Customer c = AppointmentController.findCustomer(username);
-			assertTrue(c.getNoShowCount() == 0);
+			assertTrue(c.getNoShowCount() == count);
 		} catch(Exception e) {
 			error += e.getMessage();
 			errorCntr++;
@@ -1717,10 +1724,9 @@ public class CucumberStepDefinitions {
 		
 	}
 	
-	@Then("Then the system shall have {string} appointments")
-	public void systemShallHaveAppointments(String stringCount) {
-		int count = Integer.parseInt(stringCount);
-		assertTrue(count == appointmentCount);
+	@Then("the system shall have {int} appointments")
+	public void systemShallHaveAppointments(int count) {
+		assertEquals(count, carShop.getAppointments().size());
 	}
 	
 	@Given("{string} has {int} no-show records")
@@ -1759,13 +1765,14 @@ public class CucumberStepDefinitions {
 	@Then("the appointment shall be booked")
 	public void appointmentShallBeBooked() {
 		assertNotNull(currentApp);
-		assertEquals(AppStatus.InProgress, currentApp.getAppStatus());
+		assertEquals(AppStatus.Booked, currentApp.getAppStatus());
 	}
 	
 	@When("{string} attempts to update the date to {string} and start time to {string} at {string}")
-	public void attemptsToUpdateAppDate(String username, String newDate, String startTimeStrings, String currentDate) {
+	public void attemptsToUpdateAppDate(String username, String newDateString, String startTimeStrings, String currentDate) {
 		
 		Date date = parseDate(currentDate, "yyyy-MM-dd+HH:mm");
+		Date newDate = parseDate(newDateString, "yyyy-MM-dd");
 		
 		// Used a stream
 		List<Time> times = Arrays.stream(startTimeStrings.split("\\,"))
@@ -1777,7 +1784,7 @@ public class CucumberStepDefinitions {
 			services.add(sb.getService());
 		}
 		
-		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, 
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(newDate, times, 
 				services.toArray(new Service[services.size()]));
 		
 		try {

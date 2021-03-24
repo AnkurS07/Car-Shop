@@ -341,23 +341,23 @@ Feature: Appointment management process
     Then the system shall have 2 appointments
 
   Scenario: Update appointment time for service combo and new time overlaps vacation
-    When "customer1" makes a "transmission-check-combo" appointment with service "electronics-repair" for the date "2021-04-10" and start time "10:00,12:00" at "2021-04-04+09:00"
+    When "customer1" makes a "transmission-check-combo" appointment with service "electronics-repair" for the date "2021-04-12" and start time "10:00,12:00" at "2021-04-04+09:00"
     When "customer1" attempts to update the date to "2021-04-16" and start time to "10:00,12:00" at "2021-04-07+09:30"
     Then the appointment shall be booked
     Then the service combo in the appointment shall be "transmission-check-combo"
     Then the service combo shall have "transmission-check,electronics-repair" selected services
-    Then the appointment shall be for the date "2021-04-10" with start time "10:00,12:00" and end time "11:15,12:10"
+    Then the appointment shall be for the date "2021-04-12" with start time "10:00,12:00" and end time "11:15,12:10"
     Then the username associated with the appointment shall be "customer1"
     Then the user "customer1" shall have 0 no-show records
     Then the system shall have 2 appointments
 
   Scenario: Update appointment time for service combo and new date is on a holiday
-    When "customer1" makes a "transmission-check-combo" appointment with service "electronics-repair" for the date "2021-04-10" and start time "10:00,12:00" at "2021-04-04+09:00"
+    When "customer1" makes a "transmission-check-combo" appointment with service "electronics-repair" for the date "2021-04-12" and start time "10:00,12:00" at "2021-04-04+09:00"
     When "customer1" attempts to update the date to "2021-04-18" and start time to "10:00,12:00" at "2021-04-07+09:30"
     Then the appointment shall be booked
     Then the service combo in the appointment shall be "transmission-check-combo"
     Then the service combo shall have "transmission-check,electronics-repair" selected services
-    Then the appointment shall be for the date "2021-04-10" with start time "10:00,12:00" and end time "11:15,12:10"
+    Then the appointment shall be for the date "2021-04-12" with start time "10:00,12:00" and end time "11:15,12:10"
     Then the username associated with the appointment shall be "customer1"
     Then the user "customer1" shall have 0 no-show records
     Then the system shall have 2 appointments

@@ -14,7 +14,7 @@ public class Appointment
   //------------------------
 
   //Appointment State Machines
-  public enum AppStatus { Booked, InProgress, Done, Final }
+  public enum AppStatus { Booked, Final, InProgress }
   private AppStatus appStatus;
 
   //Appointment Associations
@@ -73,11 +73,11 @@ public class Appointment
       case Booked:
         // line 6 "../../../../../CarShopStates.ump"
         addNoShow(c);
-        setAppStatus(AppStatus.Done);
+        setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
       case InProgress:
-        // line 20 "../../../../../CarShopStates.ump"
+        // line 27 "../../../../../CarShopStates.ump"
         rejectNoShow(c);
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -99,7 +99,7 @@ public class Appointment
       case Booked:
         if (canCancel())
         {
-          setAppStatus(AppStatus.Done);
+          setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
@@ -113,8 +113,26 @@ public class Appointment
         }
         break;
       case InProgress:
-        // line 17 "../../../../../CarShopStates.ump"
+        // line 21 "../../../../../CarShopStates.ump"
         rejectCancel();
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean start()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case InProgress:
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
         break;
@@ -132,26 +150,10 @@ public class Appointment
     AppStatus aAppStatus = appStatus;
     switch (aAppStatus)
     {
-      case Booked:
-        if (canUpdate())
-        {
-          setAppStatus(AppStatus.Booked);
-          wasEventProcessed = true;
-          break;
-        }
-        if (!(canUpdate()))
-        {
-        // line 10 "../../../../../CarShopStates.ump"
-          rejectUpdate();
-          setAppStatus(AppStatus.Booked);
-          wasEventProcessed = true;
-          break;
-        }
-        break;
       case InProgress:
         if (!(canUpdate()))
         {
-        // line 18 "../../../../../CarShopStates.ump"
+        // line 24 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -171,28 +173,6 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean start()
-  {
-    boolean wasEventProcessed = false;
-    
-    AppStatus aAppStatus = appStatus;
-    switch (aAppStatus)
-    {
-      case Booked:
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
-        break;
-      case InProgress:
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
-        break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
   public boolean end()
   {
     boolean wasEventProcessed = false;
@@ -201,24 +181,6 @@ public class Appointment
     switch (aAppStatus)
     {
       case InProgress:
-        setAppStatus(AppStatus.Done);
-        wasEventProcessed = true;
-        break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
-  public boolean destroy()
-  {
-    boolean wasEventProcessed = false;
-    
-    AppStatus aAppStatus = appStatus;
-    switch (aAppStatus)
-    {
-      case Done:
         setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
@@ -445,33 +407,38 @@ public class Appointment
     }
   }
 
-  // line 31 "../../../../../CarShopStates.ump"
+  // line 34 "../../../../../CarShopStates.ump"
    private void addNoShow(Customer c){
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 36 "../../../../../CarShopStates.ump"
+  // line 39 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
     
   }
 
-  // line 40 "../../../../../CarShopStates.ump"
+  // line 43 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
     
   }
 
-  // line 44 "../../../../../CarShopStates.ump"
+  // line 47 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
     
   }
 
-  // line 47 "../../../../../CarShopStates.ump"
+  // line 50 "../../../../../CarShopStates.ump"
    private boolean canUpdate(){
     return true;
   }
 
-  // line 51 "../../../../../CarShopStates.ump"
+  // line 54 "../../../../../CarShopStates.ump"
    private boolean canCancel(){
+    return true;
+  }
+
+  // line 58 "../../../../../CarShopStates.ump"
+   private boolean updateApp(){
     return true;
   }
 

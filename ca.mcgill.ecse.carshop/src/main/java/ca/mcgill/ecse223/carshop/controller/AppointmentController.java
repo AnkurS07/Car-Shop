@@ -17,7 +17,6 @@ import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
-import ca.mcgill.ecse.carshop.model.ComboItem;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
@@ -93,6 +92,9 @@ public class AppointmentController {
 	
 	public static Appointment updateAppointment(Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
 		//check overlap
+		// I did not put it in the state machine or else we need to copy
+		// like 200 lines of helper methods and since we still need those here
+		// to validate when a appointment is created it made no sense to duplicate them
 		if (servicesOverlapping(timeSlots)) {
 			throw new Exception("Time slots for two services are overlapping");
 		}
@@ -135,8 +137,13 @@ public class AppointmentController {
 	}
 	
 	public static void startAppointment(Date startDate, Appointment a) throws Exception {
-		// add check with date
+		// add check with date in the state machine
 		a.start();
+	}
+	
+	public static void endAppointment(Appointment a) throws Exception {
+		// add check with date in the state machine
+		a.end();
 	}
 	
 	public static String getAppointmentState(Appointment a) {
@@ -160,7 +167,7 @@ public class AppointmentController {
 		return app;
 	}*/
 
-	public static BookableService getBookableService(String name) {
+	public static BookableService findBookableService(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		for(BookableService bs: carShop.getBookableServices()) {
 			if(bs.getName().equals(name)) {
@@ -348,7 +355,7 @@ public class AppointmentController {
 
 		// TODO: Check for any exceptions
 
-		app.delete();
+		app.cancel();
 		return true;
 	}
 
