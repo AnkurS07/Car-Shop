@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.sql.Time;
 
-// line 55 "../../../../../carshop.ump"
+// line 58 "../../../../../carshop.ump"
 public class BusinessHour
 {
 

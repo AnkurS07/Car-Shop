@@ -17,6 +17,7 @@ import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ComboItem;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
@@ -30,7 +31,7 @@ import ca.mcgill.ecse.carshop.model.User;
 public class AppointmentController {
 
 	public static Appointment makeAppointment(boolean overrideErrors, Customer customer, String mainServiceName,
-			Date date, Time time, List<TimeSlot> timeSlots, Service mainService, List<Service> optionalServices)
+			Date date, Time time, List<TimeSlot> timeSlots, BookableService mainService, List<Service> optionalServices)
 			throws Exception {
 		CarShop carshop = CarShopApplication.getCarShop();
 
@@ -57,7 +58,13 @@ public class AppointmentController {
 
 		// TODO: verify timeslots, optinoalServices, list lengths, check null values
 
-		appointment.addServiceBooking((Service) mainService, timeSlots.get(0));
+		if(mainService instanceof Service) {
+			appointment.addServiceBooking((Service) mainService, timeSlots.get(0));
+		} else {
+			//it's a service combo
+			appointment.addServiceBooking(((ServiceCombo) mainService).getMainService().getService(), timeSlots.get(0));
+		}
+		
 		for (int i = 0; i < optionalServices.size(); i++) {
 			appointment.addServiceBooking(optionalServices.get(i), timeSlots.get(i + 1));
 		}
@@ -83,6 +90,38 @@ public class AppointmentController {
 		}
 		return cancelAppointment(c, mainServiceName, date, time);
 	}
+	
+	public static Appointment updateAppointment(Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
+		//check overlap
+		if (servicesOverlapping(timeSlots)) {
+			throw new Exception("Time slots for two services are overlapping");
+		}
+
+		if (invalidTimeSlot(a.getBookableService().getName(), timeSlots)) {
+			throw new Exception("Invlalid time slot");
+		}
+		
+		if(newOptServices.size() == 0) {
+			// updating existing services of the app
+			// make sure when check invalid before not failing because overlapping with existing services
+			for(int i=0;i<a.getServiceBookings().size();i++) {
+				Service s = a.getServiceBooking(i).getService();
+				// might be dangerous to do this but it should work
+				// deletes the time slot and the associated service booking and re-create it after
+				a.getServiceBooking(i).getTimeSlot().delete();
+				
+				new ServiceBooking(s,timeSlots.get(i), a);
+			}
+		} else {
+			// adding new services to the app
+			for(int i = 0; i< newOptServices.size();i++) {
+				new ServiceBooking(newOptServices.get(i), timeSlots.get(i), a);
+			}
+		}
+
+		
+		return a;
+	}
 
 	public static Appointment findAppointment(Customer customer, String mainServiceName, Date date, Time time) {
 		for (Appointment a : customer.getAppointments()) {
@@ -94,7 +133,63 @@ public class AppointmentController {
 		}
 		return null;
 	}
+	
+	public static void startAppointment(Date startDate, Appointment a) throws Exception {
+		// add check with date
+		a.start();
+	}
+	
+	public static String getAppointmentState(Appointment a) {
+		return a.getAppStatusFullName();
+	}
+	
+	/*private static Appointment findAppointment(Date startDate) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Appointment app = null;
+		//find appointment with date
+		for(Appointment a: carShop.getAppointments()) {
+			Date sd = a.getServiceBooking(0).getTimeSlot().getStartDate();
+			Time st = a.getServiceBooking(0).getTimeSlot().getStartTime();
+			// if the appointment start date is within 30min of the appointment time, start it
+			if(Math.abs(startDate.getTime() - sd.getTime() - st.getTime()) < 30*60*1000) {
+				// this just changes state
+				app = a;
+				break;
+			}
+		}
+		return app;
+	}*/
 
+	public static BookableService getBookableService(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs.getName().equals(name)) {
+				return bs;
+			}
+		}
+		return null;
+	}
+	
+	public static Appointment findAppointment(List<TimeSlot> timeSlots) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean possibleMatch;
+		for(Appointment a: carShop.getAppointments()) {
+			possibleMatch = true;
+			for(int i = 0; i < a.getServiceBookings().size() ; i++) {
+				TimeSlot t1 = a.getServiceBooking(i).getTimeSlot();
+				TimeSlot t2 = timeSlots.get(i);
+				possibleMatch &= (t1.getStartDate().equals(t2.getStartDate())
+						&& t1.getStartTime().equals(t2.getStartTime())
+						&& t1.getEndDate().equals(t2.getEndDate())
+						&& t1.getEndTime().equals(t2.getEndTime()));
+			}
+			if(possibleMatch) {
+				return a;
+			}
+		}
+		return null;
+	}
+	
 	// HELPER METHODS //
 
 	/**
@@ -398,7 +493,7 @@ public class AppointmentController {
 		return d;
 	}
 	
-	private static List<TimeSlot> generateTimeSlotsFromStarts(Date date, List<Time> times, Service... services) {
+	public static List<TimeSlot> generateTimeSlotsFromStarts(Date date, List<Time> times, Service... services) {
 		List<TimeSlot> slots = new ArrayList<>();
 
 		for (int i = 0; i < services.length; i++) {

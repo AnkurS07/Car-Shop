@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 15 "../../../../../carshop.ump"
+// line 17 "../../../../../carshop.ump"
 public abstract class User
 {
 
