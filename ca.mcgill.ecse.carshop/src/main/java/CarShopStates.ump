@@ -23,6 +23,8 @@ class Appointment {
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots) [canUpdate()] / {updateApp(newOptServices, timeSlots);} -> InProgress;
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots) [!canUpdate()] / {rejectUpdate();} -> InProgress;
             
+            cancel(String currentDate, String sysDate) / {reject();} -> InProgress;
+            
 			noShow(Customer c) / {rejectNoShow(c);} -> InProgress;
 			
 			end -> Final;
@@ -43,6 +45,10 @@ class Appointment {
 	
 	private void rejectNoShow(Customer c) {
 		throw new RuntimeException("Cannot register a no-show since the appointment has already started");
+	}
+	
+	private void reject() {
+		throw new RuntimeException("Action unavailable for the current state");
 	}
 	
 	private boolean canUpdate() {

@@ -78,7 +78,7 @@ public class Appointment
         wasEventProcessed = true;
         break;
       case InProgress:
-        // line 26 "../../../../../CarShopStates.ump"
+        // line 28 "../../../../../CarShopStates.ump"
         rejectNoShow(c);
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -112,6 +112,12 @@ public class Appointment
           wasEventProcessed = true;
           break;
         }
+        break;
+      case InProgress:
+        // line 26 "../../../../../CarShopStates.ump"
+        reject();
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
         break;
       default:
         // Other states do respond to this event
@@ -426,37 +432,42 @@ public class Appointment
     }
   }
 
-  // line 33 "../../../../../CarShopStates.ump"
+  // line 35 "../../../../../CarShopStates.ump"
    private void addNoShow(Customer c){
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 38 "../../../../../CarShopStates.ump"
+  // line 40 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
     
   }
 
-  // line 41 "../../../../../CarShopStates.ump"
+  // line 43 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
     throw new RuntimeException("Cannot cancel an appointment on the appointment date");
   }
 
-  // line 45 "../../../../../CarShopStates.ump"
+  // line 47 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
     throw new RuntimeException("Cannot register a no-show since the appointment has already started");
   }
 
-  // line 49 "../../../../../CarShopStates.ump"
+  // line 51 "../../../../../CarShopStates.ump"
+   private void reject(){
+    throw new RuntimeException("Action unavailable for the current state");
+  }
+
+  // line 55 "../../../../../CarShopStates.ump"
    private boolean canUpdate(){
     return true;
   }
 
-  // line 53 "../../../../../CarShopStates.ump"
+  // line 59 "../../../../../CarShopStates.ump"
    private boolean canCancel(String currentDate, String sysDate){
     return !currentDate.equals(sysDate);
   }
 
-  // line 57 "../../../../../CarShopStates.ump"
+  // line 63 "../../../../../CarShopStates.ump"
    private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
     if(newOptServices.size() == 0) {
 			// updating existing services of the app
