@@ -2,6 +2,7 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 // line 2 "../../../../../CarShopStates.ump"
@@ -14,7 +15,7 @@ public class Appointment
   //------------------------
 
   //Appointment State Machines
-  public enum AppStatus { Booked, InProgress, Done, Final }
+  public enum AppStatus { Booked, Final, InProgress }
   private AppStatus appStatus;
 
   //Appointment Associations
@@ -71,13 +72,13 @@ public class Appointment
     switch (aAppStatus)
     {
       case Booked:
-        // line 6 "../../../../../CarShopStates.ump"
+        // line 8 "../../../../../CarShopStates.ump"
         addNoShow(c);
-        setAppStatus(AppStatus.Done);
+        setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
       case InProgress:
-        // line 20 "../../../../../CarShopStates.ump"
+        // line 26 "../../../../../CarShopStates.ump"
         rejectNoShow(c);
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -89,7 +90,7 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean cancel()
+  public boolean cancel(String currentDate,String sysDate)
   {
     boolean wasEventProcessed = false;
     
@@ -97,26 +98,20 @@ public class Appointment
     switch (aAppStatus)
     {
       case Booked:
-        if (canCancel())
+        if (canCancel(currentDate,sysDate))
         {
-          setAppStatus(AppStatus.Done);
+          setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
-        if (!(canCancel()))
+        if (!(canCancel(currentDate,sysDate)))
         {
-        // line 9 "../../../../../CarShopStates.ump"
+        // line 11 "../../../../../CarShopStates.ump"
           rejectCancel();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
           break;
         }
-        break;
-      case InProgress:
-        // line 17 "../../../../../CarShopStates.ump"
-        rejectCancel();
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
         break;
       default:
         // Other states do respond to this event
@@ -125,7 +120,7 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean update()
+  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots)
   {
     boolean wasEventProcessed = false;
     
@@ -135,13 +130,15 @@ public class Appointment
       case Booked:
         if (canUpdate())
         {
+        // line 13 "../../../../../CarShopStates.ump"
+          updateApp(newOptServices, timeSlots);
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
           break;
         }
         if (!(canUpdate()))
         {
-        // line 10 "../../../../../CarShopStates.ump"
+        // line 14 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -151,7 +148,7 @@ public class Appointment
       case InProgress:
         if (!(canUpdate()))
         {
-        // line 18 "../../../../../CarShopStates.ump"
+        // line 23 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -201,24 +198,6 @@ public class Appointment
     switch (aAppStatus)
     {
       case InProgress:
-        setAppStatus(AppStatus.Done);
-        wasEventProcessed = true;
-        break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
-  public boolean destroy()
-  {
-    boolean wasEventProcessed = false;
-    
-    AppStatus aAppStatus = appStatus;
-    switch (aAppStatus)
-    {
-      case Done:
         setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
@@ -445,34 +424,55 @@ public class Appointment
     }
   }
 
-  // line 31 "../../../../../CarShopStates.ump"
+  // line 33 "../../../../../CarShopStates.ump"
    private void addNoShow(Customer c){
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 36 "../../../../../CarShopStates.ump"
+  // line 38 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
     
   }
 
-  // line 40 "../../../../../CarShopStates.ump"
+  // line 41 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
-    
+    throw new RuntimeException("Cannot cancel an appointment on the appointment date");
   }
 
-  // line 44 "../../../../../CarShopStates.ump"
+  // line 45 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
-    
+    throw new RuntimeException("Cannot register a no-show since the appointment has already started");
   }
 
-  // line 47 "../../../../../CarShopStates.ump"
+  // line 49 "../../../../../CarShopStates.ump"
    private boolean canUpdate(){
     return true;
   }
 
-  // line 51 "../../../../../CarShopStates.ump"
-   private boolean canCancel(){
-    return true;
+  // line 53 "../../../../../CarShopStates.ump"
+   private boolean canCancel(String currentDate, String sysDate){
+    return !currentDate.equals(sysDate);
+  }
+
+  // line 57 "../../../../../CarShopStates.ump"
+   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
+    if(newOptServices.size() == 0) {
+			// updating existing services of the app
+			// make sure when check invalid before not failing because overlapping with existing services
+			for(int i=0;i<this.getServiceBookings().size();i++) {
+				Service s = this.getServiceBooking(i).getService();
+				// might be dangerous to do this but it should work
+				// deletes the time slot and the associated service booking and re-create it after
+				this.getServiceBooking(i).getTimeSlot().delete();
+				
+				new ServiceBooking(s,timeSlots.get(i), this);
+			}
+		} else {
+			// adding new services to the app
+			for(int i = 0; i< newOptServices.size();i++) {
+				new ServiceBooking(newOptServices.get(i), timeSlots.get(i), this);
+			}
+		}
   }
 
 }
