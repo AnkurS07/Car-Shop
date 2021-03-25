@@ -146,16 +146,18 @@ public class Appointment
         }
         break;
       case InProgress:
-        if (!(canUpdate()))
+        if (canUpdate())
         {
         // line 23 "../../../../../CarShopStates.ump"
-          rejectUpdate();
-          setAppStatus(AppStatus.Booked);
+          updateApp(newOptServices, timeSlots);
+          setAppStatus(AppStatus.InProgress);
           wasEventProcessed = true;
           break;
         }
-        if (canUpdate())
+        if (!(canUpdate()))
         {
+        // line 24 "../../../../../CarShopStates.ump"
+          rejectUpdate();
           setAppStatus(AppStatus.InProgress);
           wasEventProcessed = true;
           break;
