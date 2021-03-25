@@ -78,7 +78,7 @@ public class Appointment
         wasEventProcessed = true;
         break;
       case InProgress:
-        // line 28 "../../../../../CarShopStates.ump"
+        // line 30 "../../../../../CarShopStates.ump"
         rejectNoShow(c);
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -114,7 +114,7 @@ public class Appointment
         }
         break;
       case InProgress:
-        // line 26 "../../../../../CarShopStates.ump"
+        // line 28 "../../../../../CarShopStates.ump"
         reject();
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -154,7 +154,7 @@ public class Appointment
       case InProgress:
         if (canUpdate())
         {
-        // line 23 "../../../../../CarShopStates.ump"
+        // line 25 "../../../../../CarShopStates.ump"
           updateApp(newOptServices, timeSlots);
           setAppStatus(AppStatus.InProgress);
           wasEventProcessed = true;
@@ -162,7 +162,7 @@ public class Appointment
         }
         if (!(canUpdate()))
         {
-        // line 24 "../../../../../CarShopStates.ump"
+        // line 26 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.InProgress);
           wasEventProcessed = true;
@@ -205,6 +205,12 @@ public class Appointment
     AppStatus aAppStatus = appStatus;
     switch (aAppStatus)
     {
+      case Booked:
+        // line 18 "../../../../../CarShopStates.ump"
+        reject();
+        setAppStatus(AppStatus.Booked);
+        wasEventProcessed = true;
+        break;
       case InProgress:
         setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
@@ -432,42 +438,42 @@ public class Appointment
     }
   }
 
-  // line 35 "../../../../../CarShopStates.ump"
+  // line 37 "../../../../../CarShopStates.ump"
    private void addNoShow(Customer c){
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 40 "../../../../../CarShopStates.ump"
+  // line 42 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
     
   }
 
-  // line 43 "../../../../../CarShopStates.ump"
+  // line 45 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
     throw new RuntimeException("Cannot cancel an appointment on the appointment date");
   }
 
-  // line 47 "../../../../../CarShopStates.ump"
+  // line 49 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
     throw new RuntimeException("Cannot register a no-show since the appointment has already started");
   }
 
-  // line 51 "../../../../../CarShopStates.ump"
+  // line 53 "../../../../../CarShopStates.ump"
    private void reject(){
-    throw new RuntimeException("Action unavailable for the current state");
+    throw new RuntimeException("Action unavailable in the current state");
   }
 
-  // line 55 "../../../../../CarShopStates.ump"
+  // line 57 "../../../../../CarShopStates.ump"
    private boolean canUpdate(){
     return true;
   }
 
-  // line 59 "../../../../../CarShopStates.ump"
+  // line 61 "../../../../../CarShopStates.ump"
    private boolean canCancel(String currentDate, String sysDate){
     return !currentDate.equals(sysDate);
   }
 
-  // line 63 "../../../../../CarShopStates.ump"
+  // line 65 "../../../../../CarShopStates.ump"
    private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
     if(newOptServices.size() == 0) {
 			// updating existing services of the app
