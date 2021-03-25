@@ -2,6 +2,7 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 // line 2 "../../../../../CarShopStates.ump"
@@ -71,13 +72,13 @@ public class Appointment
     switch (aAppStatus)
     {
       case Booked:
-        // line 6 "../../../../../CarShopStates.ump"
+        // line 8 "../../../../../CarShopStates.ump"
         addNoShow(c);
         setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
       case InProgress:
-        // line 27 "../../../../../CarShopStates.ump"
+        // line 26 "../../../../../CarShopStates.ump"
         rejectNoShow(c);
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -89,7 +90,7 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean cancel()
+  public boolean cancel(String currentDate,String sysDate)
   {
     boolean wasEventProcessed = false;
     
@@ -97,35 +98,17 @@ public class Appointment
     switch (aAppStatus)
     {
       case Booked:
-        if (canCancel())
+        if (canCancel(currentDate,sysDate))
         {
           setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
-        if (!(canCancel()))
+        if (!(canCancel(currentDate,sysDate)))
         {
-        // line 9 "../../../../../CarShopStates.ump"
+        // line 11 "../../../../../CarShopStates.ump"
           rejectCancel();
           setAppStatus(AppStatus.Booked);
-          wasEventProcessed = true;
-          break;
-        }
-        break;
-      case InProgress:
-        if (!(canCancel()))
-        {
-        // line 21 "../../../../../CarShopStates.ump"
-          rejectCancel();
-          setAppStatus(AppStatus.InProgress);
-          wasEventProcessed = true;
-          break;
-        }
-        if (canCancel())
-        {
-        // line 22 "../../../../../CarShopStates.ump"
-          
-          setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
@@ -147,7 +130,7 @@ public class Appointment
       case Booked:
         if (canUpdate())
         {
-        // line 11 "../../../../../CarShopStates.ump"
+        // line 13 "../../../../../CarShopStates.ump"
           updateApp(newOptServices, timeSlots);
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -155,7 +138,7 @@ public class Appointment
         }
         if (!(canUpdate()))
         {
-        // line 12 "../../../../../CarShopStates.ump"
+        // line 14 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -165,7 +148,7 @@ public class Appointment
       case InProgress:
         if (!(canUpdate()))
         {
-        // line 24 "../../../../../CarShopStates.ump"
+        // line 23 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -441,37 +424,37 @@ public class Appointment
     }
   }
 
-  // line 34 "../../../../../CarShopStates.ump"
+  // line 33 "../../../../../CarShopStates.ump"
    private void addNoShow(Customer c){
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 39 "../../../../../CarShopStates.ump"
+  // line 38 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
     
   }
 
-  // line 43 "../../../../../CarShopStates.ump"
+  // line 41 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
-    
+    throw new RuntimeException("Cannot cancel an appointment on the appointment date");
   }
 
-  // line 47 "../../../../../CarShopStates.ump"
+  // line 45 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
-    
+    throw new RuntimeException("Cannot register a no-show since the appointment has already started");
   }
 
-  // line 50 "../../../../../CarShopStates.ump"
+  // line 49 "../../../../../CarShopStates.ump"
    private boolean canUpdate(){
     return true;
   }
 
-  // line 54 "../../../../../CarShopStates.ump"
-   private boolean canCancel(){
-    return true;
+  // line 53 "../../../../../CarShopStates.ump"
+   private boolean canCancel(String currentDate, String sysDate){
+    return !currentDate.equals(sysDate);
   }
 
-  // line 58 "../../../../../CarShopStates.ump"
+  // line 57 "../../../../../CarShopStates.ump"
    private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
     if(newOptServices.size() == 0) {
 			// updating existing services of the app

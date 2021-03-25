@@ -75,7 +75,7 @@ public class AppointmentController {
 		return appointment;
 	}
 
-	public static boolean cancelAppointment(String customerName, String mainServiceName, Date date, Time time)
+	public static void cancelAppointment(String customerName, String mainServiceName, Date date, Time time)
 			throws Exception {
 
 		Customer c;
@@ -91,7 +91,12 @@ public class AppointmentController {
 		if (!c.getUsername().equals(CarShopApplication.getLoggedInUser())) {
 			throw new RuntimeException("A customer can only cancel their own appointments");
 		}
-		return cancelAppointment(c, mainServiceName, date, time);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String sysDate = sdf.format(new Date(CarShopApplication.getSystemDate().getTime()));
+		Appointment app = findAppointment(c, mainServiceName, date, time);
+		
+		app.cancel(sdf.format(date), sysDate);
 	}
 	
 	public static Appointment updateAppointment(Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
@@ -328,24 +333,6 @@ public class AppointmentController {
 	}
 	
 	// Private methods
-	
-	private static boolean cancelAppointment(Customer customer, String mainServiceName, Date date, Time time)
-			throws Exception {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String sysDate = sdf.format(new Date(CarShopApplication.getSystemDate().getTime()));
-		if (sdf.format(date).equals(sysDate)) {
-
-			throw new Exception("Cannot cancel an appointment on the appointment date");
-		}
-
-		Appointment app = findAppointment(customer, mainServiceName, date, time);
-
-		// TODO: Check for any exceptions
-
-		app.cancel();
-		return true;
-	}
 
 	private static boolean servicesOverlapping(List<TimeSlot> timeSlots) {
 		for (int i = 0; i < timeSlots.size(); i++) {

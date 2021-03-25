@@ -1,12 +1,14 @@
 
 class Appointment {
+
+	depend java.text.SimpleDateFormat;
     
 	AppStatus {
 		Booked {
 				noShow(Customer c) / {addNoShow(c);} -> Final;
 				
-				cancel [canCancel()] -> Final;
-				cancel [!canCancel()] / {rejectCancel();} -> Booked;
+				cancel(String currentDate, String sysDate) [canCancel(currentDate, sysDate)] -> Final;
+				cancel(String currentDate, String sysDate) [!canCancel(currentDate, sysDate)] / {rejectCancel();} -> Booked;
 				
 				update(List<Service> newOptServices, List<TimeSlot> timeSlots) [canUpdate()] / {updateApp(newOptServices, timeSlots);} -> Booked;
 				update(List<Service> newOptServices, List<TimeSlot> timeSlots) [!canUpdate()] / {rejectUpdate();} -> Booked;
@@ -17,9 +19,6 @@ class Appointment {
 		InProgress {
 		
 			start -> InProgress;
-			
-			cancel [!canCancel()] / {rejectCancel();} -> InProgress;
-			cancel [canCancel()] / {} -> Final;
 			
 			update [!canUpdate()] / {rejectUpdate();} -> Booked;
             update [canUpdate()] -> InProgress;
@@ -39,19 +38,19 @@ class Appointment {
 	}
   
 	private void rejectCancel() {
-	    
+	    throw new RuntimeException("Cannot cancel an appointment on the appointment date");
 	}
 	
 	private void rejectNoShow(Customer c) {
-	
+		throw new RuntimeException("Cannot register a no-show since the appointment has already started");
 	}
 	
 	private boolean canUpdate() {
 	  return true;
 	}
 	  
-	private boolean canCancel() {
-	  return true; 
+	private boolean canCancel(String currentDate, String sysDate) {
+		return !currentDate.equals(sysDate);
 	}
 	
 	private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
