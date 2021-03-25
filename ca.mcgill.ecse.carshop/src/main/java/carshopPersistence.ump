@@ -1,0 +1,94 @@
+external interface Serializable {}
+
+
+class CarShop  {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 94450194170481L;
+}
+
+class User {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 97092458866941L;
+}
+
+class Owner {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 62277880568680L;
+}
+
+class Customer {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 92577821492238L;
+}
+
+class Technician {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 80496055631430L;
+}
+
+class Business {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 32320552306211L;
+}
+
+class BusinessHour {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 78710124348809L;
+}
+
+class TimeSlot {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 24940965752540L;
+}
+
+class Garage {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 19048776333921L;
+}
+
+class BookableService {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 89278883359799L;
+}
+
+class Service {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 59479375933615L;
+}
+
+class ServiceCombo {
+  	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 40920177922870L;
+
+}
+
+class ComboItem {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 67149090620816L;
+}
+
+
+class Appointment {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 23066424091059L;
+}
+
+class ServiceBooking {
+	depend java.io.Serializable;
+	isA Serializable;
+	private static final long serialVersionUID = 43277386251199L;
+}

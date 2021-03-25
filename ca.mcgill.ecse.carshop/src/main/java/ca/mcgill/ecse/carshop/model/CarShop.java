@@ -2,12 +2,14 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 import java.sql.Time;
 import java.sql.Date;
 
-// line 5 "../../../../../carshop.ump"
-public class CarShop
+// line 4 "../../../../../carshopPersistence.ump"
+// line 6 "../../../../../carshop.ump"
+public class CarShop implements Serializable
 {
 
   //------------------------
@@ -931,5 +933,13 @@ public class CarShop
     }
     
   }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 7 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 94450194170481L ;
 
+  
 }

@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 23 "../../../../../carshop.ump"
-public class Owner extends User
+// line 16 "../../../../../carshopPersistence.ump"
+// line 24 "../../../../../carshop.ump"
+public class Owner extends User implements Serializable
 {
 
   //------------------------
@@ -76,5 +78,13 @@ public class Owner extends User
     }
     super.delete();
   }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 19 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 62277880568680L ;
 
+  
 }

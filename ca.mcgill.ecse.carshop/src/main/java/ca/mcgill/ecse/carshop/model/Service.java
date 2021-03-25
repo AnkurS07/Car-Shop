@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 82 "../../../../../carshop.ump"
-public class Service extends BookableService
+// line 64 "../../../../../carshopPersistence.ump"
+// line 83 "../../../../../carshop.ump"
+public class Service extends BookableService implements Serializable
 {
 
   //------------------------
@@ -200,5 +202,13 @@ public class Service extends BookableService
     return super.toString() + "["+
             "duration" + ":" + getDuration()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "garage = "+(getGarage()!=null?Integer.toHexString(System.identityHashCode(getGarage())):"null");
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 67 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 59479375933615L ;
+
+  
 }

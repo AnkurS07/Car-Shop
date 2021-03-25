@@ -5,6 +5,7 @@ package ca.mcgill.ecse.carshop.application;
 
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
+import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
 public class CarShopApplication {
 	
@@ -16,13 +17,13 @@ public class CarShopApplication {
         return "Hello World!";
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         System.out.println(new CarShopApplication().getGreeting());
     }
     
     public static CarShop getCarShop() {
     	if (carShop == null) {
-    		carShop = new CarShop();
+    		carShop = CarshopPersistence.load();
     	}
     	return carShop;
     	
