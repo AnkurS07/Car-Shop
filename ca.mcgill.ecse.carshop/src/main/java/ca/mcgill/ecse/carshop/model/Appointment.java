@@ -14,7 +14,7 @@ public class Appointment
   //------------------------
 
   //Appointment State Machines
-  public enum AppStatus { Booked, InProgress, Done, Final }
+  public enum AppStatus { Booked, Final, InProgress }
   private AppStatus appStatus;
 
   //Appointment Associations
@@ -73,11 +73,11 @@ public class Appointment
       case Booked:
         // line 6 "../../../../../CarShopStates.ump"
         addNoShow(c);
-        setAppStatus(AppStatus.Done);
+        setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
       case InProgress:
-        // line 20 "../../../../../CarShopStates.ump"
+        // line 27 "../../../../../CarShopStates.ump"
         rejectNoShow(c);
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
@@ -99,7 +99,7 @@ public class Appointment
       case Booked:
         if (canCancel())
         {
-          setAppStatus(AppStatus.Done);
+          setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
@@ -113,10 +113,22 @@ public class Appointment
         }
         break;
       case InProgress:
-        // line 17 "../../../../../CarShopStates.ump"
-        rejectCancel();
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
+        if (!(canCancel()))
+        {
+        // line 21 "../../../../../CarShopStates.ump"
+          rejectCancel();
+          setAppStatus(AppStatus.InProgress);
+          wasEventProcessed = true;
+          break;
+        }
+        if (canCancel())
+        {
+        // line 22 "../../../../../CarShopStates.ump"
+          
+          setAppStatus(AppStatus.Final);
+          wasEventProcessed = true;
+          break;
+        }
         break;
       default:
         // Other states do respond to this event
@@ -125,7 +137,7 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean update()
+  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots)
   {
     boolean wasEventProcessed = false;
     
@@ -135,13 +147,15 @@ public class Appointment
       case Booked:
         if (canUpdate())
         {
+        // line 11 "../../../../../CarShopStates.ump"
+          updateApp(newOptServices, timeSlots);
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
           break;
         }
         if (!(canUpdate()))
         {
-        // line 10 "../../../../../CarShopStates.ump"
+        // line 12 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -151,7 +165,7 @@ public class Appointment
       case InProgress:
         if (!(canUpdate()))
         {
-        // line 18 "../../../../../CarShopStates.ump"
+        // line 24 "../../../../../CarShopStates.ump"
           rejectUpdate();
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
@@ -201,24 +215,6 @@ public class Appointment
     switch (aAppStatus)
     {
       case InProgress:
-        setAppStatus(AppStatus.Done);
-        wasEventProcessed = true;
-        break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
-  public boolean destroy()
-  {
-    boolean wasEventProcessed = false;
-    
-    AppStatus aAppStatus = appStatus;
-    switch (aAppStatus)
-    {
-      case Done:
         setAppStatus(AppStatus.Final);
         wasEventProcessed = true;
         break;
@@ -445,34 +441,55 @@ public class Appointment
     }
   }
 
-  // line 31 "../../../../../CarShopStates.ump"
+  // line 34 "../../../../../CarShopStates.ump"
    private void addNoShow(Customer c){
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 36 "../../../../../CarShopStates.ump"
+  // line 39 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
     
   }
 
-  // line 40 "../../../../../CarShopStates.ump"
+  // line 43 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
     
   }
 
-  // line 44 "../../../../../CarShopStates.ump"
+  // line 47 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
     
   }
 
-  // line 47 "../../../../../CarShopStates.ump"
+  // line 50 "../../../../../CarShopStates.ump"
    private boolean canUpdate(){
     return true;
   }
 
-  // line 51 "../../../../../CarShopStates.ump"
+  // line 54 "../../../../../CarShopStates.ump"
    private boolean canCancel(){
     return true;
+  }
+
+  // line 58 "../../../../../CarShopStates.ump"
+   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
+    if(newOptServices.size() == 0) {
+			// updating existing services of the app
+			// make sure when check invalid before not failing because overlapping with existing services
+			for(int i=0;i<this.getServiceBookings().size();i++) {
+				Service s = this.getServiceBooking(i).getService();
+				// might be dangerous to do this but it should work
+				// deletes the time slot and the associated service booking and re-create it after
+				this.getServiceBooking(i).getTimeSlot().delete();
+				
+				new ServiceBooking(s,timeSlots.get(i), this);
+			}
+		} else {
+			// adding new services to the app
+			for(int i = 0; i< newOptServices.size();i++) {
+				new ServiceBooking(newOptServices.get(i), timeSlots.get(i), this);
+			}
+		}
   }
 
 }

@@ -3,27 +3,30 @@ class Appointment {
     
 	AppStatus {
 		Booked {
-				noShow(Customer c) / {addNoShow(c);} -> Done;
-				cancel [canCancel()] -> Done;
-				update [canUpdate()] -> Booked;
+				noShow(Customer c) / {addNoShow(c);} -> Final;
+				
+				cancel [canCancel()] -> Final;
 				cancel [!canCancel()] / {rejectCancel();} -> Booked;
-				update [!canUpdate()] / {rejectUpdate();} -> Booked;
+				
+				update(List<Service> newOptServices, List<TimeSlot> timeSlots) [canUpdate()] / {updateApp(newOptServices, timeSlots);} -> Booked;
+				update(List<Service> newOptServices, List<TimeSlot> timeSlots) [!canUpdate()] / {rejectUpdate();} -> Booked;
+				
 				start -> InProgress;
 		}
 		
 		InProgress {
 		
 			start -> InProgress;
-			cancel / {rejectCancel();} -> InProgress;
+			
+			cancel [!canCancel()] / {rejectCancel();} -> InProgress;
+			cancel [canCancel()] / {} -> Final;
+			
 			update [!canUpdate()] / {rejectUpdate();} -> Booked;
             update [canUpdate()] -> InProgress;
+            
 			noShow(Customer c) / {rejectNoShow(c);} -> InProgress;
-			end -> Done;
-		}
-		
-		Done {
 			
-			destroy -> Final;
+			end -> Final;
 		}
 	}
 
@@ -32,7 +35,7 @@ class Appointment {
 	}
 	
 	private void rejectUpdate() {
-      
+
 	}
   
 	private void rejectCancel() {
@@ -50,4 +53,24 @@ class Appointment {
 	private boolean canCancel() {
 	  return true; 
 	}
+	
+	private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
+	   if(newOptServices.size() == 0) {
+			// updating existing services of the app
+			// make sure when check invalid before not failing because overlapping with existing services
+			for(int i=0;i<this.getServiceBookings().size();i++) {
+				Service s = this.getServiceBooking(i).getService();
+				// might be dangerous to do this but it should work
+				// deletes the time slot and the associated service booking and re-create it after
+				this.getServiceBooking(i).getTimeSlot().delete();
+				
+				new ServiceBooking(s,timeSlots.get(i), this);
+			}
+		} else {
+			// adding new services to the app
+			for(int i = 0; i< newOptServices.size();i++) {
+				new ServiceBooking(newOptServices.get(i), timeSlots.get(i), this);
+			}
+		}
+  }
 }
