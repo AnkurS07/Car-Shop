@@ -113,10 +113,22 @@ public class Appointment
         }
         break;
       case InProgress:
+        if (!(canCancel()))
+        {
         // line 21 "../../../../../CarShopStates.ump"
-        rejectCancel();
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
+          rejectCancel();
+          setAppStatus(AppStatus.InProgress);
+          wasEventProcessed = true;
+          break;
+        }
+        if (canCancel())
+        {
+        // line 22 "../../../../../CarShopStates.ump"
+          
+          setAppStatus(AppStatus.Final);
+          wasEventProcessed = true;
+          break;
+        }
         break;
       default:
         // Other states do respond to this event
@@ -125,31 +137,31 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean start()
+  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots)
   {
     boolean wasEventProcessed = false;
     
     AppStatus aAppStatus = appStatus;
     switch (aAppStatus)
     {
-      case InProgress:
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
+      case Booked:
+        if (canUpdate())
+        {
+        // line 11 "../../../../../CarShopStates.ump"
+          updateApp(newOptServices, timeSlots);
+          setAppStatus(AppStatus.Booked);
+          wasEventProcessed = true;
+          break;
+        }
+        if (!(canUpdate()))
+        {
+        // line 12 "../../../../../CarShopStates.ump"
+          rejectUpdate();
+          setAppStatus(AppStatus.Booked);
+          wasEventProcessed = true;
+          break;
+        }
         break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
-  public boolean update()
-  {
-    boolean wasEventProcessed = false;
-    
-    AppStatus aAppStatus = appStatus;
-    switch (aAppStatus)
-    {
       case InProgress:
         if (!(canUpdate()))
         {
@@ -165,6 +177,28 @@ public class Appointment
           wasEventProcessed = true;
           break;
         }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean start()
+  {
+    boolean wasEventProcessed = false;
+    
+    AppStatus aAppStatus = appStatus;
+    switch (aAppStatus)
+    {
+      case Booked:
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
+        break;
+      case InProgress:
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
         break;
       default:
         // Other states do respond to this event
@@ -438,8 +472,24 @@ public class Appointment
   }
 
   // line 58 "../../../../../CarShopStates.ump"
-   private boolean updateApp(){
-    return true;
+   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
+    if(newOptServices.size() == 0) {
+			// updating existing services of the app
+			// make sure when check invalid before not failing because overlapping with existing services
+			for(int i=0;i<this.getServiceBookings().size();i++) {
+				Service s = this.getServiceBooking(i).getService();
+				// might be dangerous to do this but it should work
+				// deletes the time slot and the associated service booking and re-create it after
+				this.getServiceBooking(i).getTimeSlot().delete();
+				
+				new ServiceBooking(s,timeSlots.get(i), this);
+			}
+		} else {
+			// adding new services to the app
+			for(int i = 0; i< newOptServices.size();i++) {
+				new ServiceBooking(newOptServices.get(i), timeSlots.get(i), this);
+			}
+		}
   }
 
 }

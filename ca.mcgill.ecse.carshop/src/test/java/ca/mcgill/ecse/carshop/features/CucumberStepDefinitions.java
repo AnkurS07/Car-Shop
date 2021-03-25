@@ -307,7 +307,7 @@ public class CucumberStepDefinitions {
 			CarShopApplication.setLoggedInUser("owner");
 			// Changes string format to date and time.
 			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+			SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 			CarShopController.addTimeSlot(type, new Date(sdfDate.parse(startDate).getTime()),
 					new Time(sdfTime.parse(startTime).getTime()), new Date(sdfDate.parse(endDate).getTime()),
 					new Time(sdfTime.parse(endTime).getTime()));
@@ -324,7 +324,7 @@ public class CucumberStepDefinitions {
 		try {
 			// Changes string format to date and time.
 			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+			SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 			CarShopController.addTimeSlot(type, new Date(sdfDate.parse(startDate).getTime()),
 					new Time(sdfTime.parse(startTime).getTime()), new Date(sdfDate.parse(endDate).getTime()),
 					new Time(sdfTime.parse(endTime).getTime()));
@@ -344,7 +344,7 @@ public class CucumberStepDefinitions {
 				boolean foundMatch = false;
 				// Changes string format to date and time.
 				SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-				SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+				SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 				for (TOTimeSlot t : CarShopController.getTimeSlots(type)) {
 					if (t.getStartDate().equals(new Date(sdfDate.parse(startDate).getTime()))
 							&& t.getStartTime().equals(new Time(sdfTime.parse(startTime).getTime()))
@@ -395,7 +395,7 @@ public class CucumberStepDefinitions {
 			String newStartTime, String newEndTime) {
 		try {
 			// Cast string to time
-			SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 			CarShopController.updateBusinessHour(DayOfWeek.valueOf(currentDay),
 					new Time(sdf.parse(currentStartTime).getTime()), DayOfWeek.valueOf(newDay),
 					new Time(sdf.parse(newStartTime).getTime()), new Time(sdf.parse(newEndTime).getTime()));
@@ -420,7 +420,7 @@ public class CucumberStepDefinitions {
 	public void userTriesRemoveBusinessHour(String day, String startTime) {
 		try {
 			// Cast string to time
-			SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 			CarShopController.removeBusinessHour(DayOfWeek.valueOf(day), new Time(sdf.parse(startTime).getTime()));
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -431,7 +431,7 @@ public class CucumberStepDefinitions {
 	@Then("the business hour starting {string} at {string} shall {string} exist")
 	public void businessHourShallExist(String day, String startTime, String result) {
 		// Cast string to time
-		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 		boolean exists;
 		try {
 			exists = CarShopController.businessHourExists(DayOfWeek.valueOf(day),
@@ -469,7 +469,7 @@ public class CucumberStepDefinitions {
 		try {
 			// Cast String to Time and Date.
 			SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+			SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 			CarShopController.updateTimeSlot(type, new Date(sdfDate.parse(oldStartDate).getTime()),
 					new Time(sdfTime.parse(oldStartTime).getTime()), new Date(sdfDate.parse(newStartDate).getTime()),
 					new Time(sdfTime.parse(newStartTime).getTime()), new Date(sdfDate.parse(newEndDate).getTime()),
@@ -485,7 +485,7 @@ public class CucumberStepDefinitions {
 			String endTime) {
 		// Cast String to Time and Date.
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+		SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 		TOTimeSlot toTimeSlot;
 		try {
 			toTimeSlot = CarShopController.findTimeSlot(type, new Date(sdfDate.parse(startDate).getTime()),
@@ -513,7 +513,7 @@ public class CucumberStepDefinitions {
 	public void userRemovesTimeSlot(String type, String startDate, String startTime, String endDate, String endTime) {
 		// Cast String to Time and Date.
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+		SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 		try {
 			CarShopController.removeTimeSlot(type, new Date(sdfDate.parse(startDate).getTime()),
 					new Time(sdfTime.parse(startTime).getTime()), new Date(sdfDate.parse(endDate).getTime()),
@@ -528,7 +528,7 @@ public class CucumberStepDefinitions {
 	public void timeSlotShallExist(String type, String startDate, String startTime, String result) {
 		// Cast String to Time and Date.
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm");
+		SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
 		TOTimeSlot toTimeSlot;
 		try {
 			toTimeSlot = CarShopController.findTimeSlot(type, new Date(sdfDate.parse(startDate).getTime()),
