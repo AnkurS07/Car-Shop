@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1753,11 +1754,11 @@ public class CucumberStepDefinitions {
 		List<Time> times = new ArrayList<Time>();
 		times.add(new Time((parseDate(startTime, "HH:mm")).getTime()));
 		
-		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, 
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), times, 
 				services.toArray(new Service[services.size()]));
 		
 		try {
-			AppointmentController.updateAppointment(AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+			AppointmentController.updateAppointment(true, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
 		} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
@@ -1790,7 +1791,7 @@ public class CucumberStepDefinitions {
 				services.toArray(new Service[services.size()]));
 		
 		try {
-			AppointmentController.updateAppointment(AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+			AppointmentController.updateAppointment(false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
 		} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
@@ -1798,7 +1799,67 @@ public class CucumberStepDefinitions {
 	}
 	
 	
-	
+	@When("{string} makes a {string} appointment for the date {string} and time {string} at {string}")
+	public void makes_a_appointment_for_the_date_and_time_at(String string, String string2, String string3, String string4, String string5) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@When("{string} attempts to change the service in the appointment to {string} at {string}")
+	public void attempts_to_change_the_service_in_the_appointment_to_at(String string, String string2, String string3) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("the service in the appointment shall be {string}")
+	public void the_service_in_the_appointment_shall_be(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@When("{string} attempts to update the date to {string} and time to {string} at {string}")
+	public void attempts_to_update_the_date_to_and_time_to_at(String string, String string2, String string3, String string4) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@When("{string} attempts to cancel the appointment at {string}")
+	public void attempts_to_cancel_the_appointment_at(String string, String string2) {
+	    try {
+
+	         Date date = parseDate(string2, "yyyy-MM-dd+hh:mm");
+	        CarShopApplication.setSystemDate(date);
+	    	AppointmentController.cancelAppointment(string, currentApp.getBookableService().getName(),currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), currentApp.getServiceBooking(0).getTimeSlot().getStartTime());
+	    }
+	    catch(Exception e)
+	{
+	    	error = e.getMessage();
+	    	}
+	}
+
+	@Then("the system shall have {int} appointment")
+	public void the_system_shall_have_appointment(Integer int1) {
+	    // Write code here that turns the phrase above into concrete actions
+	    assertEquals(int1, carShop.numberOfAppointments());
+	}
+
+	@When("the owner ends the appointment at {string}")
+	public void the_owner_ends_the_appointment_at(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@When("the owner attempts to register a no-show for the appointment at {string}")
+	public void the_owner_attempts_to_register_a_no_show_for_the_appointment_at(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@When("the owner attempts to end the appointment at {string}")
+	public void the_owner_attempts_to_end_the_appointment_at(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
 	
 	
 

@@ -1,15 +1,16 @@
 
 package ca.mcgill.ecse223.carshop.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.sql.Date;
-import java.util.List;
+import static ca.mcgill.ecse223.carshop.controller.AppointmentController.parseDate;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.Appointment;
@@ -99,21 +100,34 @@ public class AppointmentController {
 		app.cancel(sdf.format(date), sysDate);
 	}
 	
-	public static Appointment updateAppointment(Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
+	public static Appointment updateAppointment(boolean isNewService, Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
 		//check overlap
 		// I did not put it in the state machine or else we need to copy
 		// like 200 lines of helper methods and since we still need those here
 		// to validate when a appointment is created it made no sense to duplicate them
-		if (servicesOverlapping(timeSlots)) {
+		List<TimeSlot> totalTimeSlots = new ArrayList<TimeSlot>();
+		for(ServiceBooking s: a.getServiceBookings()) {
+			totalTimeSlots.add(s.getTimeSlot());
+		}
+		for(TimeSlot t: timeSlots) {
+			totalTimeSlots.add(t);
+		}
+		
+		if (servicesOverlapping(totalTimeSlots)) {
 			throw new Exception("Time slots for two services are overlapping");
 		}
 
-		for(int i=0;i < a.getServiceBookings().size();i++) {
-			if (invalidTimeSlot(a.getServiceBooking(i).getService().getName(), timeSlots.get(i))) {
+		for(int i=0;i < newOptServices.size();i++) {
+			if (invalidTimeSlot(newOptServices.get(i).getName(), timeSlots.get(i))) {
 				throw new Exception("Invlalid time slot");
 			}
 		}
-		a.update(newOptServices, timeSlots);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String appDate = sdf.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
+		String currentDate = sdf.format(modificationDate.getTime());
+		
+		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
 
 		return a;
 	}
@@ -137,6 +151,12 @@ public class AppointmentController {
 	public static void endAppointment(Appointment a) throws Exception {
 		// add check with date in the state machine
 		a.end();
+	}
+	
+	public static void cancelAppointment(String date, Appointment a) throws Exception{
+		java.util.Date currDate=new java.util.Date(); 
+		Date date3 = parseDate(currDate.toString(), "yyyy-MM-dd+HH:mm");
+		a.cancel(date, date3.toString());
 	}
 	
 	public static String getAppointmentState(Appointment a) {
