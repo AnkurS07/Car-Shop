@@ -126,7 +126,7 @@ public class Appointment
     return wasEventProcessed;
   }
 
-  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots)
+  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots,String currentDate,String sysDate,boolean isNewService)
   {
     boolean wasEventProcessed = false;
     
@@ -134,15 +134,15 @@ public class Appointment
     switch (aAppStatus)
     {
       case Booked:
-        if (canUpdate())
+        if (canUpdate(currentDate,sysDate))
         {
         // line 13 "../../../../../CarShopStates.ump"
-          updateApp(newOptServices, timeSlots);
+          updateApp(newOptServices, timeSlots, isNewService);
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
           break;
         }
-        if (!(canUpdate()))
+        if (!(canUpdate(currentDate,sysDate)))
         {
         // line 14 "../../../../../CarShopStates.ump"
           rejectUpdate();
@@ -152,15 +152,15 @@ public class Appointment
         }
         break;
       case InProgress:
-        if (canUpdate())
+        if (canUpdate(currentDate,sysDate))
         {
         // line 25 "../../../../../CarShopStates.ump"
-          updateApp(newOptServices, timeSlots);
+          updateApp(newOptServices, timeSlots, isNewService);
           setAppStatus(AppStatus.InProgress);
           wasEventProcessed = true;
           break;
         }
-        if (!(canUpdate()))
+        if (!(canUpdate(currentDate,sysDate)))
         {
         // line 26 "../../../../../CarShopStates.ump"
           rejectUpdate();
@@ -443,9 +443,9 @@ public class Appointment
     c.setNoShowCount(c.getNoShowCount() + 1);
   }
 
-  // line 42 "../../../../../CarShopStates.ump"
+  // line 41 "../../../../../CarShopStates.ump"
    private void rejectUpdate(){
-    
+    throw new RuntimeException("Cannot update an appointment on the appointment date");
   }
 
   // line 45 "../../../../../CarShopStates.ump"
@@ -464,8 +464,8 @@ public class Appointment
   }
 
   // line 57 "../../../../../CarShopStates.ump"
-   private boolean canUpdate(){
-    return true;
+   private boolean canUpdate(String currentDate, String sysDate){
+    return !currentDate.equals(sysDate);
   }
 
   // line 61 "../../../../../CarShopStates.ump"
@@ -474,17 +474,24 @@ public class Appointment
   }
 
   // line 65 "../../../../../CarShopStates.ump"
-   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots){
-    if(newOptServices.size() == 0) {
+   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService){
+    List<String> servicescopy = new ArrayList<>();
+	   for(int i=0;i<this.getServiceBookings().size();i++){
+		   servicescopy.add(this.getServiceBooking(i).getService().getName());
+	   }
+    if(!isNewService) {
 			// updating existing services of the app
 			// make sure when check invalid before not failing because overlapping with existing services
-			for(int i=0;i<this.getServiceBookings().size();i++) {
-				Service s = this.getServiceBooking(i).getService();
+			for(int i=0; i< servicescopy.size();i++) {
 				// might be dangerous to do this but it should work
 				// deletes the time slot and the associated service booking and re-create it after
-				this.getServiceBooking(i).getTimeSlot().delete();
+				this.getServiceBooking(0).getTimeSlot().delete();
+				this.getServiceBooking(0).delete();
 				
-				new ServiceBooking(s,timeSlots.get(i), this);
+				
+			}
+			for(int i=0;i<newOptServices.size();i++) {
+				new ServiceBooking(newOptServices.get(i),timeSlots.get(i), this);
 			}
 		} else {
 			// adding new services to the app
