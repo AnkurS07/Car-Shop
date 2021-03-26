@@ -39,6 +39,7 @@ import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOTimeSlot;
+import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
@@ -84,6 +85,7 @@ public class CucumberStepDefinitions {
 		// carried over.
 		carShop.delete();
 		currentApp = null;
+		CarshopPersistence.save(carShop);
 		try {
 			CarShopApplication.setLoggedInUser(null); // Set the logged in user to null to avoid information being
 														// carried over.

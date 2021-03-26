@@ -25,6 +25,7 @@ import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
 /**
  * Controller class. Implements all controller methods as static methods. The controller should be stateless. It interacts with the View and the Model.
@@ -51,6 +52,7 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		try {
 			new Owner(userName, password, carShop);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -76,7 +78,7 @@ public class CarShopController {
 					BusinessHour copy = new BusinessHour(h.getDayOfWeek(), h.getStartTime(), h.getEndTime(), carShop);
 				}
 			}
-			
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -94,6 +96,7 @@ public class CarShopController {
 		checkValidityOfCustomerCreation(userName, password);
 		try {
 			carShop.addCustomer(userName, password);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -112,6 +115,7 @@ public class CarShopController {
 					carShop.addGarage(t);					
 				}
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -161,6 +165,7 @@ public class CarShopController {
 			}*/
 
 			new Business(name, address, phoneNumber, email, carShop);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 
 		}
 		catch (RuntimeException e) {
@@ -187,11 +192,18 @@ public class CarShopController {
 		if(!matcherEmail.matches()) {
 			throw new Exception("Invalid email");
 		}
+		
+		try {
+			carShop.getBusiness().setName(name);
+			carShop.getBusiness().setAddress(address);
+			carShop.getBusiness().setPhoneNumber(phoneNumber);
+			carShop.getBusiness().setEmail(email);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 
-		carShop.getBusiness().setName(name);
-		carShop.getBusiness().setAddress(address);
-		carShop.getBusiness().setPhoneNumber(phoneNumber);
-		carShop.getBusiness().setEmail(email);
 
 	}
 
@@ -218,6 +230,7 @@ public class CarShopController {
 			}
 
 			carShop.getBusiness().addBusinessHour(new BusinessHour(day, startTime, endTime, carShop));
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -235,6 +248,7 @@ public class CarShopController {
 	 */
 	public static void updateBusinessHour(DayOfWeek currentDay, Time currentStartTime, DayOfWeek newDay, Time newStartTime, Time newEndTime) throws Exception {
 		BusinessHour currentHour = findBusinessHour(currentDay, currentStartTime);
+		CarShop carShop = CarShopApplication.getCarShop();
 		try {
 			if(!userIsOwner()) {
 				throw new Exception("No permission to update business information");
@@ -253,6 +267,7 @@ public class CarShopController {
 				currentHour.setStartTime(newStartTime);
 				currentHour.setEndTime(newEndTime);
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -277,6 +292,7 @@ public class CarShopController {
 			if(hourToRemove != null) {
 				carShop.getBusiness().removeBusinessHour(hourToRemove);
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -392,6 +408,7 @@ public class CarShopController {
 			} else {
 				carShop.getBusiness().addHoliday(newTimeSlot);
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -542,6 +559,7 @@ public class CarShopController {
 			targetTimeSlot.setStartTime(newStartTime);
 			targetTimeSlot.setEndDate(newEndDate);
 			targetTimeSlot.setEndTime(newEndTime);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -607,6 +625,7 @@ public class CarShopController {
 					carShop.getBusiness().removeHoliday(timeSlotToRemove);
 				}
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -751,6 +770,7 @@ public class CarShopController {
 					customer.setPassword(newPassword);
 				}
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
@@ -777,6 +797,7 @@ public class CarShopController {
 				garage.addService(name, carShop, duration);
 				
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 			
 		catch (RuntimeException e) {
@@ -866,6 +887,7 @@ public class CarShopController {
 					serviceUpdate.setDuration(duration);
 					serviceUpdate.setGarage(garage);
 				}
+				CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 			}
 		catch (RuntimeException e){
 			throw new Exception(e.getMessage());
@@ -945,17 +967,24 @@ public class CarShopController {
 		if((serviceCheck(mainService))==null) {
 			throw new Exception ("Service " + mainService + " does not exist");
 		}
-
-		ServiceCombo combo = new ServiceCombo(name, carShop);
-		for(int i=0; i<serviceList.length; i++) {
-			service = serviceCheck(serviceList[i]);
-			mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
-			Item = new ComboItem(mandatoryToSet, service, combo);
-			if(Item.getService().getName().equals(mainService)) {
-				combo.setMainService(Item);
+		
+		try {
+			ServiceCombo combo = new ServiceCombo(name, carShop);
+			for(int i=0; i<serviceList.length; i++) {
+				service = serviceCheck(serviceList[i]);
+				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+				Item = new ComboItem(mandatoryToSet, service, combo);
+				if(Item.getService().getName().equals(mainService)) {
+					combo.setMainService(Item);
+				}
+				combo.addService(Item);
 			}
-			combo.addService(Item);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
 	}
 	
 	/**
@@ -1010,19 +1039,26 @@ public class CarShopController {
 			}
 		}
 		
-		ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
-		combo.setName(name);
-		for (int i = 0; i < serviceList.length; i++) {
-			service = serviceCheck(serviceList[i]);
-			mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
-			Item = new ComboItem(mandatoryToSet, service, combo);
-
-			combo.addService(Item);
-			if (Item.getService().getName().equals(mainService)) {
-				combo.setMainService(Item);
-
+		try {
+			ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
+			combo.setName(name);
+			for (int i = 0; i < serviceList.length; i++) {
+				service = serviceCheck(serviceList[i]);
+				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+				Item = new ComboItem(mandatoryToSet, service, combo);
+	
+				combo.addService(Item);
+				if (Item.getService().getName().equals(mainService)) {
+					combo.setMainService(Item);
+	
+				}
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
 	}
 	
 	
@@ -1196,8 +1232,14 @@ public class CarShopController {
 			throw new Exception("You are not authorized to perform this operation");
 		}
 		
-		BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
-		garage.addBusinessHour(newBusinessHour);
+		try {
+			BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+			garage.addBusinessHour(newBusinessHour);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
 	public static void removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
@@ -1214,12 +1256,19 @@ public class CarShopController {
 			throw new Exception("You are not authorized to perform this operation");
 		}
 		
-		for(BusinessHour h: garage.getBusinessHours()) {
-			if(h.getDayOfWeek().equals(dayOfWeek) && h.getStartTime().equals(start) && h.getEndTime().equals(end)) {
-				garage.removeBusinessHour(h);
-				h.delete();
+		try {
+			for(BusinessHour h: garage.getBusinessHours()) {
+				if(h.getDayOfWeek().equals(dayOfWeek) && h.getStartTime().equals(start) && h.getEndTime().equals(end)) {
+					garage.removeBusinessHour(h);
+					h.delete();
+				}
 			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
 	}
 	
 	private static boolean overlapsWithBusinessHour(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> hours) {

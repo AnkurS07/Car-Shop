@@ -2,12 +2,14 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 // line 2 "../../../../../CarShopStates.ump"
-// line 101 "../../../../../carshop.ump"
-public class Appointment
+// line 84 "../../../../../carshopPersistence.ump"
+// line 102 "../../../../../carshop.ump"
+public class Appointment implements Serializable
 {
 
   //------------------------
@@ -500,5 +502,13 @@ public class Appointment
 			}
 		}
   }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 87 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 23066424091059L ;
 
+  
 }

@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 72 "../../../../../carshop.ump"
-public class Garage
+// line 52 "../../../../../carshopPersistence.ump"
+// line 73 "../../../../../carshop.ump"
+public class Garage implements Serializable
 {
 
   //------------------------
@@ -321,5 +323,13 @@ public class Garage
       existingTechnician.setGarage(null);
     }
   }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 55 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 19048776333921L ;
 
+  
 }
