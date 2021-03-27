@@ -1800,9 +1800,34 @@ public class CucumberStepDefinitions {
 	
 	
 	@When("{string} makes a {string} appointment for the date {string} and time {string} at {string}")
-	public void makes_a_appointment_for_the_date_and_time_at(String string, String string2, String string3, String string4, String string5) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	public void makes_a_appointment_for_the_date_and_time_at(String customerName, String mainServiceString, String stringDate, String startTime, String currentTime) {
+		try {
+			CarShopApplication.setLoggedInUser(customerName);
+			Customer c = AppointmentController.findCustomer(customerName);
+			Date date = parseDate(stringDate, "yyyy-MM-dd");
+			BookableService mainService = AppointmentController.findBookableService(mainServiceString);
+
+			List<Time> times = Arrays.stream(startTime.split("\\,"))
+					.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
+			List<Service> services = new ArrayList<Service>();
+			//for(String str: Arrays.asList(serviceStrings.split("\\,"))) {
+			//	services.add(AppointmentController.findService(str));
+			//}
+			
+
+			List<TimeSlot> timeSlots = new ArrayList<TimeSlot>();
+			if(mainService instanceof Service) {
+				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, (Service)mainService, services.toArray(new Service[services.size()]));
+			} else {
+				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)mainService).getMainService().getService(), services.toArray(new Service[services.size()]));
+			}
+			
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
+			
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
 	}
 
 	@When("{string} attempts to change the service in the appointment to {string} at {string}")
@@ -1844,9 +1869,21 @@ public class CucumberStepDefinitions {
 	}
 
 	@When("the owner ends the appointment at {string}")
-	public void the_owner_ends_the_appointment_at(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	public void the_owner_ends_the_appointment_at(String endTime) {
+		try {
+			String currentUser = CarShopApplication.getLoggedInUser();
+			CarShopApplication.setLoggedInUser("owner");
+			
+			Date date = parseDate(endTime, "yyyy-MM-dd+HH:mm");
+			
+			AppointmentController.endAppointment(date, currentApp);;
+
+			CarShopApplication.setLoggedInUser(currentUser);
+			
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
 	}
 
 	@When("the owner attempts to register a no-show for the appointment at {string}")

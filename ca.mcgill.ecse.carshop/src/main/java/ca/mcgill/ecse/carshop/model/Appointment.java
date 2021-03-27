@@ -2,8 +2,8 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.io.Serializable;
 import java.util.*;
 
 // line 2 "../../../../../CarShopStates.ump"
@@ -154,22 +154,10 @@ public class Appointment implements Serializable
         }
         break;
       case InProgress:
-        if (canUpdate(currentDate,sysDate))
-        {
         // line 25 "../../../../../CarShopStates.ump"
-          updateApp(newOptServices, timeSlots, isNewService);
-          setAppStatus(AppStatus.InProgress);
-          wasEventProcessed = true;
-          break;
-        }
-        if (!(canUpdate(currentDate,sysDate)))
-        {
-        // line 26 "../../../../../CarShopStates.ump"
-          rejectUpdate();
-          setAppStatus(AppStatus.InProgress);
-          wasEventProcessed = true;
-          break;
-        }
+        updateApp(newOptServices, timeSlots, isNewService);
+        setAppStatus(AppStatus.InProgress);
+        wasEventProcessed = true;
         break;
       default:
         // Other states do respond to this event
@@ -190,6 +178,8 @@ public class Appointment implements Serializable
         wasEventProcessed = true;
         break;
       case InProgress:
+        // line 23 "../../../../../CarShopStates.ump"
+        reject();
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
         break;
