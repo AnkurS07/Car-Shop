@@ -13,7 +13,8 @@ class Appointment {
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdate(currentDate, sysDate)] / {updateApp(newOptServices, timeSlots, isNewService);} -> Booked;
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [!canUpdate(currentDate, sysDate)] / {rejectUpdate();} -> Booked;
 			
-			start -> InProgress;
+			start(Date currentDate, Date appDate, Date currentTime, Date appTime) [canStart(currentDate, appDate, currentTime, appTime)] -> InProgress;
+			start(Date currentDate, Date appDate, Date currentTime, Date appTime) [!canStart(currentDate, appDate, currentTime, appTime)] / {rejectStart();} -> Booked;
 			
 			end / {reject();} -> Booked;
 		}
@@ -45,6 +46,10 @@ class Appointment {
 	    throw new RuntimeException("Cannot cancel an appointment on the appointment date");
 	}
 	
+	private void rejectStart() {
+		throw new RuntimeException("Cannot start an appointment early.");
+	}
+	
 	private void rejectNoShow(Customer c) {
 		throw new RuntimeException("Cannot register a no-show since the appointment has already started");
 	}
@@ -59,6 +64,10 @@ class Appointment {
 	  
 	private boolean canCancel(String currentDate, String sysDate) {
 		return !currentDate.equals(sysDate);
+	}
+	
+	private boolean canStart(Date currentDate, Date appDate, Date currentTime, Date appTime) {
+		return currentDate.equals(appDate) & !currentTime.before(appTime);
 	}
 	
 	private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService){

@@ -145,10 +145,17 @@ public class AppointmentController {
 	
 	public static void startAppointment(Date startDate, Appointment a) throws Exception {
 		// add check with date in the state machine
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd+HH:mm");
-		String appDate = sdf.format(a.getServiceBooking(0).getTimeSlot().getStartDate());
-		String currentDate = sdf.format(startDate);
-		a.start();
+		SimpleDateFormat day = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat time = new SimpleDateFormat("HH:mm");
+		String appDateString = day.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
+		String appTimeString = time.format(a.getServiceBooking(0).getTimeSlot().getStartTime().getTime());
+		String currentDateString = day.format(startDate.getTime());
+		String currentTimeString = time.format(startDate.getTime());
+		Date appDate = parseDate(appDateString, "yyyy-MM-dd");
+		Date appTime = parseDate(appTimeString, "HH:mm");
+		Date currentDate = parseDate(currentDateString, "yyyy-MM-dd");
+		Date currentTime = parseDate(currentTimeString, "HH:mm");
+		a.start(currentDate, appDate, currentTime, appTime);
 	}
 	
 	public static void endAppointment(Date endDate,Appointment a) throws Exception {
