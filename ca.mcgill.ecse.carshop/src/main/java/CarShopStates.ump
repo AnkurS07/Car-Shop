@@ -20,10 +20,10 @@ class Appointment {
 		
 		InProgress {
 		
-			start -> InProgress;
+			start / {reject();} -> InProgress;
 			
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdate(currentDate, sysDate)] / {updateApp(newOptServices, timeSlots, isNewService);} -> InProgress;
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [!canUpdate(currentDate, sysDate)] / {rejectUpdate();} -> InProgress;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) / {updateApp(newOptServices, timeSlots, isNewService);} -> InProgress;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) / {rejectUpdate();} -> InProgress;
             
             cancel(String currentDate, String sysDate) / {reject();} -> InProgress;
             
