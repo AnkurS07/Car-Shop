@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
 
-// line 90 "../../../../../carshopPersistence.ump"
+// line 115 "../../../../../carshopPersistence.ump"
 // line 108 "../../../../../carshop.ump"
 public class ServiceBooking implements Serializable
 {
@@ -129,7 +129,7 @@ public class ServiceBooking implements Serializable
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 93 "../../../../../carshopPersistence.ump"
+  // line 118 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 43277386251199L ;
 
   

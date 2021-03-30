@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 2 "../../../../../CarShopStates.ump"
-// line 84 "../../../../../carshopPersistence.ump"
+// line 109 "../../../../../carshopPersistence.ump"
 // line 102 "../../../../../carshop.ump"
 public class Appointment implements Serializable
 {
@@ -191,7 +191,7 @@ public class Appointment implements Serializable
         break;
       case InProgress:
         // line 24 "../../../../../CarShopStates.ump"
-        reject();
+        rejectStart();
         setAppStatus(AppStatus.InProgress);
         wasEventProcessed = true;
         break;
@@ -459,7 +459,7 @@ public class Appointment implements Serializable
 
   // line 50 "../../../../../CarShopStates.ump"
    private void rejectStart(){
-    throw new RuntimeException("Cannot start an appointment early.");
+    throw new RuntimeException("Cannot start an appointment early or while it is already in progress.");
   }
 
   // line 54 "../../../../../CarShopStates.ump"
@@ -519,7 +519,7 @@ public class Appointment implements Serializable
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 87 "../../../../../carshopPersistence.ump"
+  // line 112 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 23066424091059L ;
 
   

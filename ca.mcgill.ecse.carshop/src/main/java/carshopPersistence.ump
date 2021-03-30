@@ -3,14 +3,33 @@ external interface Serializable {}
 
 class CarShop  {
 	depend java.io.Serializable;
+	depend java.util.stream.Stream;
 	isA Serializable;
 	private static final long serialVersionUID = 94450194170481L;
+   public void reinitializeStaticFields(){
+   	List<User> users = new ArrayList<>();
+  	users.add(this.getOwner());
+  	for (Technician t : this.getTechnicians()) {
+  		users.add(t);
+  	}
+  	for (Customer c : this.getCustomers()) {
+  		users.add(c);
+  	}
+  	User.reinitializeUsersMap(users);
+  	BookableService.reinitializeServicesMap(this.getBookableServices());
+  }
 }
 
 class User {
 	depend java.io.Serializable;
 	isA Serializable;
 	private static final long serialVersionUID = 97092458866941L;
+    public static void reinitializeUsersMap(List<User> users) {
+    	usersByUsername = new HashMap<String, User>();
+  		for (User user : users) {
+	  		usersByUsername.put(user.getUsername(), user);
+  		}
+  	}
 }
 
 class Owner {
@@ -59,6 +78,12 @@ class BookableService {
 	depend java.io.Serializable;
 	isA Serializable;
 	private static final long serialVersionUID = 89278883359799L;
+	public static  void reinitializeServicesMap(List<BookableService> bookeableServices){
+		bookableservicesByName = new HashMap<String, BookableService>();
+	    for (BookableService bookeableService : bookeableServices) {
+	  		bookableservicesByName.put(bookeableService.getName(), bookeableService);
+	  	}
+	}
 }
 
 class Service {

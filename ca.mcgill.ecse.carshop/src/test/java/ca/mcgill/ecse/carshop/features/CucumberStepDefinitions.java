@@ -84,6 +84,7 @@ public class CucumberStepDefinitions {
 		// Delete the car shop instance between each scenario to avoid information being
 		// carried over.
 		carShop.delete();
+		this.carShop = null;
 		currentApp = null;
 		CarshopPersistence.save(carShop);
 		try {

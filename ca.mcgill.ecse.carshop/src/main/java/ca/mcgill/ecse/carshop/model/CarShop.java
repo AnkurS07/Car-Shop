@@ -3,6 +3,7 @@
 
 package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
+import java.util.stream.Stream;
 import java.util.*;
 import java.sql.Time;
 import java.sql.Date;
@@ -933,12 +934,26 @@ public class CarShop implements Serializable
     }
     
   }
+
+  // line 10 "../../../../../carshopPersistence.ump"
+   public void reinitializeStaticFields(){
+    List<User> users = new ArrayList<>();
+  	users.add(this.getOwner());
+  	for (Technician t : this.getTechnicians()) {
+  		users.add(t);
+  	}
+  	for (Customer c : this.getCustomers()) {
+  		users.add(c);
+  	}
+  	User.reinitializeUsersMap(users);
+  	BookableService.reinitializeServicesMap(this.getBookableServices());
+  }
   
   //------------------------
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 7 "../../../../../carshopPersistence.ump"
+  // line 8 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 94450194170481L ;
 
   
