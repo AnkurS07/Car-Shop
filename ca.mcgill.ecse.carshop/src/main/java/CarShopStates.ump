@@ -21,7 +21,7 @@ class Appointment {
 		
 		InProgress {
 		
-			start / {reject();} -> InProgress;
+			start / {rejectStart();} -> InProgress;
 			
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) / {updateApp(newOptServices, timeSlots, isNewService);} -> InProgress;
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) / {rejectUpdate();} -> InProgress;
@@ -47,7 +47,7 @@ class Appointment {
 	}
 	
 	private void rejectStart() {
-		throw new RuntimeException("Cannot start an appointment early.");
+		throw new RuntimeException("Cannot start an appointment early or while it is already in progress.");
 	}
 	
 	private void rejectNoShow(Customer c) {

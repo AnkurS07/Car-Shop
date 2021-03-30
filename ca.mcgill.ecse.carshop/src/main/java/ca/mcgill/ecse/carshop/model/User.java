@@ -5,7 +5,7 @@ package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
 import java.util.*;
 
-// line 10 "../../../../../carshopPersistence.ump"
+// line 23 "../../../../../carshopPersistence.ump"
 // line 18 "../../../../../carshop.ump"
 public abstract class User implements Serializable
 {
@@ -93,6 +93,14 @@ public abstract class User implements Serializable
     usersByUsername.remove(getUsername());
   }
 
+  // line 28 "../../../../../carshopPersistence.ump"
+   public static  void reinitializeUsersMap(List<User> users){
+    usersByUsername = new HashMap<String, User>();
+  		for (User user : users) {
+	  		usersByUsername.put(user.getUsername(), user);
+  		}
+  }
+
 
   public String toString()
   {
@@ -104,7 +112,7 @@ public abstract class User implements Serializable
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 13 "../../../../../carshopPersistence.ump"
+  // line 26 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 97092458866941L ;
 
   

@@ -27,6 +27,7 @@ import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
 public class AppointmentController {
 
@@ -72,13 +73,20 @@ public class AppointmentController {
 			}
 			appointment.addServiceBooking(optionalServices.get(i), timeSlots.get(i + 1));
 		}
+		try {
+			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 
 		return appointment;
 	}
 
 	public static void cancelAppointment(String customerName, String mainServiceName, Date date, Time time)
 			throws Exception {
-
+		
+		CarShop carshop = CarShopApplication.getCarShop();
 		Customer c;
 		User user = User.getWithUsername(customerName);
 		if (user instanceof Customer) {
@@ -98,6 +106,13 @@ public class AppointmentController {
 		Appointment app = findAppointment(c, mainServiceName, date, time);
 		
 		app.cancel(sdf.format(date), sysDate);
+		
+		try {
+			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
 	public static Appointment updateAppointment(boolean isNewService, Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
@@ -105,6 +120,7 @@ public class AppointmentController {
 		// I did not put it in the state machine or else we need to copy
 		// like 200 lines of helper methods and since we still need those here
 		// to validate when a appointment is created it made no sense to duplicate them
+		CarShop carshop = CarShopApplication.getCarShop();
 		List<TimeSlot> totalTimeSlots = new ArrayList<TimeSlot>();
 		for(ServiceBooking s: a.getServiceBookings()) {
 			totalTimeSlots.add(s.getTimeSlot());
@@ -128,6 +144,13 @@ public class AppointmentController {
 		String currentDate = sdf.format(modificationDate.getTime());
 		
 		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
+		
+		try {
+			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 
 		return a;
 	}
@@ -145,6 +168,7 @@ public class AppointmentController {
 	
 	public static void startAppointment(Date startDate, Appointment a) throws Exception {
 		// add check with date in the state machine
+		CarShop carshop = CarShopApplication.getCarShop();
 		SimpleDateFormat day = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat time = new SimpleDateFormat("HH:mm");
 		String appDateString = day.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
@@ -156,6 +180,12 @@ public class AppointmentController {
 		Date currentDate = parseDate(currentDateString, "yyyy-MM-dd");
 		Date currentTime = parseDate(currentTimeString, "HH:mm");
 		a.start(currentDate, appDate, currentTime, appTime);
+		try {
+			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
 	public static void endAppointment(Date endDate,Appointment a) throws Exception {
@@ -164,9 +194,16 @@ public class AppointmentController {
 	}
 	
 	public static void cancelAppointment(String date, Appointment a) throws Exception{
+		CarShop carshop = CarShopApplication.getCarShop();
 		java.util.Date currDate=new java.util.Date(); 
 		Date date3 = parseDate(currDate.toString(), "yyyy-MM-dd+HH:mm");
 		a.cancel(date, date3.toString());
+		try {
+			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
 	public static String getAppointmentState(Appointment a) {
