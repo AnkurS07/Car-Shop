@@ -1862,11 +1862,35 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the service in the appointment shall be {string}")
-	public void the_service_in_the_appointment_shall_be(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-		assertEquals(BookableService.getWithName(string), currentApp.getBookableService());
+	public void the_service_in_the_appointment_shall_be(String service) {
+		assertEquals(service, currentApp.getBookableService().getName());
 	}
 
+	@When("{string} attempts to update the date to {string} and time to {string} at {string}")
+	public void attempts_to_update_the_date_to_and_time_to_at(String username, String newTime, String startTime, String currentTime) {
+		Date date = parseDate(currentTime, "yyyy-MM-dd+HH:mm");
+		Date newDate = parseDate(newTime, "yyyy-MM-dd");
+		
+		// Used a stream
+		List<Time> times = Arrays.stream(startTime.split("\\,"))
+				.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
+
+		List<Service> services = new ArrayList<Service>();
+		assertNotNull(currentApp);
+		for(ServiceBooking sb:currentApp.getServiceBookings()) {
+			services.add(sb.getService());
+		}
+		
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(newDate, times, 
+				services.toArray(new Service[services.size()]));
+		
+		try {
+			AppointmentController.updateAppointment(false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
 
 	@When("{string} attempts to cancel the appointment at {string}")
 	public void attempts_to_cancel_the_appointment_at(String string, String string2) {
@@ -1906,49 +1930,35 @@ public class CucumberStepDefinitions {
 		}
 	}
 
-	@When("the owner attempts to register a no-show for the appointment at {string}")
-	public void the_owner_attempts_to_register_a_no_show_for_the_appointment_at(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
 	@When("the owner attempts to end the appointment at {string}")
-	public void the_owner_attempts_to_end_the_appointment_at(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-	
-	@When("{string} attempts to update the date to {string} and time to {string} at {string}")
-	public void attempts_to_update_the_date_to_and_time_to_at(String username, String newDateString, String startTimeStrings, String currentDate) {
-	    // Write code here that turns the phrase above into concrete actions
-		Date date = parseDate(currentDate, "yyyy-MM-dd+HH:mm");
-		Date newDate = parseDate(newDateString, "yyyy-MM-dd");
-		
-		// Used a stream
-		List<Time> times = Arrays.stream(startTimeStrings.split("\\,"))
-				.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
-
-		List<Service> services = new ArrayList<Service>();
-		assertNotNull(currentApp);
-		for(ServiceBooking sb:currentApp.getServiceBookings()) {
-			services.add(sb.getService());
-		}
-		
-		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(newDate, times, 
-				services.toArray(new Service[services.size()]));
-		
+	public void the_owner_attempts_to_end_the_appointment_at(String time) {
 		try {
-			AppointmentController.updateAppointment(false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+			String currentUser = CarShopApplication.getLoggedInUser();
+			CarShopApplication.setLoggedInUser("owner");
+			
+			Date date = parseDate(time, "yyyy-MM-dd+HH:mm");
+			AppointmentController.endAppointment(date, currentApp);
+
+			CarShopApplication.setLoggedInUser(currentUser);
+			
 		} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
 		}
 	}
-
-
-
 	
-	
-	
-
+	@When("the owner attempts to register a no-show for the appointment at {string}")
+	public void the_owner_attempts_to_register_a_no_show_for_the_appointment_at(String time) {
+		try {
+			String currentUser = CarShopApplication.getLoggedInUser();
+			CarShopApplication.setLoggedInUser("owner");
+						
+			Date date = parseDate(time, "yyyy-MM-dd+HH:mm");
+			AppointmentController.registerNoShow(date, currentApp);
+			CarShopApplication.setLoggedInUser(currentUser);
+		} catch(Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
 }

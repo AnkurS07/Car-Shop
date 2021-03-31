@@ -14,6 +14,7 @@ import java.util.List;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.Appointment;
+import ca.mcgill.ecse.carshop.model.Appointment.AppStatus;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
@@ -143,7 +144,12 @@ public class AppointmentController {
 		String appDate = sdf.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
 		String currentDate = sdf.format(modificationDate.getTime());
 		
-		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
+		if (a.getAppStatus()==AppStatus.InProgress && isNewService==false) {
+			throw new Exception("Cannot reschedule an appointment while the appointment is in progress");
+		}
+		else {
+			a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
+		}
 		
 		try {
 			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
@@ -189,8 +195,9 @@ public class AppointmentController {
 	}
 	
 	public static void endAppointment(Date endDate,Appointment a) throws Exception {
-		// add check with date in the state machine
-		a.end();
+		if (a.getAppStatus()==AppStatus.InProgress) {
+			a.end();
+		}
 	}
 	
 	public static void cancelAppointment(String date, Appointment a) throws Exception{
@@ -575,5 +582,15 @@ public class AppointmentController {
 
 	private static Time incrementTimeByMinutes(Time original, int minutesElapsed) {
 		return new Time(original.getTime() + minutesElapsed * 60000);
+	}
+
+	public static void registerNoShow(Date d, Appointment a) throws Exception {		
+		try {
+			if (d.after(CarShopApplication.getSystemDate()));
+				a.noShow(a.getCustomer());
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 }
