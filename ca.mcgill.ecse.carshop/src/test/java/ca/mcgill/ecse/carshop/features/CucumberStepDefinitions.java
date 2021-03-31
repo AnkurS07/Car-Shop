@@ -1824,35 +1824,54 @@ public class CucumberStepDefinitions {
 			
 			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
 			
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
 		}
 	}
 
 	@When("{string} attempts to change the service in the appointment to {string} at {string}")
-	public void attempts_to_change_the_service_in_the_appointment_to_at(String string, String string2, String string3) {
+	public void attempts_to_change_the_service_in_the_appointment_to_at(String user, String serviceName, String time) {
 	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		
+		try {
+			Customer c = AppointmentController.findCustomer(user);
+			Date date = parseDate(time, "yyyy-MM-dd+HH:mm");
+			
+			List<Time> times = new ArrayList<Time>();
+			times.add(currentApp.getServiceBooking(0).getTimeSlot().getStartTime());
+			
+			List<Service> services = new ArrayList<Service>();
+			assertNotNull(currentApp);
+			
+			List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), times, 
+					services.toArray(new Service[services.size()]));
+			for(ServiceBooking service:currentApp.getServiceBookings()) {
+				services.add(service.getService());
+				
+			}
+			
+			currentApp = AppointmentController.updateAppointment(true, c, currentApp, services, timeSlots, date);
+		} 
+		catch (Exception e) {
+			error = e.getMessage();
+			errorCntr++;
+		}
 	}
 
 	@Then("the service in the appointment shall be {string}")
 	public void the_service_in_the_appointment_shall_be(String string) {
 	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		assertEquals(BookableService.getWithName(string), currentApp.getBookableService());
 	}
 
-	@When("{string} attempts to update the date to {string} and time to {string} at {string}")
-	public void attempts_to_update_the_date_to_and_time_to_at(String string, String string2, String string3, String string4) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
 
 	@When("{string} attempts to cancel the appointment at {string}")
 	public void attempts_to_cancel_the_appointment_at(String string, String string2) {
 	    try {
 
-	         Date date = parseDate(string2, "yyyy-MM-dd+hh:mm");
+	        Date date = parseDate(string2, "yyyy-MM-dd+hh:mm");
 	        CarShopApplication.setSystemDate(date);
 	    	AppointmentController.cancelAppointment(string, currentApp.getBookableService().getName(),currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), currentApp.getServiceBooking(0).getTimeSlot().getStartTime());
 	    }
@@ -1897,6 +1916,37 @@ public class CucumberStepDefinitions {
 	    // Write code here that turns the phrase above into concrete actions
 	    throw new io.cucumber.java.PendingException();
 	}
+	
+	@When("{string} attempts to update the date to {string} and time to {string} at {string}")
+	public void attempts_to_update_the_date_to_and_time_to_at(String username, String newDateString, String startTimeStrings, String currentDate) {
+	    // Write code here that turns the phrase above into concrete actions
+		Date date = parseDate(currentDate, "yyyy-MM-dd+HH:mm");
+		Date newDate = parseDate(newDateString, "yyyy-MM-dd");
+		
+		// Used a stream
+		List<Time> times = Arrays.stream(startTimeStrings.split("\\,"))
+				.map(s -> new Time((parseDate(s, "HH:mm")).getTime())).collect(Collectors.toList());
+
+		List<Service> services = new ArrayList<Service>();
+		assertNotNull(currentApp);
+		for(ServiceBooking sb:currentApp.getServiceBookings()) {
+			services.add(sb.getService());
+		}
+		
+		List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(newDate, times, 
+				services.toArray(new Service[services.size()]));
+		
+		try {
+			AppointmentController.updateAppointment(false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+		} catch (Exception e) {
+			error += e.getMessage();
+			errorCntr++;
+		}
+	}
+
+
+
+	
 	
 	
 
