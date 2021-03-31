@@ -5,7 +5,7 @@ package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
 import java.sql.Time;
 
-// line 40 "../../../../../carshopPersistence.ump"
+// line 59 "../../../../../carshopPersistence.ump"
 // line 59 "../../../../../carshop.ump"
 public class BusinessHour implements Serializable
 {
@@ -134,7 +134,7 @@ public class BusinessHour implements Serializable
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 43 "../../../../../carshopPersistence.ump"
+  // line 62 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 78710124348809L ;
 
   

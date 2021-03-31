@@ -5,7 +5,7 @@ package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
 import java.util.*;
 
-// line 16 "../../../../../carshopPersistence.ump"
+// line 35 "../../../../../carshopPersistence.ump"
 // line 24 "../../../../../carshop.ump"
 public class Owner extends User implements Serializable
 {
@@ -83,7 +83,7 @@ public class Owner extends User implements Serializable
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 19 "../../../../../carshopPersistence.ump"
+  // line 38 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 62277880568680L ;
 
   

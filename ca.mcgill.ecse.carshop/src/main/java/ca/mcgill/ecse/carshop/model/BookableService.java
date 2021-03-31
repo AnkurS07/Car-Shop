@@ -5,7 +5,7 @@ package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
 import java.util.*;
 
-// line 58 "../../../../../carshopPersistence.ump"
+// line 77 "../../../../../carshopPersistence.ump"
 // line 78 "../../../../../carshop.ump"
 public abstract class BookableService implements Serializable
 {
@@ -225,6 +225,14 @@ public abstract class BookableService implements Serializable
     }
   }
 
+  // line 82 "../../../../../carshopPersistence.ump"
+   public static  void reinitializeServicesMap(List<BookableService> bookeableServices){
+    bookableservicesByName = new HashMap<String, BookableService>();
+	    for (BookableService bookeableService : bookeableServices) {
+	  		bookableservicesByName.put(bookeableService.getName(), bookeableService);
+	  	}
+  }
+
 
   public String toString()
   {
@@ -236,7 +244,7 @@ public abstract class BookableService implements Serializable
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
   
-  // line 61 "../../../../../carshopPersistence.ump"
+  // line 80 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 89278883359799L ;
 
   

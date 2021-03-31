@@ -16,6 +16,9 @@ public class CarshopPersistence {
 		if (carshop == null) {
 			carshop = new CarShop();
 		}
+		else {
+			carshop.reinitializeStaticFields();
+		}
 		return carshop;
 	}
 	
