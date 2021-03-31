@@ -1825,16 +1825,40 @@ public class CucumberStepDefinitions {
 			
 			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
 			
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
 		}
 	}
 
 	@When("{string} attempts to change the service in the appointment to {string} at {string}")
-	public void attempts_to_change_the_service_in_the_appointment_to_at(String string, String string2, String string3) {
+	public void attempts_to_change_the_service_in_the_appointment_to_at(String user, String serviceName, String time) {
 	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		
+		try {
+			Customer c = AppointmentController.findCustomer(user);
+			Date date = parseDate(time, "yyyy-MM-dd+HH:mm");
+			
+			List<Time> times = new ArrayList<Time>();
+			times.add(currentApp.getServiceBooking(0).getTimeSlot().getStartTime());
+			
+			List<Service> services = new ArrayList<Service>();
+			assertNotNull(currentApp);
+			
+			List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), times, 
+					services.toArray(new Service[services.size()]));
+			for(ServiceBooking service:currentApp.getServiceBookings()) {
+				services.add(service.getService());
+				
+			}
+			
+			currentApp = AppointmentController.updateAppointment(true, c, currentApp, services, timeSlots, date);
+		} 
+		catch (Exception e) {
+			error = e.getMessage();
+			errorCntr++;
+		}
 	}
 
 	@Then("the service in the appointment shall be {string}")
@@ -1872,7 +1896,7 @@ public class CucumberStepDefinitions {
 	public void attempts_to_cancel_the_appointment_at(String string, String string2) {
 	    try {
 
-	         Date date = parseDate(string2, "yyyy-MM-dd+hh:mm");
+	        Date date = parseDate(string2, "yyyy-MM-dd+hh:mm");
 	        CarShopApplication.setSystemDate(date);
 	    	AppointmentController.cancelAppointment(string, currentApp.getBookableService().getName(),currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), currentApp.getServiceBooking(0).getTimeSlot().getStartTime());
 	    }
@@ -1931,7 +1955,6 @@ public class CucumberStepDefinitions {
 						
 			Date date = parseDate(time, "yyyy-MM-dd+HH:mm");
 			AppointmentController.registerNoShow(date, currentApp);
-
 			CarShopApplication.setLoggedInUser(currentUser);
 		} catch(Exception e) {
 			error += e.getMessage();
