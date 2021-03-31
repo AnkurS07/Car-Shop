@@ -1705,6 +1705,8 @@ public class CucumberStepDefinitions {
 			assertEquals(st.get(i), currentApp.getServiceBooking(i).getTimeSlot().getStartTime());
 			assertEquals(et.get(i), currentApp.getServiceBooking(i).getTimeSlot().getEndTime());
 		}
+		
+
 	}
 	
 	
@@ -1830,7 +1832,6 @@ public class CucumberStepDefinitions {
 		}
 	}
 
-
 	@When("{string} attempts to change the service in the appointment to {string} at {string}")
 	public void attempts_to_change_the_service_in_the_appointment_to_at(String user, String serviceName, String time) {
 	    // Write code here that turns the phrase above into concrete actions
@@ -1891,7 +1892,6 @@ public class CucumberStepDefinitions {
 		}
 	}
 
-
 	@When("{string} attempts to cancel the appointment at {string}")
 	public void attempts_to_cancel_the_appointment_at(String string, String string2) {
 	    try {
@@ -1946,7 +1946,6 @@ public class CucumberStepDefinitions {
 			errorCntr++;
 		}
 	}
-
 	
 	@When("the owner attempts to register a no-show for the appointment at {string}")
 	public void the_owner_attempts_to_register_a_no_show_for_the_appointment_at(String time) {
@@ -1962,5 +1961,4 @@ public class CucumberStepDefinitions {
 			errorCntr++;
 		}
 	}
-
 }
