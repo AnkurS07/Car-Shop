@@ -154,10 +154,14 @@ public class Appointment implements Serializable
         }
         break;
       case InProgress:
+        if (canUpdateInProgress(isNewService))
+        {
         // line 26 "../../../../../CarShopStates.ump"
-        updateApp(newOptServices, timeSlots, isNewService);
-        setAppStatus(AppStatus.InProgress);
-        wasEventProcessed = true;
+          updateApp(newOptServices, timeSlots, isNewService);
+          setAppStatus(AppStatus.InProgress);
+          wasEventProcessed = true;
+          break;
+        }
         break;
       default:
         // Other states do respond to this event
@@ -453,41 +457,51 @@ public class Appointment implements Serializable
   }
 
   // line 46 "../../../../../CarShopStates.ump"
+   private void rejectUpdateInProgress(){
+    throw new RuntimeException("Cannot reschedule an appointment while the appointment is in progress");
+  }
+
+  // line 50 "../../../../../CarShopStates.ump"
    private void rejectCancel(){
     throw new RuntimeException("Cannot cancel an appointment on the appointment date");
   }
 
-  // line 50 "../../../../../CarShopStates.ump"
+  // line 54 "../../../../../CarShopStates.ump"
    private void rejectStart(){
     throw new RuntimeException("Cannot start an appointment early or while it is already in progress.");
   }
 
-  // line 54 "../../../../../CarShopStates.ump"
+  // line 58 "../../../../../CarShopStates.ump"
    private void rejectNoShow(Customer c){
     throw new RuntimeException("Cannot register a no-show since the appointment has already started");
   }
 
-  // line 58 "../../../../../CarShopStates.ump"
+  // line 62 "../../../../../CarShopStates.ump"
    private void reject(){
     throw new RuntimeException("Action unavailable in the current state");
   }
 
-  // line 62 "../../../../../CarShopStates.ump"
+  // line 66 "../../../../../CarShopStates.ump"
    private boolean canUpdate(String currentDate, String sysDate){
     return !currentDate.equals(sysDate);
   }
 
-  // line 66 "../../../../../CarShopStates.ump"
+  // line 70 "../../../../../CarShopStates.ump"
+   private boolean canUpdateInProgress(boolean isNewService){
+    return isNewService;
+  }
+
+  // line 74 "../../../../../CarShopStates.ump"
    private boolean canCancel(String currentDate, String sysDate){
     return !currentDate.equals(sysDate);
   }
 
-  // line 70 "../../../../../CarShopStates.ump"
+  // line 78 "../../../../../CarShopStates.ump"
    private boolean canStart(Date currentDate, Date appDate, Date currentTime, Date appTime){
     return currentDate.equals(appDate) & !currentTime.before(appTime);
   }
 
-  // line 74 "../../../../../CarShopStates.ump"
+  // line 82 "../../../../../CarShopStates.ump"
    private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService){
     List<String> servicescopy = new ArrayList<>();
 	   for(int i=0;i<this.getServiceBookings().size();i++){
