@@ -144,12 +144,8 @@ public class AppointmentController {
 		String appDate = sdf.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
 		String currentDate = sdf.format(modificationDate.getTime());
 		
-		if (a.getAppStatus()==AppStatus.InProgress && isNewService==false) {
-			throw new Exception("Cannot reschedule an appointment while the appointment is in progress");
-		}
-		else {
-			a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
-		}
+		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
+
 		
 		try {
 			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
