@@ -23,8 +23,8 @@ class Appointment {
 		
 			start / {rejectStart();} -> InProgress;
 			
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) / {updateApp(newOptServices, timeSlots, isNewService);} -> InProgress;
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) / {rejectUpdate();} -> InProgress;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdateInProgress(isNewService)] / {updateApp(newOptServices, timeSlots, isNewService);} -> InProgress;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdateInProgress(isNewService)] / {rejectUpdateInProgress();} -> InProgress;
             
             cancel(String currentDate, String sysDate) / {reject();} -> InProgress;
             
@@ -40,6 +40,10 @@ class Appointment {
 	
 	private void rejectUpdate() {
 		throw new RuntimeException("Cannot update an appointment on the appointment date");
+	}
+	
+	private void rejectUpdateInProgress() {
+		throw new RuntimeException("Cannot reschedule an appointment while the appointment is in progress");
 	}
   
 	private void rejectCancel() {
@@ -60,6 +64,10 @@ class Appointment {
 	
 	private boolean canUpdate(String currentDate, String sysDate) {
 	  return !currentDate.equals(sysDate);
+	}
+	
+	private boolean canUpdateInProgress(boolean isNewService) {
+		return isNewService;
 	}
 	  
 	private boolean canCancel(String currentDate, String sysDate) {
