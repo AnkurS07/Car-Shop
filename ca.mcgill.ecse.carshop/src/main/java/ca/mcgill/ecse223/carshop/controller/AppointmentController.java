@@ -116,7 +116,7 @@ public class AppointmentController {
 		}
 	}
 	
-	public static Appointment updateAppointment(boolean isNewService, Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
+	public static Appointment updateAppointment(boolean isNewService, boolean isExistingService, Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
 		//check overlap
 		// I did not put it in the state machine or else we need to copy
 		// like 200 lines of helper methods and since we still need those here
@@ -124,6 +124,9 @@ public class AppointmentController {
 		CarShop carshop = CarShopApplication.getCarShop();
 		List<TimeSlot> totalTimeSlots = new ArrayList<TimeSlot>();
 		for(ServiceBooking s: a.getServiceBookings()) {
+			if(isExistingService) {
+				break;
+			}
 			totalTimeSlots.add(s.getTimeSlot());
 		}
 		for(TimeSlot t: timeSlots) {
@@ -140,11 +143,12 @@ public class AppointmentController {
 			}
 		}
 		
+		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String appDate = sdf.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
 		String currentDate = sdf.format(modificationDate.getTime());
 		
-		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
+		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService, isExistingService);
 
 		
 		try {

@@ -10,8 +10,8 @@ class Appointment {
 			cancel(String currentDate, String sysDate) [canCancel(currentDate, sysDate)] -> Final;
 			cancel(String currentDate, String sysDate) [!canCancel(currentDate, sysDate)] / {rejectCancel();} -> Booked;
 			
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdate(currentDate, sysDate)] / {updateApp(newOptServices, timeSlots, isNewService);} -> Booked;
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [!canUpdate(currentDate, sysDate)] / {rejectUpdate();} -> Booked;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [canUpdate(currentDate, sysDate)] / {updateApp(newOptServices, timeSlots, isNewService, isExistingService);} -> Booked;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [!canUpdate(currentDate, sysDate)] / {rejectUpdate();} -> Booked;
 			
 			start(Date currentDate, Date appDate, Date currentTime, Date appTime) [canStart(currentDate, appDate, currentTime, appTime)] -> InProgress;
 			start(Date currentDate, Date appDate, Date currentTime, Date appTime) [!canStart(currentDate, appDate, currentTime, appTime)] / {rejectStart();} -> Booked;
@@ -23,8 +23,8 @@ class Appointment {
 		
 			start / {rejectStart();} -> InProgress;
 			
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdateInProgress(isNewService)] / {updateApp(newOptServices, timeSlots, isNewService);} -> InProgress;
-			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService) [canUpdateInProgress(isNewService)] / {rejectUpdateInProgress();} -> InProgress;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [canUpdateInProgress(isNewService)] / {updateApp(newOptServices, timeSlots, isNewService, isExistingService);} -> InProgress;
+			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [!canUpdateInProgress(isNewService)] / {rejectUpdateInProgress();} -> InProgress;
             
             cancel(String currentDate, String sysDate) / {reject();} -> InProgress;
             
@@ -78,8 +78,8 @@ class Appointment {
 		return currentDate.equals(appDate) & !currentTime.before(appTime);
 	}
 	
-	private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService){
-	   List<String> servicescopy = new ArrayList<>();
+   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService, boolean isExistingService){
+    List<String> servicescopy = new ArrayList<>();
 	   for(int i=0;i<this.getServiceBookings().size();i++){
 		   servicescopy.add(this.getServiceBooking(i).getService().getName());
 	   }
@@ -97,11 +97,15 @@ class Appointment {
 			for(int i=0;i<newOptServices.size();i++) {
 				new ServiceBooking(newOptServices.get(i),timeSlots.get(i), this);
 			}
+			if(isExistingService) {
+				this.setBookableService(newOptServices.get(0));
+			}
 		} else {
 			// adding new services to the app
 			for(int i = 0; i< newOptServices.size();i++) {
 				new ServiceBooking(newOptServices.get(i), timeSlots.get(i), this);
 			}
-		}
+		} 
   }
+  
 }
