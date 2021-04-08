@@ -3,7 +3,28 @@
  */
 package ca.mcgill.ecse.carshop.application;
 
+import static ca.mcgill.ecse223.carshop.controller.AppointmentController.parseDate;
+
+import java.sql.Date;
+import java.sql.Time;
+
+import ca.mcgill.ecse.carshop.model.Appointment;
+import ca.mcgill.ecse.carshop.model.BookableService;
+import ca.mcgill.ecse.carshop.model.Business;
+import ca.mcgill.ecse.carshop.model.BusinessHour;
+import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ComboItem;
+import ca.mcgill.ecse.carshop.model.Customer;
+import ca.mcgill.ecse.carshop.model.Garage;
+import ca.mcgill.ecse.carshop.model.Service;
+import ca.mcgill.ecse.carshop.model.ServiceBooking;
+import ca.mcgill.ecse.carshop.model.ServiceCombo;
+import ca.mcgill.ecse.carshop.model.Technician;
+import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
+import ca.mcgill.ecse.carshop.model.TimeSlot;
+import ca.mcgill.ecse.carshop.view.CarShopPage;
+import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
@@ -19,6 +40,80 @@ public class CarShopApplication {
 
     public static void main(String[] args) throws Exception{
         System.out.println(new CarShopApplication().getGreeting());
+        
+        Date systemDate = AppointmentController.parseDate("2021-03-07+09:00", "yyyy-MM-dd+hh:mm");
+        CarShopApplication.setSystemDate(systemDate);
+        
+        carShop = CarShopApplication.getCarShop();
+        Customer c = new Customer("customer1", "customer1", carShop);
+        Technician t = new Technician("Engine-Technician", "pass1", TechnicianType.Engine, carShop);
+        Garage g = new Garage(carShop, t);
+        Technician t2 = new Technician("Tire-Technician", "pass2", TechnicianType.Tire, carShop);
+        Garage g2 = new Garage(carShop, t2);
+        Service s = new Service("engine-check", carShop, 60, g);
+        Service s2 = new Service("tire-change", carShop, 30, g2);
+        ServiceCombo sc = new ServiceCombo("tire-change-combo", carShop);
+        sc.setMainService(new ComboItem(true, s2, sc));
+        new ComboItem(false, s, sc);
+        
+        Appointment a = new Appointment(c, s, carShop);
+        Appointment a2 = new Appointment(c, sc, carShop);
+        
+        Date startDate = AppointmentController.parseDate("2021-05-07", "yyyy-MM-dd");
+        Time startTime = new Time((parseDate("9:00", "HH:mm")).getTime());
+        Date endDate = AppointmentController.parseDate("2021-05-07", "yyyy-MM-dd");
+        Time endTime = new Time((parseDate("10:00", "HH:mm")).getTime());
+        TimeSlot ts = new TimeSlot(startDate, startTime, endDate, endTime, carShop);
+        new ServiceBooking(s, ts, a);
+        
+        startDate = AppointmentController.parseDate("2021-06-07", "yyyy-MM-dd");
+        startTime = new Time((parseDate("9:00", "HH:mm")).getTime());
+        endDate = AppointmentController.parseDate("2021-06-07", "yyyy-MM-dd");
+        endTime = new Time((parseDate("9:30", "HH:mm")).getTime());
+        ts = new TimeSlot(startDate, startTime, endDate, endTime, carShop);
+        new ServiceBooking(sc.getService(0).getService(), ts, a2);
+        
+        startDate = AppointmentController.parseDate("2021-06-07", "yyyy-MM-dd");
+        startTime = new Time((parseDate("9:30", "HH:mm")).getTime());
+        endDate = AppointmentController.parseDate("2021-06-07", "yyyy-MM-dd");
+        endTime = new Time((parseDate("10:30", "HH:mm")).getTime());
+        ts = new TimeSlot(startDate, startTime, endDate, endTime, carShop);
+        new ServiceBooking(sc.getService(1).getService(), ts, a2);
+        
+        CarShopApplication.setLoggedInUser(c.getUsername());
+        
+        new Business("cs","123 New Str", "(514)987-6543", "busy@gmail.com", carShop);
+        startTime = new Time((parseDate("9:00", "HH:mm")).getTime());
+        endTime = new Time((parseDate("17:00", "HH:mm")).getTime());
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Monday, startTime, endTime, carShop));
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Tuesday, startTime, endTime, carShop));
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Wednesday, startTime, endTime, carShop));
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Thursday, startTime, endTime, carShop));
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Friday, startTime, endTime, carShop));
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Saturday, startTime, endTime, carShop));
+        carShop.getBusiness().addBusinessHour(new BusinessHour(DayOfWeek.Sunday, startTime, endTime, carShop));
+        
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Monday, startTime, endTime, carShop));
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Tuesday, startTime, endTime, carShop));
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Wednesday, startTime, endTime, carShop));
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Thursday, startTime, endTime, carShop));
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Friday, startTime, endTime, carShop));
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Saturday, startTime, endTime, carShop));
+        g.addBusinessHour(new BusinessHour(DayOfWeek.Sunday, startTime, endTime, carShop));
+        
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Monday, startTime, endTime, carShop));
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Tuesday, startTime, endTime, carShop));
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Wednesday, startTime, endTime, carShop));
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Thursday, startTime, endTime, carShop));
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Friday, startTime, endTime, carShop));
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Saturday, startTime, endTime, carShop));
+        g2.addBusinessHour(new BusinessHour(DayOfWeek.Sunday, startTime, endTime, carShop));
+        
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new CarShopPage().setVisible(true);
+            }
+        });
     }
     
     public static CarShop getCarShop() {

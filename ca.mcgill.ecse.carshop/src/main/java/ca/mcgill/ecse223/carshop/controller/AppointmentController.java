@@ -19,6 +19,7 @@ import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ComboItem;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
@@ -28,10 +29,51 @@ import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.view.OptServiceVisualizer;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
 public class AppointmentController {
 
+	public static Appointment makeAppointmentFromView(boolean overrideErrors, String customerName, TOBookableService toBookableService, List<TOService> toServices, List<TOTimeSlot> toTimeSlots) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Customer c;
+		User user = User.getWithUsername(customerName);
+		if (user instanceof Customer) {
+			c = (Customer) user;
+		} else if (user instanceof Owner) {
+			throw new Exception("An owner cannot create an appointment");
+		} else {
+			throw new Exception("A technician cannot create an appointment");
+		}
+
+		if (!c.getUsername().equals(CarShopApplication.getLoggedInUser())) {
+			throw new RuntimeException("A customer can only create their own appointments");
+		}
+		Date date = toTimeSlots.get(0).getStartDate();
+		Time time = toTimeSlots.get(0).getStartTime();
+		List<TimeSlot> timeSlots = new ArrayList<TimeSlot>();
+		BookableService mainService;
+		List<Service> optionalServices = new ArrayList<Service>();
+		
+		if(toBookableService instanceof TOService) {
+			mainService = AppointmentController.findService(toBookableService.getName());
+		} else {
+			mainService = AppointmentController.findServiceCombo(toBookableService.getName());
+			for(int i = 1;i<toServices.size();i++) {
+				optionalServices.add(AppointmentController.findService(toServices.get(i).getName()));
+			}
+		}
+		
+		for(int i = 0; i< toTimeSlots.size();i++) {
+			timeSlots.add(new TimeSlot(toTimeSlots.get(i).getStartDate(), toTimeSlots.get(i).getStartTime(), toTimeSlots.get(i).getEndDate(), toTimeSlots.get(i).getEndTime(), carShop));
+		}
+		
+		
+		
+		return makeAppointment(overrideErrors, c, toBookableService.getName(), date, time, timeSlots, mainService, optionalServices);
+		
+	}
+			
 	public static Appointment makeAppointment(boolean overrideErrors, Customer customer, String mainServiceName,
 			Date date, Time time, List<TimeSlot> timeSlots, BookableService mainService, List<Service> optionalServices)
 			throws Exception {
@@ -427,12 +469,13 @@ public class AppointmentController {
 	private static boolean invalidTimeSlot(String serviceName, TimeSlot t1) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean invalid = false;
-		@SuppressWarnings("deprecation")
-		Date currentDay = new Date(CarShopApplication.getSystemDate().getYear(),
-				CarShopApplication.getSystemDate().getMonth(), CarShopApplication.getSystemDate().getDay());
-		@SuppressWarnings("deprecation")
-		Time currentTime = new Time(CarShopApplication.getSystemDate().getHours(),
-				CarShopApplication.getSystemDate().getMinutes(), 0);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String d = sdf.format(CarShopApplication.getSystemDate());
+		Date currentDay = parseDate(d, "yyyy-MM-dd");
+
+		SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
+		String t = sdf2.format(CarShopApplication.getSystemDate());
+		Time currentTime = new Time(parseDate(t, "HH:mm").getTime());
 
 		// appt in the past
 		if (t1.getStartDate().compareTo(currentDay) < 0
@@ -580,7 +623,7 @@ public class AppointmentController {
 		return timeSlots;
 	}
 
-	private static Time incrementTimeByMinutes(Time original, int minutesElapsed) {
+	public static Time incrementTimeByMinutes(Time original, int minutesElapsed) {
 		return new Time(original.getTime() + minutesElapsed * 60000);
 	}
 
@@ -593,4 +636,77 @@ public class AppointmentController {
 			throw new Exception(e.getMessage());
 		}
 	}
+	
+	// Transfer objects
+	
+	public static List<TOAppointment> getAppointments(){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOAppointment> toAppts = new ArrayList<TOAppointment>();
+		for(Appointment a: carShop.getAppointments()) {
+			TOAppointment app = new TOAppointment(a.getBookableService().getName());
+			for (ServiceBooking sb: a.getServiceBookings()) {
+				TOTimeSlot toTimeSlot = new TOTimeSlot(sb.getTimeSlot().getStartDate(), sb.getTimeSlot().getStartTime(), sb.getTimeSlot().getEndDate(), sb.getTimeSlot().getEndTime());
+				TOService toService = new TOService(sb.getService().getName(), sb.getService().getDuration()); 
+				new TOServiceBooking(toService, toTimeSlot, app);
+			}
+			toAppts.add(app);
+		}
+		return toAppts;
+		
+	}
+	
+	public static List<TOBookableService> getBookableServices(){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOBookableService> toBs = new ArrayList<TOBookableService>();
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof Service) {
+				Service s = (Service) bs;
+				toBs.add(new TOService(s.getName(), s.getDuration()));
+			} else {
+				ServiceCombo sc = (ServiceCombo) bs;
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				
+				for(ComboItem ci: sc.getServices()) {
+					new TOComboItem(ci.getMandatory(), 
+							new TOService(ci.getService().getName(), 
+									ci.getService().getDuration()), toSc);
+				}
+				toBs.add(toSc);
+			}
+		}
+		return toBs;
+	}
+	
+	public static TOServiceCombo findServiceCombo(List<OptServiceVisualizer> services) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOServiceCombo> toBs = new ArrayList<TOServiceCombo>();
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof ServiceCombo) {
+				ServiceCombo sc = (ServiceCombo) bs;
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				
+				for(ComboItem ci: sc.getServices()) {
+					new TOComboItem(ci.getMandatory(), 
+							new TOService(ci.getService().getName(), 
+									ci.getService().getDuration()), toSc);
+				}
+				toBs.add(toSc);
+			}
+		}
+		boolean foundMatch = false;
+		TOServiceCombo match = null;
+		for(TOServiceCombo sc: toBs) {
+			foundMatch = true;
+			for(int i=0;i<sc.getServices().size();i++) {
+				foundMatch &= sc.getService(i).getService().getName().equals(services.get(i).getTOService().getName());
+			}
+			if(foundMatch) {
+				match = sc;
+				break;
+			}
+		}
+		
+		return match;
+	}
+	
 }
