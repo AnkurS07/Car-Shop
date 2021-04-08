@@ -97,6 +97,13 @@ public class CarShopPage extends JFrame{
 	private JDatePickerImpl apptDatePicker;
 	private JLabel apptDateLabel;
 	
+	//update appt
+	private JButton updateApptButton;
+	private JDatePanelImpl datePanelUpdate;
+	private JDatePickerImpl apptDatePickerUpdate;
+	private JPanel optServicePanelUpdate;
+	private List<OptServiceVisualizer> optServicesUpdate;
+	
 	
 	
 	
@@ -153,16 +160,34 @@ public class CarShopPage extends JFrame{
 		p.put("text.today", "Today");
 		p.put("text.month", "Month");
 		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+		datePanel = new JDatePanelImpl(model, p);
 		apptDatePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
 		apptDateLabel = new JLabel();
 		apptDateLabel.setText("Date:");
+		
+		optServicePanelUpdate = new JPanel();
+		optServicePanelUpdate.setLayout(new BoxLayout(optServicePanelUpdate, BoxLayout.PAGE_AXIS));
+		SqlDateModel model2 = new SqlDateModel();
+		Properties p2 = new Properties();
+		p.put("text.today", "Today");
+		p.put("text.month", "Month");
+		p.put("text.year", "Year");
+		datePanelUpdate = new JDatePanelImpl(model2, p2);
+		apptDatePickerUpdate = new JDatePickerImpl(datePanelUpdate, new DateLabelFormatter());
+		updateApptButton = new JButton();
+		updateApptButton.setText("Update");
 		
 		
 		// listeners for apptList
 		cancelApptButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				cancelApptButtonActionPerformed(evt);
+			}
+		});
+		
+		updateApptButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				updateApptButtonActionPerformed(evt);
 			}
 		});
 		
@@ -175,6 +200,12 @@ public class CarShopPage extends JFrame{
 		bookableServiceList.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				showOptionalServices(evt);
+			}
+		});
+		
+		apptList.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				showOptionalServicesForUpdate(evt);
 			}
 		});
 	
@@ -214,10 +245,15 @@ public class CarShopPage extends JFrame{
 						.addGroup(layout.createParallelGroup()
 								.addComponent(cancelAppt)
 								.addComponent(apptList)
+								.addComponent(optServicePanelUpdate)
+								.addComponent(apptDatePickerUpdate)
+								.addComponent(updateApptButton)
 								.addComponent(cancelApptButton)))
 				);
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelAppt});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, updateApptButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, apptDatePickerUpdate});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptLabel});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
@@ -237,11 +273,15 @@ public class CarShopPage extends JFrame{
 						.addComponent(apptList))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(optServicePanel)
-						.addComponent(cancelApptButton))
+						.addComponent(optServicePanelUpdate))
 				.addGroup(layout.createParallelGroup()
-						.addComponent(apptDatePicker))
+						.addComponent(apptDatePicker)
+						.addComponent(apptDatePickerUpdate))
 				.addGroup(layout.createParallelGroup()
+						.addComponent(updateApptButton)
 						.addComponent(makeApptButton))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(cancelApptButton))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(horizontalLineBottom))
 				);
@@ -282,6 +322,7 @@ public class CarShopPage extends JFrame{
 			bookableServiceList.setSelectedIndex(-1);
 			
 			apptDatePicker.getModel().setValue(null);
+			apptDatePickerUpdate.getModel().setValue(null);
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
@@ -332,7 +373,6 @@ public class CarShopPage extends JFrame{
 				List<TOTimeSlot> timeSlots = new ArrayList<TOTimeSlot>();
 				for(OptServiceVisualizer opt: optServices) {
 					if(opt.getIsSelected()) {
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 						Time st = new Time(AppointmentController.parseDate(opt.getStartTime(), "HH:mm").getTime());
 						Time et = AppointmentController.incrementTimeByMinutes(st, opt.getTOService().getDuration());
 						// Double check that this gives the expected values
@@ -342,7 +382,7 @@ public class CarShopPage extends JFrame{
 					}
 				}
 
-				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots);
+				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots, new ArrayList<TOTimeSlot>());
 			} catch (Exception e) {
 				error = e.getMessage();
 			}
@@ -380,6 +420,124 @@ public class CarShopPage extends JFrame{
 			error = e.getMessage();
 		}
 		
+		// update visuals
+		//refreshData();	
+		pack();
+	}
+	
+	private void showOptionalServicesForUpdate(java.awt.event.ActionEvent evt) {
+		int selectedApp = apptList.getSelectedIndex();
+		try {
+			optServicePanelUpdate.removeAll();
+			optServicesUpdate = new ArrayList<OptServiceVisualizer>();
+		
+		
+			if(selectedApp >= 0) {
+				SimpleDateFormat sdf = new SimpleDateFormat("HH");
+				SimpleDateFormat sdf2 = new SimpleDateFormat("mm");
+				
+				Date sd = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartDate();
+				int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(sd));
+				int month = Integer.parseInt(new SimpleDateFormat("MM").format(sd)) - 1;
+				int day = Integer.parseInt(new SimpleDateFormat("dd").format(sd));
+				apptDatePickerUpdate.getModel().setDate(year, month, day);
+				apptDatePickerUpdate.getModel().setSelected(true);
+				
+				
+				TOBookableService toBs =  appts.get(selectedApp).getToBookableService();
+				if(toBs instanceof TOServiceCombo) {
+					TOServiceCombo toSc = (TOServiceCombo) toBs;
+					List<String> selectedServiceNames = AppointmentController.getSelectedServiceNames(appts.get(selectedApp));
+					int idx = 0;
+					for(int i = 0 ; i < toSc.getServices().size();i++) {
+						OptServiceVisualizer visualizer = new OptServiceVisualizer(toSc.getService(i));
+						if(selectedServiceNames.contains(visualizer.getTOService().getName())) {
+							visualizer.setIsSelected(true);
+							TOTimeSlot toTimeSlots = appts.get(selectedApp).getToServiceBooking(idx).getToTimeSlot();
+							
+							Time st = toTimeSlots.getStartTime();
+							
+							int startHour = Integer.parseInt(sdf.format(st));
+							int startMin = Integer.parseInt(sdf2.format(st));
+							visualizer.setStartTime(startHour, startMin);
+							
+							idx++;
+						}
+						
+							
+						optServicePanelUpdate.add(visualizer); 
+						optServicesUpdate.add(visualizer);
+					}
+				} else {
+					TOService toS = (TOService) toBs;
+					OptServiceVisualizer visualizer = new OptServiceVisualizer(toS);
+					
+					Time st = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartTime();
+					
+					int startHour = Integer.parseInt(sdf.format(st));
+					int startMin = Integer.parseInt(sdf2.format(st));
+					visualizer.setStartTime(startHour, startMin);
+					
+					optServicePanelUpdate.add(visualizer); 
+					optServicesUpdate.add(visualizer);
+				}
+			}
+		} catch (Exception e) {
+			error = e.getMessage();
+		}
+		
+		// update visuals
+		//refreshData();
+		pack();
+	}
+	
+	private void updateApptButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		// take services in optServicesUpdate
+		// easiest is probably to delete the existing appointment, try creating a new one and if it fails set it back to the previous one
+		error = "";
+		int selectedAppt = apptList.getSelectedIndex();
+		if(optServicePanelUpdate.getComponentCount() == 0) {
+			error = "An appointment needs to be selected to update an appointment";
+		}
+		error = error.trim();
+		
+		if (error.length() == 0) {
+			// call the controller
+			try {
+				TOBookableService toBs;
+				if(optServicesUpdate.size() > 1) {
+					toBs = AppointmentController.findServiceCombo(optServicesUpdate);
+				} else {
+					toBs =  optServicesUpdate.get(0).getTOService();
+				}
+				//TOBookableService toBs =  optServices.get(0).getTOService();
+				List<TOService> services = new ArrayList<TOService>();
+				List<TOTimeSlot> timeSlots = new ArrayList<TOTimeSlot>();
+				for(OptServiceVisualizer opt: optServicesUpdate) {
+					if(opt.getIsSelected()) {
+						String tst = opt.getStartTime();
+						Time st = new Time(AppointmentController.parseDate(opt.getStartTime(), "HH:mm").getTime());
+						Time et = AppointmentController.incrementTimeByMinutes(st, opt.getTOService().getDuration());
+						// Double check that this gives the expected values
+						Date sd = new Date(apptDatePickerUpdate.getModel().getYear() - 1900, apptDatePickerUpdate.getModel().getMonth(), apptDatePickerUpdate.getModel().getDay());
+						timeSlots.add(new TOTimeSlot(sd, st, sd, et));
+						services.add(opt.getTOService());
+					}
+				}
+				List<TOTimeSlot> toExclude = new ArrayList<TOTimeSlot>();
+				for(TOServiceBooking toServiceBooking: appts.get(selectedAppt).getToServiceBookings()) {
+					toExclude.add(toServiceBooking.getToTimeSlot());
+				}
+				
+				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots, toExclude);
+				TOAppointment app = appts.get(selectedAppt);
+				AppointmentController.deleteAppt(CarShopApplication.getLoggedInUser(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
+			
+			} catch (Exception e) {
+				error = e.getMessage();
+			}
+		}
+
 		// update visuals
 		refreshData();	
 	}

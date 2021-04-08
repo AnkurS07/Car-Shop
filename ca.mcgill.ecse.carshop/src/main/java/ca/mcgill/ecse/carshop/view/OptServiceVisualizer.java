@@ -95,6 +95,16 @@ public class OptServiceVisualizer extends JPanel {
 		this.add(separator);
 		this.add(startMin);
 		this.add(duration);
+		
+	}
+	
+	public void setStartTime(int hour, int min) {
+		startHour.setSelectedIndex(hour);
+		startMin.setSelectedIndex(min);
+	}
+	
+	public void setIsSelected(boolean isSelected) {
+		optServiceSelected.setSelected(isSelected);
 	}
 	
 	public boolean getIsSelected() {

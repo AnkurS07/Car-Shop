@@ -16,15 +16,21 @@ public class TOAppointment
   private String mainServiceName;
 
   //TOAppointment Associations
+  private TOBookableService toBookableService;
   private List<TOServiceBooking> toServiceBookings;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TOAppointment(String aMainServiceName)
+  public TOAppointment(String aMainServiceName, TOBookableService aToBookableService)
   {
     mainServiceName = aMainServiceName;
+    boolean didAddToBookableService = setToBookableService(aToBookableService);
+    if (!didAddToBookableService)
+    {
+      throw new RuntimeException("Unable to create tOAppointment due to toBookableService. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
     toServiceBookings = new ArrayList<TOServiceBooking>();
   }
 
@@ -43,6 +49,11 @@ public class TOAppointment
   public String getMainServiceName()
   {
     return mainServiceName;
+  }
+  /* Code from template association_GetOne */
+  public TOBookableService getToBookableService()
+  {
+    return toBookableService;
   }
   /* Code from template association_GetMany */
   public TOServiceBooking getToServiceBooking(int index)
@@ -73,6 +84,25 @@ public class TOAppointment
   {
     int index = toServiceBookings.indexOf(aToServiceBooking);
     return index;
+  }
+  /* Code from template association_SetOneToMany */
+  public boolean setToBookableService(TOBookableService aToBookableService)
+  {
+    boolean wasSet = false;
+    if (aToBookableService == null)
+    {
+      return wasSet;
+    }
+
+    TOBookableService existingToBookableService = toBookableService;
+    toBookableService = aToBookableService;
+    if (existingToBookableService != null && !existingToBookableService.equals(aToBookableService))
+    {
+      existingToBookableService.removeTOAppointment(this);
+    }
+    toBookableService.addTOAppointment(this);
+    wasSet = true;
+    return wasSet;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfToServiceBookings()
@@ -149,6 +179,12 @@ public class TOAppointment
 
   public void delete()
   {
+    TOBookableService placeholderToBookableService = toBookableService;
+    this.toBookableService = null;
+    if(placeholderToBookableService != null)
+    {
+      placeholderToBookableService.removeTOAppointment(this);
+    }
     while (toServiceBookings.size() > 0)
     {
       TOServiceBooking aToServiceBooking = toServiceBookings.get(toServiceBookings.size() - 1);
@@ -162,6 +198,7 @@ public class TOAppointment
   public String toString()
   {
     return super.toString() + "["+
-            "mainServiceName" + ":" + getMainServiceName()+ "]";
+            "mainServiceName" + ":" + getMainServiceName()+ "]" + System.getProperties().getProperty("line.separator") +
+            "  " + "toBookableService = "+(getToBookableService()!=null?Integer.toHexString(System.identityHashCode(getToBookableService())):"null");
   }
 }

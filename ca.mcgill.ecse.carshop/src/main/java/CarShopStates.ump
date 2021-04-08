@@ -7,8 +7,8 @@ class Appointment {
 		Booked {
 			noShow(Customer c) / {addNoShow(c);} -> Final;
 			
-			cancel(String currentDate, String sysDate) [canCancel(currentDate, sysDate)] -> Final;
-			cancel(String currentDate, String sysDate) [!canCancel(currentDate, sysDate)] / {rejectCancel();} -> Booked;
+			cancel(String currentDate, String sysDate, boolean overrideError) [canCancel(currentDate, sysDate, overrideError)] -> Final;
+			cancel(String currentDate, String sysDate, boolean overrideError) [!canCancel(currentDate, sysDate, overrideError)] / {rejectCancel();} -> Booked;
 			
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [canUpdate(currentDate, sysDate)] / {updateApp(newOptServices, timeSlots, isNewService, isExistingService);} -> Booked;
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [!canUpdate(currentDate, sysDate)] / {rejectUpdate();} -> Booked;
@@ -26,7 +26,7 @@ class Appointment {
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [canUpdateInProgress(isNewService)] / {updateApp(newOptServices, timeSlots, isNewService, isExistingService);} -> InProgress;
 			update(List<Service> newOptServices, List<TimeSlot> timeSlots, String currentDate, String sysDate, boolean isNewService, boolean isExistingService) [!canUpdateInProgress(isNewService)] / {rejectUpdateInProgress();} -> InProgress;
             
-            cancel(String currentDate, String sysDate) / {reject();} -> InProgress;
+            cancel(String currentDate, String sysDate, boolean overrideError) / {reject();} -> InProgress;
             
 			noShow(Customer c) / {rejectNoShow(c);} -> InProgress;
 			
@@ -70,8 +70,8 @@ class Appointment {
 		return isNewService;
 	}
 	  
-	private boolean canCancel(String currentDate, String sysDate) {
-		return !currentDate.equals(sysDate);
+	private boolean canCancel(String currentDate, String sysDate, boolean overrideError) {
+		return !currentDate.equals(sysDate) || overrideError;
 	}
 	
 	private boolean canStart(Date currentDate, Date appDate, Date currentTime, Date appTime) {

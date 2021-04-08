@@ -45,6 +45,7 @@ class TOServiceBooking {
 
 class TOAppointment {
 	String mainServiceName;
+	* -- 1 TOBookableService toBookableService;
 	1 <@>- * TOServiceBooking toServiceBookings;
 	
 }

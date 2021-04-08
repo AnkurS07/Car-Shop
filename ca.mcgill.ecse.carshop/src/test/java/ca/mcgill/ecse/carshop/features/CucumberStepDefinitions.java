@@ -1336,7 +1336,7 @@ public class CucumberStepDefinitions {
 			}
 
 			AppointmentController.makeAppointment(false, AppointmentController.findCustomer(customer),
-					mainServiceString, date, times.get(0), timeSlots, main, optionalServices);
+					mainServiceString, date, times.get(0), timeSlots, main, optionalServices, new ArrayList<TimeSlot>());
 
 		} catch (Exception e) {
 			errorReportMessage = e.getMessage();
@@ -1374,7 +1374,7 @@ public class CucumberStepDefinitions {
 						columns.get(4).split("\\,"));
 
 				AppointmentController.makeAppointment(true, customer, mainServiceName, date, first, timeSlots,
-						mainService, optionalServices);
+						mainService, optionalServices, new ArrayList<TimeSlot>());
 
 			}
 			CarShopApplication.setLoggedInUser(currentUser);
@@ -1631,7 +1631,7 @@ public class CucumberStepDefinitions {
 				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)mainService).getMainService().getService(), services.toArray(new Service[services.size()]));
 			}
 			
-			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services, new ArrayList<TimeSlot>());
 			
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -1823,7 +1823,7 @@ public class CucumberStepDefinitions {
 				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)mainService).getMainService().getService(), services.toArray(new Service[services.size()]));
 			}
 			
-			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services, new ArrayList<TimeSlot>());
 			
 		} 
 		catch (Exception e) {

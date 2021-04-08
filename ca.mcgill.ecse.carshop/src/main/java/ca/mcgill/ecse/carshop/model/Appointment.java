@@ -92,7 +92,7 @@ public class Appointment implements Serializable
     return wasEventProcessed;
   }
 
-  public boolean cancel(String currentDate,String sysDate)
+  public boolean cancel(String currentDate,String sysDate,boolean overrideError)
   {
     boolean wasEventProcessed = false;
     
@@ -100,13 +100,13 @@ public class Appointment implements Serializable
     switch (aAppStatus)
     {
       case Booked:
-        if (canCancel(currentDate,sysDate))
+        if (canCancel(currentDate,sysDate,overrideError))
         {
           setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
-        if (!(canCancel(currentDate,sysDate)))
+        if (!(canCancel(currentDate,sysDate,overrideError)))
         {
         // line 11 "../../../../../CarShopStates.ump"
           rejectCancel();
@@ -500,8 +500,8 @@ public class Appointment implements Serializable
   }
 
   // line 74 "../../../../../CarShopStates.ump"
-   private boolean canCancel(String currentDate, String sysDate){
-    return !currentDate.equals(sysDate);
+   private boolean canCancel(String currentDate, String sysDate, boolean overrideError){
+    return !currentDate.equals(sysDate) || overrideError;
   }
 
   // line 78 "../../../../../CarShopStates.ump"
