@@ -3,13 +3,11 @@ package ca.mcgill.ecse.carshop.view;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
@@ -28,7 +26,6 @@ import ca.mcgill.ecse223.carshop.controller.TOServiceCombo;
 import ca.mcgill.ecse223.carshop.controller.TOTimeSlot;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.sql.Date;
@@ -46,34 +43,6 @@ public class CarShopPage extends JFrame{
 	
 	// UI elements
 	private JLabel errorMessage;
-	// driver
-	private JTextField driverNameTextField;
-	private JLabel driverNameLabel;
-	private JButton addDriverButton;
-	private JComboBox<String> driverToggleList;
-	private JLabel driverToggleLabel;
-	private JButton sickButton;
-	private JButton deleteDriverButton;
-	// route
-	private JTextField routeNumberTextField;
-	private JLabel routeNumberLabel;
-	private JButton addRouteButton;
-	// bus
-	private JTextField busLicencePlateTextField;
-	private JLabel busLicencePlateLabel;
-	private JButton addBusButton;
-	private JComboBox<String> busToggleList;
-	private JLabel busToggleLabel;
-	private JButton repairButton;
-	// bus assignment
-	private JComboBox<String> busList;
-	private JLabel busLabel;
-	private JComboBox<String> routeList;
-	private JLabel routeLabel;
-	private JDatePickerImpl assignmentDatePicker;
-	
-	private JButton assignButton;
-
 	
 	//Cancel appt
 	private JLabel cancelAppt;
