@@ -90,17 +90,21 @@ public class CarShopController {
 	 * @param userName
 	 * @param password
 	 * @throws Exception
+	 * @return true if account successfully created
 	 */
-	public static void createCustomer(String userName, String password) throws Exception {
+	public static boolean createCustomer(String userName, String password) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
+		boolean isCreated = false;
 		checkValidityOfCustomerCreation(userName, password);
 		try {
 			carShop.addCustomer(userName, password);
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			isCreated = true;
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
+		return isCreated;
 	}
 
 	/**
@@ -711,7 +715,7 @@ public class CarShopController {
 	 * @throws Exception
 	 * @return the logged in user (String userName)
 	 */
-	private static String getLoggedInUser() {
+	public static String getLoggedInUser() {
 		String user = null;
 		try {
 			user = CarShopApplication.getLoggedInUser();
@@ -757,10 +761,12 @@ public class CarShopController {
 	 * Updates the customer account.
 	 * @param newUserName
 	 * @param newPassword
+	 * @return true if account updated successfully
 	 * @throws Exception
 	 */
-	public static void updateCustomer(String newUserName, String newPassword) throws Exception {
+	public static boolean updateCustomer(String newUserName, String newPassword) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
+		boolean isUpdated = false;
 		String currentUserName = getLoggedInUser();
 		checkValidityOfCustomerUpdate(newUserName, newPassword);
 		try {
@@ -771,10 +777,12 @@ public class CarShopController {
 				}
 			}
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			isUpdated = true;
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
+		return isUpdated;
 	}
 
 
@@ -1152,6 +1160,17 @@ public class CarShopController {
 		}
 		
 		return isLoggedIn;
+	}
+	
+	public static boolean logout() throws Exception{
+		boolean isLoggedOut = false;
+		try {
+			CarShopApplication.setLoggedInUser(null);
+			isLoggedOut = true;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return isLoggedOut;
 	}
 	
 	public static boolean createdAccount() throws Exception {
