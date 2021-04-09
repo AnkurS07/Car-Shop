@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
@@ -17,6 +18,7 @@ import org.jdatepicker.impl.SqlDateModel;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
+import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
 import ca.mcgill.ecse223.carshop.controller.TOBookableService;
 import ca.mcgill.ecse223.carshop.controller.TOComboItem;
@@ -43,6 +45,39 @@ public class CarShopPage extends JFrame{
 	
 	// UI elements
 	private JLabel errorMessage;
+	
+	// Header
+	private JLabel headerTitle;
+	private JButton logoutButton;
+	
+	// Login - Sign up
+	private JLabel login;
+	private JLabel signup;
+	private JLabel orLabel;
+	private JLabel loginErrorMessage;
+	private JLabel signupErrorMessage;
+	private JLabel loginUsername;
+	private JLabel loginPassword;
+	private JLabel signupUsername;
+	private JLabel signupPassword;
+	private JTextField loginUsernameField;
+	private JTextField loginPasswordField;
+	private JTextField signupUsernameField;
+	private JTextField signupPasswordField;
+	private JButton loginButton;
+	private JButton signupButton;
+	private JSeparator loginTopSeparator;
+	
+	// Update Account
+	private JLabel updateAccount;
+	private JLabel updateAccountErrorMessage;
+	private JLabel updateAccountSuccessMessage;
+	private JLabel updateUsername;
+	private JLabel updatePassword;
+	private JTextField updateUsernameField;
+	private JTextField updatePasswordField;
+	private JButton updateAccountButton;
+	private JSeparator updateAccountTopSeparator;
 	
 	//Cancel appt
 	private JLabel cancelAppt;
@@ -78,6 +113,10 @@ public class CarShopPage extends JFrame{
 	
 	// data elements
 	private String error = null;
+	private String loginError = null;
+	private String signupError = null;
+	private String updateAccountError = null;
+	private String updateAccountSuccess = null;
 	// toggle sick status
 	// private HashMap<Integer, Integer> drivers;
 	// toggle repairs status
@@ -99,13 +138,82 @@ public class CarShopPage extends JFrame{
 		errorMessage = new JLabel();
 		errorMessage.setForeground(Color.RED);
 		
+		// header
+		headerTitle = new JLabel();
+		headerTitle.setText("CarShop");
+		Font titleFont = headerTitle.getFont();
+		Map<TextAttribute, Object> titleAttributes = new HashMap<>(titleFont.getAttributes());
+		titleAttributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+		titleAttributes.put(TextAttribute.SIZE, 24);
+		headerTitle.setFont(titleFont.deriveFont(titleAttributes));
+		logoutButton = new JButton();
+		logoutButton.setText("Log out");
+		logoutButton.setVisible(false);
+		
+		// login
+		login = new JLabel();
+		login.setText("Login");
+		orLabel = new JLabel();
+		orLabel.setText("OR");
+		loginErrorMessage = new JLabel();
+		loginErrorMessage.setForeground(Color.RED);
+		Font underlinedFont = login.getFont();
+		Map<TextAttribute, Object> underlinedAttributes = new HashMap<>(underlinedFont.getAttributes());
+		underlinedAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+		underlinedAttributes.put(TextAttribute.SIZE, 14);
+		login.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		loginUsername = new JLabel();
+		loginUsername.setText("Username: ");
+		loginPassword = new JLabel();
+		loginPassword.setText("Password: ");
+		loginUsernameField = new JTextField(15);
+		loginPasswordField = new JTextField(15);
+		loginButton = new JButton();
+		loginButton.setText("Login");
+		loginTopSeparator = new JSeparator();
+		
+		// sign up
+		signup = new JLabel();
+		signup.setText("Sign Up");
+		signup.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		signupErrorMessage = new JLabel();
+		signupErrorMessage.setForeground(Color.RED);
+		signupUsername = new JLabel();
+		signupUsername.setText("Username: ");
+		signupPassword = new JLabel();
+		signupPassword.setText("Password: ");
+		signupUsernameField = new JTextField(15);
+		signupPasswordField = new JTextField(15);
+		signupButton = new JButton();
+		signupButton.setText("Sign Up");
+		
+		// Update Account
+		updateAccount = new JLabel();
+		updateAccount.setText("Update Account");
+		updateAccount.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		updateAccountErrorMessage = new JLabel();
+		updateAccountErrorMessage.setForeground(Color.RED);
+		updateAccountSuccessMessage = new JLabel();
+		updateAccountSuccessMessage.setForeground(Color.GREEN);
+		updateUsername = new JLabel();
+		updateUsername.setText("New username: ");
+		updatePassword = new JLabel();
+		updatePassword.setText("New password: ");
+		updateUsernameField = new JTextField(15);
+		updatePasswordField = new JTextField(15);
+		updateAccountButton = new JButton();
+		updateAccountButton.setText("Confirm changes");
+		updateAccountTopSeparator = new JSeparator();
+		hideUpdateAccountSection();
+		
+		
 		// Cancel Appt
 		cancelAppt = new JLabel();
 		cancelAppt.setText("Update/Cancel Appointment");
-		Font font = cancelAppt.getFont();
-		Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
-		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-		cancelAppt.setFont(font.deriveFont(attributes));
+//		Font font = cancelAppt.getFont();
+//		Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
+//		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+		cancelAppt.setFont(underlinedFont.deriveFont(underlinedAttributes));
 		apptLabel = new JLabel();
 		apptLabel.setText("Appointment:");
 		cancelApptButton = new JButton();
@@ -115,7 +223,7 @@ public class CarShopPage extends JFrame{
 		// Make appt
 		makeApptLabel = new JLabel();
 		makeApptLabel.setText("Make Appointment");
-		makeApptLabel.setFont(font.deriveFont(attributes));
+		makeApptLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
 		bookableServiceLabel = new JLabel();
 		bookableServiceLabel.setText("Bookable Service:");
 		bookableServiceList = new JComboBox<String>(new String[0]);
@@ -146,6 +254,31 @@ public class CarShopPage extends JFrame{
 		updateApptButton = new JButton();
 		updateApptButton.setText("Update");
 		
+		// Action Listeners
+		// Listeners for Login - Sign up
+		loginButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				loginButtonActionPerformed(evt);
+			}
+		});
+		
+		logoutButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				logoutButtonActionPerformed(evt);
+			}
+		});
+		
+		signupButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				signupButtonActionPerformed(evt);
+			}
+		});
+		
+		updateAccountButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				updateAccountButtonActionPerformed(evt);
+			}
+		});
 		
 		// listeners for apptList
 		cancelApptButton.addActionListener(new java.awt.event.ActionListener() {
@@ -192,8 +325,61 @@ public class CarShopPage extends JFrame{
 		getContentPane().setLayout(layout);
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
+		// Horizontal Layout
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
+				// Header Section
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(headerTitle)
+						.addGap(50)
+						.addComponent(logoutButton)
+						)
+				// Login - Setup Section
+				.addComponent(loginTopSeparator)
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup()
+								.addComponent(login)
+								.addComponent(loginUsername)
+								.addComponent(loginPassword)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(loginErrorMessage)
+								.addComponent(loginUsernameField)
+								.addComponent(loginPasswordField)
+								.addComponent(loginButton)
+								)
+						.addGap(50)
+						.addComponent(orLabel)
+						.addGap(50)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(signup)
+								.addComponent(signupUsername)
+								.addComponent(signupPassword)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(signupErrorMessage)
+								.addComponent(signupUsernameField)
+								.addComponent(signupPasswordField)
+								.addComponent(signupButton)
+								)
+						)
+				// Update Account Section
+				.addComponent(updateAccountTopSeparator)
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateAccount)
+								.addComponent(updateUsername)
+								.addComponent(updatePassword)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateAccountErrorMessage)
+								.addComponent(updateUsernameField)
+								.addComponent(updatePasswordField)
+								.addComponent(updateAccountButton)
+								)
+						.addComponent(updateAccountSuccessMessage)
+						)
+				// Make-Update-Cancel Appointment Section
 				.addComponent(errorMessage)
 				.addComponent(horizontalLineTop)
 				.addComponent(horizontalLineBottom)
@@ -219,6 +405,9 @@ public class CarShopPage extends JFrame{
 								.addComponent(updateApptButton)
 								.addComponent(cancelApptButton)))
 				);
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {loginUsernameField, loginPasswordField, loginButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signupUsernameField, signupPasswordField, signupButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updateAccountButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelAppt});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, updateApptButton});
@@ -227,11 +416,69 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
 
+		// Vertical Layout
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
-				.addComponent(errorMessage)
+				// Header
+				.addGroup(layout.createParallelGroup()
+						.addComponent(headerTitle)
+						.addComponent(logoutButton)
+						)
+				.addGap(20)
+				// Login - Sign up Section
+				.addGroup(layout.createParallelGroup()
+						.addComponent(loginTopSeparator))
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup()
+								.addComponent(login)
+								.addComponent(loginErrorMessage)
+								.addComponent(signup)
+								.addComponent(signupErrorMessage)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(loginUsername)
+								.addComponent(loginUsernameField)
+								.addComponent(signupUsername)
+								.addComponent(signupUsernameField)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(loginPassword)
+								.addComponent(loginPasswordField)
+								.addComponent(orLabel)
+								
+								.addComponent(signupPassword)
+								.addComponent(signupPasswordField)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(loginButton)
+								.addComponent(signupButton)
+								)
+						)
+				// Update Account Section
+				.addGroup(layout.createParallelGroup()
+						.addComponent(updateAccountTopSeparator))
+				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateAccount)
+								.addComponent(updateAccountErrorMessage)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateUsername)
+								.addComponent(updateUsernameField)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updatePassword)
+								.addComponent(updatePasswordField)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateAccountButton)
+								.addComponent(updateAccountSuccessMessage)
+								)
+						)
+				// Make-Update-Cancel Appointment Section
 				.addGroup(layout.createParallelGroup()
 						.addComponent(horizontalLineTop))
+				.addComponent(errorMessage)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(makeApptLabel)
 						.addComponent(cancelAppt))
@@ -296,6 +543,92 @@ public class CarShopPage extends JFrame{
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
 		pack();
+	}
+	
+	private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		loginError = "";
+		if (loginUsernameField.getText().isBlank() || loginPasswordField.getText().isBlank()) {
+			loginError = "Username and password must not be empty.";
+		}
+		// Check for other errors here //
+		if (loginError.length() == 0) {
+			try {
+				if (CarShopController.logIn(loginUsernameField.getText(), loginPasswordField.getText())) {
+					hideLoginSection();
+					showUpdateAccountSection();
+					headerTitle.setText("Hi, " + CarShopController.getLoggedInUser() + "!");
+					logoutButton.setVisible(true);
+				}
+			} catch (Exception e) {
+				loginError = e.getMessage();
+			}
+		}
+		loginErrorMessage.setText(loginError);
+		refreshData();
+	}
+	
+	private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		try {
+			if (CarShopController.logout()) {
+				showLoginSection();
+				hideUpdateAccountSection();
+				headerTitle.setText("CarShop");
+				logoutButton.setVisible(false);
+				loginUsernameField.setText("");
+				loginPasswordField.setText("");
+				updateAccountErrorMessage.setText("");
+				updateAccountSuccessMessage.setText("");
+			}
+		} catch (Exception e) {
+			loginError = e.getMessage();
+		}
+		refreshData();
+	}
+	
+	private void signupButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		signupError = "";
+		if (signupUsernameField.getText().isBlank() || signupPasswordField.getText().isBlank()) {
+			signupError = "Username and password must not be empty.";
+		}
+		// Check for other errors here //
+		if (signupError.length() == 0) {
+			try {
+				if (CarShopController.createCustomer(signupUsernameField.getText(), signupPasswordField.getText())) {
+					loginUsernameField.setText(signupUsernameField.getText());
+					loginPasswordField.setText(signupPasswordField.getText());
+					signupUsernameField.setText("");
+					signupPasswordField.setText("");
+					
+				}
+			} catch (Exception e) {
+				signupError = e.getMessage();
+			}
+		}
+		signupErrorMessage.setText(signupError);
+		refreshData();
+	}
+	
+	private void updateAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		updateAccountError = "";
+		updateAccountSuccess = "";
+		if (updateUsernameField.getText().isBlank() || updatePasswordField.getText().isBlank()) {
+			updateAccountError = "Username and password must not be empty.";
+		}
+		// Check for other errors here //
+		if (updateAccountError.length() == 0) {
+			try {
+				if (CarShopController.updateCustomer(updateUsernameField.getText(), updatePasswordField.getText())) {
+					updateAccountSuccess = "Account successfully updated!";
+					updateUsernameField.setText("");
+					updatePasswordField.setText("");
+				}
+			} catch (Exception e) {
+				updateAccountError = e.getMessage();
+			}
+		}
+		updateAccountErrorMessage.setText(updateAccountError);
+		updateAccountSuccessMessage.setText(updateAccountSuccess);
+		refreshData();
 	}
 	
 	private void cancelApptButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -509,6 +842,66 @@ public class CarShopPage extends JFrame{
 
 		// update visuals
 		refreshData();	
+	}
+	
+	private void hideLoginSection() {
+		loginTopSeparator.setVisible(false);
+		login.setVisible(false);
+		signup.setVisible(false);
+		orLabel.setVisible(false);
+		loginErrorMessage.setVisible(false);
+		loginUsername.setVisible(false);
+		loginPassword.setVisible(false);
+		signupUsername.setVisible(false);
+		signupPassword.setVisible(false);
+		loginUsernameField.setVisible(false);
+		loginPasswordField.setVisible(false);
+		signupUsernameField.setVisible(false);
+		signupPasswordField.setVisible(false);
+		loginButton.setVisible(false);
+		signupButton.setVisible(false);
+	}
+	
+	private void showLoginSection() {
+		loginTopSeparator.setVisible(true);
+		login.setVisible(true);
+		signup.setVisible(true);
+		orLabel.setVisible(true);
+		loginErrorMessage.setVisible(true);
+		loginUsername.setVisible(true);
+		loginPassword.setVisible(true);
+		signupUsername.setVisible(true);
+		signupPassword.setVisible(true);
+		loginUsernameField.setVisible(true);
+		loginPasswordField.setVisible(true);
+		signupUsernameField.setVisible(true);
+		signupPasswordField.setVisible(true);
+		loginButton.setVisible(true);
+		signupButton.setVisible(true);
+	}
+	
+	private void hideUpdateAccountSection() {
+		updateAccountTopSeparator.setVisible(false);
+		updateAccount.setVisible(false);
+		updateAccountErrorMessage.setVisible(false);
+		updateAccountSuccessMessage.setVisible(false);
+		updateUsername.setVisible(false);
+		updatePassword.setVisible(false);
+		updateUsernameField.setVisible(false);
+		updatePasswordField.setVisible(false);
+		updateAccountButton.setVisible(false);
+	}
+	
+	private void showUpdateAccountSection() {
+		updateAccountTopSeparator.setVisible(true);
+		updateAccount.setVisible(true);
+		updateAccountErrorMessage.setVisible(true);
+		updateAccountSuccessMessage.setVisible(true);
+		updateUsername.setVisible(true);
+		updatePassword.setVisible(true);
+		updateUsernameField.setVisible(true);
+		updatePasswordField.setVisible(true);
+		updateAccountButton.setVisible(true);
 	}
 
 }
