@@ -19,6 +19,7 @@ import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ComboItem;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
@@ -28,12 +29,57 @@ import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.view.OptServiceVisualizer;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
 public class AppointmentController {
 
+	public static Appointment makeAppointmentFromView(boolean overrideErrors, String customerName, TOBookableService toBookableService, List<TOService> toServices, List<TOTimeSlot> toTimeSlots, List<TOTimeSlot> toExclude) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Customer c;
+		User user = User.getWithUsername(customerName);
+		if (user instanceof Customer) {
+			c = (Customer) user;
+		} else if (user instanceof Owner) {
+			throw new Exception("An owner cannot create an appointment");
+		} else {
+			throw new Exception("A technician cannot create an appointment");
+		}
+
+		if (!c.getUsername().equals(CarShopApplication.getLoggedInUser())) {
+			throw new RuntimeException("A customer can only create their own appointments");
+		}
+		Date date = toTimeSlots.get(0).getStartDate();
+		Time time = toTimeSlots.get(0).getStartTime();
+		List<TimeSlot> timeSlots = new ArrayList<TimeSlot>();
+		BookableService mainService;
+		List<Service> optionalServices = new ArrayList<Service>();
+		
+		if(toBookableService instanceof TOService) {
+			mainService = AppointmentController.findService(toBookableService.getName());
+		} else {
+			mainService = AppointmentController.findServiceCombo(toBookableService.getName());
+			for(int i = 1;i<toServices.size();i++) {
+				optionalServices.add(AppointmentController.findService(toServices.get(i).getName()));
+			}
+		}
+		
+		for(int i = 0; i< toTimeSlots.size();i++) {
+			timeSlots.add(new TimeSlot(toTimeSlots.get(i).getStartDate(), toTimeSlots.get(i).getStartTime(), toTimeSlots.get(i).getEndDate(), toTimeSlots.get(i).getEndTime(), carShop));
+		}
+		
+		List<TimeSlot> exclude = new ArrayList<TimeSlot>();
+		for(TOTimeSlot toTs: toExclude) {
+			exclude.add(new TimeSlot(toTs.getStartDate(), toTs.getStartTime(), toTs.getEndDate(), toTs.getEndTime(), carShop));
+		}
+		
+		
+		return makeAppointment(overrideErrors, c, toBookableService.getName(), date, time, timeSlots, mainService, optionalServices, exclude);
+		
+	}
+			
 	public static Appointment makeAppointment(boolean overrideErrors, Customer customer, String mainServiceName,
-			Date date, Time time, List<TimeSlot> timeSlots, BookableService mainService, List<Service> optionalServices)
+			Date date, Time time, List<TimeSlot> timeSlots, BookableService mainService, List<Service> optionalServices, List<TimeSlot> exclude)
 			throws Exception {
 		CarShop carshop = CarShopApplication.getCarShop();
 		
@@ -49,8 +95,13 @@ public class AppointmentController {
 			if (servicesOverlapping(timeSlots)) {
 				throw new Exception("Time slots for two services are overlapping");
 			}
+			
+			// add a check to see if services are presented sequentially in service combos
+			if (!servicesSequential(timeSlots)) {
+				throw new Exception("Services in service combos must be performed sequentially");
+			}
 
-			if (invalidTimeSlot(mainService.getName(), timeSlots.get(0))) {
+			if (invalidTimeSlot(mainService.getName(), timeSlots.get(0), exclude)) {
 				throw new Exception(
 						"There are no available slots for " + mainServiceName + " on " + sdf.format(date) + " at " + t);
 			}
@@ -68,7 +119,7 @@ public class AppointmentController {
 		}
 		
 		for (int i = 0; i < optionalServices.size(); i++) {
-			if (!overrideErrors && invalidTimeSlot(optionalServices.get(i).getName(), timeSlots.get(i+1))) {
+			if (!overrideErrors && invalidTimeSlot(optionalServices.get(i).getName(), timeSlots.get(i+1), exclude)) {
 				throw new Exception(
 						"There are no available slots for " + optionalServices.get(i).getName() + " on " + sdf.format(date) + " at " + t);
 			}
@@ -106,7 +157,7 @@ public class AppointmentController {
 		String sysDate = sdf.format(new Date(CarShopApplication.getSystemDate().getTime()));
 		Appointment app = findAppointment(c, mainServiceName, date, time);
 		
-		app.cancel(sdf.format(date), sysDate);
+		app.cancel(sdf.format(date), sysDate, false);
 		
 		try {
 			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
@@ -116,7 +167,32 @@ public class AppointmentController {
 		}
 	}
 	
-	public static Appointment updateAppointment(boolean isNewService, Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
+	public static void deleteAppt(String customerName, String mainServiceName, Date date, Time time) throws Exception {
+		CarShop carshop = CarShopApplication.getCarShop();
+		Customer c;
+		User user = User.getWithUsername(customerName);
+		if (user instanceof Customer) {
+			c = (Customer) user;
+		} else if (user instanceof Owner) {
+			throw new Exception("An owner cannot cancel an appointment");
+		} else {
+			throw new Exception("A technician cannot cancel an appointment");
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String sysDate = sdf.format(new Date(CarShopApplication.getSystemDate().getTime()));
+		Appointment app = findAppointment(c, mainServiceName, date, time);
+		
+		app.cancel(sdf.format(date), sysDate, true);
+		
+		try {
+			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static Appointment updateAppointment(boolean isNewService, boolean isExistingService, Customer c, Appointment a, List<Service> newOptServices, List<TimeSlot> timeSlots, Date modificationDate) throws Exception {
 		//check overlap
 		// I did not put it in the state machine or else we need to copy
 		// like 200 lines of helper methods and since we still need those here
@@ -124,6 +200,9 @@ public class AppointmentController {
 		CarShop carshop = CarShopApplication.getCarShop();
 		List<TimeSlot> totalTimeSlots = new ArrayList<TimeSlot>();
 		for(ServiceBooking s: a.getServiceBookings()) {
+			if(isExistingService) {
+				break;
+			}
 			totalTimeSlots.add(s.getTimeSlot());
 		}
 		for(TimeSlot t: timeSlots) {
@@ -135,16 +214,17 @@ public class AppointmentController {
 		}
 
 		for(int i=0;i < newOptServices.size();i++) {
-			if (invalidTimeSlot(newOptServices.get(i).getName(), timeSlots.get(i))) {
+			if (invalidTimeSlot(newOptServices.get(i).getName(), timeSlots.get(i), new ArrayList<TimeSlot>())) {
 				throw new Exception("Invlalid time slot");
 			}
 		}
+		
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String appDate = sdf.format(a.getServiceBooking(0).getTimeSlot().getStartDate().getTime());
 		String currentDate = sdf.format(modificationDate.getTime());
 		
-		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService);
+		a.update(newOptServices, timeSlots, currentDate, appDate, isNewService, isExistingService);
 
 		
 		try {
@@ -200,7 +280,7 @@ public class AppointmentController {
 		CarShop carshop = CarShopApplication.getCarShop();
 		java.util.Date currDate=new java.util.Date(); 
 		Date date3 = parseDate(currDate.toString(), "yyyy-MM-dd+HH:mm");
-		a.cancel(date, date3.toString());
+		a.cancel(date, date3.toString(), false);
 		try {
 			CarshopPersistence.save(carshop);			// Serialize the carShop and save to the disk
 		}
@@ -420,15 +500,28 @@ public class AppointmentController {
 		return false;
 	}
 	
-	private static boolean invalidTimeSlot(String serviceName, TimeSlot t1) throws Exception {
+	private static boolean servicesSequential(List<TimeSlot> timeSlots) {
+		// compare i and i+1
+		boolean sequential = true;
+		for (int i = 0; i < timeSlots.size()-1; i++) {
+			if(timeSlots.get(i).getEndTime().compareTo(timeSlots.get(i+1).getStartTime()) > 0){
+				sequential = false;
+				break;
+			}
+		}
+		return sequential;
+	}
+	
+	private static boolean invalidTimeSlot(String serviceName, TimeSlot t1, List<TimeSlot> exclude) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean invalid = false;
-		@SuppressWarnings("deprecation")
-		Date currentDay = new Date(CarShopApplication.getSystemDate().getYear(),
-				CarShopApplication.getSystemDate().getMonth(), CarShopApplication.getSystemDate().getDay());
-		@SuppressWarnings("deprecation")
-		Time currentTime = new Time(CarShopApplication.getSystemDate().getHours(),
-				CarShopApplication.getSystemDate().getMinutes(), 0);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String d = sdf.format(CarShopApplication.getSystemDate());
+		Date currentDay = parseDate(d, "yyyy-MM-dd");
+
+		SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
+		String t = sdf2.format(CarShopApplication.getSystemDate());
+		Time currentTime = new Time(parseDate(t, "HH:mm").getTime());
 
 		// appt in the past
 		if (t1.getStartDate().compareTo(currentDay) < 0
@@ -439,6 +532,17 @@ public class AppointmentController {
 		// overlaps with another appointment
 		for (Appointment a : carShop.getAppointments()) {
 			for (ServiceBooking bs : a.getServiceBookings()) {
+				boolean isExcluded = false;
+				for(TimeSlot ts: exclude) {
+					if(ts.getStartDate().equals(bs.getTimeSlot().getStartDate()) && ts.getStartTime().equals(bs.getTimeSlot().getStartTime())) {
+						isExcluded = true;
+						break;
+					}
+				}
+				if(isExcluded) {
+					continue;
+				}
+			
 				if (serviceName.contains(
 						bs.getService().getGarage().getTechnician().getType().name().toLowerCase().split("-")[0])
 						&& timeSlotOverlaps(t1, bs.getTimeSlot())) {
@@ -487,11 +591,11 @@ public class AppointmentController {
 		boolean overlapping = false;
 		if (!(t2.getStartDate().compareTo(t1.getEndDate()) >= 0 || t2.getEndDate().compareTo(t1.getStartDate()) <= 0)
 				|| (t2.getStartDate().compareTo(t1.getStartDate()) == 0
-						&& !(t2.getStartTime().compareTo(t1.getEndTime()) > 0
-								|| t2.getEndTime().compareTo(t1.getStartTime()) < 0))
+						&& !(t2.getStartTime().compareTo(t1.getEndTime()) >= 0
+								|| t2.getEndTime().compareTo(t1.getStartTime()) <= 0))
 				|| (t2.getEndDate().compareTo(t1.getEndDate()) == 0
-						&& !(t2.getStartTime().compareTo(t1.getEndTime()) > 0
-								|| t2.getEndTime().compareTo(t1.getStartTime()) < 0))
+						&& !(t2.getStartTime().compareTo(t1.getEndTime()) >= 0
+								|| t2.getEndTime().compareTo(t1.getStartTime()) <= 0))
 				|| (t2.getStartDate().compareTo(t1.getEndDate()) == 0
 						&& t2.getStartTime().compareTo(t1.getEndTime()) < 0 && t2.getEndTime().compareTo(t1.getEndTime()) > 0)
 				|| (t2.getEndDate().compareTo(t1.getStartDate()) == 0
@@ -576,7 +680,7 @@ public class AppointmentController {
 		return timeSlots;
 	}
 
-	private static Time incrementTimeByMinutes(Time original, int minutesElapsed) {
+	public static Time incrementTimeByMinutes(Time original, int minutesElapsed) {
 		return new Time(original.getTime() + minutesElapsed * 60000);
 	}
 
@@ -589,4 +693,115 @@ public class AppointmentController {
 			throw new Exception(e.getMessage());
 		}
 	}
+	
+	// Transfer objects
+	
+	public static List<TOAppointment> getAppointments(){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOAppointment> toAppts = new ArrayList<TOAppointment>();
+		for(Appointment a: carShop.getAppointments()) {
+			try {
+				if(CarShopApplication.getLoggedInUser().equals(a.getCustomer().getUsername())) {
+					TOBookableService toBs;
+					if(a.getBookableService() instanceof Service) {
+						Service s = (Service) a.getBookableService();
+						toBs = new TOService(s.getName(), s.getDuration());
+					} else {
+						ServiceCombo sc = (ServiceCombo) a.getBookableService();
+						toBs = new TOServiceCombo(sc.getName());
+						for(ComboItem ci: sc.getServices()) {
+							new TOComboItem(ci.getMandatory(), 
+									new TOService(ci.getService().getName(), 
+											ci.getService().getDuration()), (TOServiceCombo)toBs);
+						}
+					}
+					TOAppointment app = new TOAppointment(a.getBookableService().getName(), toBs);
+					for (ServiceBooking sb: a.getServiceBookings()) {
+						TOTimeSlot toTimeSlot = new TOTimeSlot(sb.getTimeSlot().getStartDate(), sb.getTimeSlot().getStartTime(), sb.getTimeSlot().getEndDate(), sb.getTimeSlot().getEndTime());
+						TOService toService = new TOService(sb.getService().getName(), sb.getService().getDuration()); 
+						new TOServiceBooking(toService, toTimeSlot, app);
+					}
+					toAppts.add(app);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return toAppts;
+		
+	}
+	
+	public static List<TOBookableService> getBookableServices(){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOBookableService> toBs = new ArrayList<TOBookableService>();
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof Service) {
+				Service s = (Service) bs;
+				toBs.add(new TOService(s.getName(), s.getDuration()));
+			} else {
+				ServiceCombo sc = (ServiceCombo) bs;
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				
+				for(ComboItem ci: sc.getServices()) {
+					new TOComboItem(ci.getMandatory(), 
+							new TOService(ci.getService().getName(), 
+									ci.getService().getDuration()), toSc);
+				}
+				toBs.add(toSc);
+			}
+		}
+		return toBs;
+	}
+	
+	public static TOServiceCombo findServiceCombo(List<OptServiceVisualizer> services) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOServiceCombo> toBs = new ArrayList<TOServiceCombo>();
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof ServiceCombo) {
+				ServiceCombo sc = (ServiceCombo) bs;
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				
+				for(ComboItem ci: sc.getServices()) {
+					new TOComboItem(ci.getMandatory(), 
+							new TOService(ci.getService().getName(), 
+									ci.getService().getDuration()), toSc);
+				}
+				toBs.add(toSc);
+			}
+		}
+		boolean foundMatch = false;
+		TOServiceCombo match = null;
+		for(TOServiceCombo sc: toBs) {
+			foundMatch = true;
+			for(int i=0;i<sc.getServices().size();i++) {
+				foundMatch &= sc.getService(i).getService().getName().equals(services.get(i).getTOService().getName());
+			}
+			if(foundMatch) {
+				match = sc;
+				break;
+			}
+		}
+		
+		return match;
+	}
+	
+	public static List<String> getSelectedServiceNames(TOAppointment toApp){
+		List<String> names = new ArrayList<String>();
+		for(TOServiceBooking toSb : toApp.getToServiceBookings()) {
+			names.add(toSb.getToService().getName());
+		}
+		return names;
+	}
+	
+	public static TimeSlot findTimeSlots(TOTimeSlot t1) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		for(TimeSlot t2: carShop.getTimeSlots()) {
+			if(t1.getStartDate().equals(t2.getStartDate()) && t2.getStartTime().equals(t2.getStartTime())) {
+				return t2;
+			}
+		}
+		return null;
+	}
+	
 }
