@@ -194,7 +194,7 @@ public class CarShopPage extends JFrame{
 		updateAccountErrorMessage = new JLabel();
 		updateAccountErrorMessage.setForeground(Color.RED);
 		updateAccountSuccessMessage = new JLabel();
-		updateAccountSuccessMessage.setForeground(Color.GREEN);
+		updateAccountSuccessMessage.setForeground(new Color(0, 153, 0));
 		updateUsername = new JLabel();
 		updateUsername.setText("New username: ");
 		updatePassword = new JLabel();
