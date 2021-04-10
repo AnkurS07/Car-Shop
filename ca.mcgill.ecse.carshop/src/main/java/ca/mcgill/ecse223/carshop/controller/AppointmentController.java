@@ -701,28 +701,31 @@ public class AppointmentController {
 		List<TOAppointment> toAppts = new ArrayList<TOAppointment>();
 		for(Appointment a: carShop.getAppointments()) {
 			try {
-				if(CarShopApplication.getLoggedInUser().equals(a.getCustomer().getUsername())) {
-					TOBookableService toBs;
-					if(a.getBookableService() instanceof Service) {
-						Service s = (Service) a.getBookableService();
-						toBs = new TOService(s.getName(), s.getDuration());
-					} else {
-						ServiceCombo sc = (ServiceCombo) a.getBookableService();
-						toBs = new TOServiceCombo(sc.getName());
-						for(ComboItem ci: sc.getServices()) {
-							new TOComboItem(ci.getMandatory(), 
-									new TOService(ci.getService().getName(), 
-											ci.getService().getDuration()), (TOServiceCombo)toBs);
+				if (CarShopApplication.getLoggedInUser() != null) {
+					if(CarShopApplication.getLoggedInUser().equals(a.getCustomer().getUsername())) {
+						TOBookableService toBs;
+						if(a.getBookableService() instanceof Service) {
+							Service s = (Service) a.getBookableService();
+							toBs = new TOService(s.getName(), s.getDuration());
+						} else {
+							ServiceCombo sc = (ServiceCombo) a.getBookableService();
+							toBs = new TOServiceCombo(sc.getName());
+							for(ComboItem ci: sc.getServices()) {
+								new TOComboItem(ci.getMandatory(), 
+										new TOService(ci.getService().getName(), 
+												ci.getService().getDuration()), (TOServiceCombo)toBs);
+							}
 						}
+						TOAppointment app = new TOAppointment(a.getBookableService().getName(), toBs);
+						for (ServiceBooking sb: a.getServiceBookings()) {
+							TOTimeSlot toTimeSlot = new TOTimeSlot(sb.getTimeSlot().getStartDate(), sb.getTimeSlot().getStartTime(), sb.getTimeSlot().getEndDate(), sb.getTimeSlot().getEndTime());
+							TOService toService = new TOService(sb.getService().getName(), sb.getService().getDuration()); 
+							new TOServiceBooking(toService, toTimeSlot, app);
+						}
+						toAppts.add(app);
 					}
-					TOAppointment app = new TOAppointment(a.getBookableService().getName(), toBs);
-					for (ServiceBooking sb: a.getServiceBookings()) {
-						TOTimeSlot toTimeSlot = new TOTimeSlot(sb.getTimeSlot().getStartDate(), sb.getTimeSlot().getStartTime(), sb.getTimeSlot().getEndDate(), sb.getTimeSlot().getEndTime());
-						TOService toService = new TOService(sb.getService().getName(), sb.getService().getDuration()); 
-						new TOServiceBooking(toService, toTimeSlot, app);
-					}
-					toAppts.add(app);
 				}
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
