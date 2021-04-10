@@ -1323,6 +1323,20 @@ public class CarShopController {
 
 			return isOverlapping;
 	  }
+	
+	public static boolean isCustomerLoggedIn() {
+		boolean isCustomer = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Customer) {
+				isCustomer = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isCustomer;
+	}
 }
 	
 	

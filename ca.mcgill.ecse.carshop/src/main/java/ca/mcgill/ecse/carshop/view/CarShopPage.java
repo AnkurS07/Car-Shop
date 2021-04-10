@@ -254,6 +254,8 @@ public class CarShopPage extends JFrame{
 		updateApptButton = new JButton();
 		updateApptButton.setText("Update");
 		
+		hideAppointmentSection();
+		
 		// Action Listeners
 		// Listeners for Login - Sign up
 		loginButton.addActionListener(new java.awt.event.ActionListener() {
@@ -558,6 +560,9 @@ public class CarShopPage extends JFrame{
 					showUpdateAccountSection();
 					headerTitle.setText("Hi, " + CarShopController.getLoggedInUser() + "!");
 					logoutButton.setVisible(true);
+					if(CarShopController.isCustomerLoggedIn()) {
+						showAppointmentSection();
+					}
 				}
 			} catch (Exception e) {
 				loginError = e.getMessage();
@@ -572,6 +577,7 @@ public class CarShopPage extends JFrame{
 			if (CarShopController.logout()) {
 				showLoginSection();
 				hideUpdateAccountSection();
+				hideAppointmentSection();
 				headerTitle.setText("CarShop");
 				logoutButton.setVisible(false);
 				loginUsernameField.setText("");
@@ -903,5 +909,60 @@ public class CarShopPage extends JFrame{
 		updatePasswordField.setVisible(true);
 		updateAccountButton.setVisible(true);
 	}
+	
+	private void hideAppointmentSection() {
+		//Cancel appt
+		cancelAppt.setVisible(false);
+		apptList.setVisible(false);
+		apptLabel.setVisible(false);
+		cancelApptButton.setVisible(false);
+		
+		// Make Appt
+		makeApptLabel.setVisible(false);
+		bookableServiceList.setVisible(false);
+		bookableServiceLabel.setVisible(false);
+		makeApptButton.setVisible(false);
+		
+		optServicePanel.setVisible(false);
+		
+		
+		datePanel.setVisible(false);
+		apptDatePicker.setVisible(false);
+		apptDateLabel.setVisible(false);
+		
+		//update appt
+		updateApptButton.setVisible(false);
+		datePanelUpdate.setVisible(false);
+		apptDatePickerUpdate.setVisible(false);
+		optServicePanelUpdate.setVisible(false);
+	}
+	
+	private void showAppointmentSection() {
+		//Cancel appt
+		cancelAppt.setVisible(true);
+		apptList.setVisible(true);
+		apptLabel.setVisible(true);
+		cancelApptButton.setVisible(true);
+		
+		// Make Appt
+		makeApptLabel.setVisible(true);
+		bookableServiceList.setVisible(true);
+		bookableServiceLabel.setVisible(true);
+		makeApptButton.setVisible(true);
+		
+		optServicePanel.setVisible(true);
+		
+		
+		datePanel.setVisible(true);
+		apptDatePicker.setVisible(true);
+		apptDateLabel.setVisible(true);
+		
+		//update appt
+		updateApptButton.setVisible(true);
+		datePanelUpdate.setVisible(true);
+		apptDatePickerUpdate.setVisible(true);
+		optServicePanelUpdate.setVisible(true);
+	}
+	
 
 }
