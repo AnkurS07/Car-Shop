@@ -1336,7 +1336,7 @@ public class CucumberStepDefinitions {
 			}
 
 			AppointmentController.makeAppointment(false, AppointmentController.findCustomer(customer),
-					mainServiceString, date, times.get(0), timeSlots, main, optionalServices);
+					mainServiceString, date, times.get(0), timeSlots, main, optionalServices, new ArrayList<TimeSlot>());
 
 		} catch (Exception e) {
 			errorReportMessage = e.getMessage();
@@ -1374,7 +1374,7 @@ public class CucumberStepDefinitions {
 						columns.get(4).split("\\,"));
 
 				AppointmentController.makeAppointment(true, customer, mainServiceName, date, first, timeSlots,
-						mainService, optionalServices);
+						mainService, optionalServices, new ArrayList<TimeSlot>());
 
 			}
 			CarShopApplication.setLoggedInUser(currentUser);
@@ -1631,7 +1631,7 @@ public class CucumberStepDefinitions {
 				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)mainService).getMainService().getService(), services.toArray(new Service[services.size()]));
 			}
 			
-			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services, new ArrayList<TimeSlot>());
 			
 		} catch (Exception e) {
 			error += e.getMessage();
@@ -1759,7 +1759,7 @@ public class CucumberStepDefinitions {
 				services.toArray(new Service[services.size()]));
 		
 		try {
-			AppointmentController.updateAppointment(true, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+			AppointmentController.updateAppointment(true, false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
 		} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
@@ -1792,7 +1792,7 @@ public class CucumberStepDefinitions {
 				services.toArray(new Service[services.size()]));
 		
 		try {
-			AppointmentController.updateAppointment(false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+			AppointmentController.updateAppointment(false, false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
 		} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;
@@ -1823,7 +1823,7 @@ public class CucumberStepDefinitions {
 				timeSlots = AppointmentController.generateTimeSlotsFromStarts(date, times, ((ServiceCombo)mainService).getMainService().getService(), services.toArray(new Service[services.size()]));
 			}
 			
-			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services);
+			currentApp = AppointmentController.makeAppointment(false, c, mainServiceString, date, times.get(0), timeSlots, mainService, services, new ArrayList<TimeSlot>());
 			
 		} 
 		catch (Exception e) {
@@ -1846,14 +1846,15 @@ public class CucumberStepDefinitions {
 			List<Service> services = new ArrayList<Service>();
 			assertNotNull(currentApp);
 			
-			List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), times, 
-					services.toArray(new Service[services.size()]));
-			for(ServiceBooking service:currentApp.getServiceBookings()) {
+			services.add(AppointmentController.findService(serviceName));
+			/*for(ServiceBooking service:currentApp.getServiceBookings()) {
 				services.add(service.getService());
 				
-			}
+			}*/
+			List<TimeSlot> timeSlots = AppointmentController.generateTimeSlotsFromStarts(currentApp.getServiceBooking(0).getTimeSlot().getStartDate(), times, services.toArray(new Service[services.size()]));
+			//List<TimeSlot> timeSlots = new ArrayList<TimeSlot>();
 			
-			currentApp = AppointmentController.updateAppointment(true, c, currentApp, services, timeSlots, date);
+			currentApp = AppointmentController.updateAppointment(false, true, c, currentApp, services, timeSlots, date);
 		} 
 		catch (Exception e) {
 			error = e.getMessage();
@@ -1885,7 +1886,7 @@ public class CucumberStepDefinitions {
 				services.toArray(new Service[services.size()]));
 		
 		try {
-			AppointmentController.updateAppointment(false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
+			AppointmentController.updateAppointment(false, false, AppointmentController.findCustomer(username), currentApp, services, timeSlots, date);
 		} catch (Exception e) {
 			error += e.getMessage();
 			errorCntr++;

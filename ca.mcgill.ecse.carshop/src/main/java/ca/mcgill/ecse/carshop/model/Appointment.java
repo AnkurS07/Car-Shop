@@ -92,7 +92,7 @@ public class Appointment implements Serializable
     return wasEventProcessed;
   }
 
-  public boolean cancel(String currentDate,String sysDate)
+  public boolean cancel(String currentDate,String sysDate,boolean overrideError)
   {
     boolean wasEventProcessed = false;
     
@@ -100,13 +100,13 @@ public class Appointment implements Serializable
     switch (aAppStatus)
     {
       case Booked:
-        if (canCancel(currentDate,sysDate))
+        if (canCancel(currentDate,sysDate,overrideError))
         {
           setAppStatus(AppStatus.Final);
           wasEventProcessed = true;
           break;
         }
-        if (!(canCancel(currentDate,sysDate)))
+        if (!(canCancel(currentDate,sysDate,overrideError)))
         {
         // line 11 "../../../../../CarShopStates.ump"
           rejectCancel();
@@ -128,7 +128,7 @@ public class Appointment implements Serializable
     return wasEventProcessed;
   }
 
-  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots,String currentDate,String sysDate,boolean isNewService)
+  public boolean update(List<Service> newOptServices,List<TimeSlot> timeSlots,String currentDate,String sysDate,boolean isNewService,boolean isExistingService)
   {
     boolean wasEventProcessed = false;
     
@@ -139,7 +139,7 @@ public class Appointment implements Serializable
         if (canUpdate(currentDate,sysDate))
         {
         // line 13 "../../../../../CarShopStates.ump"
-          updateApp(newOptServices, timeSlots, isNewService);
+          updateApp(newOptServices, timeSlots, isNewService, isExistingService);
           setAppStatus(AppStatus.Booked);
           wasEventProcessed = true;
           break;
@@ -157,7 +157,15 @@ public class Appointment implements Serializable
         if (canUpdateInProgress(isNewService))
         {
         // line 26 "../../../../../CarShopStates.ump"
-          updateApp(newOptServices, timeSlots, isNewService);
+          updateApp(newOptServices, timeSlots, isNewService, isExistingService);
+          setAppStatus(AppStatus.InProgress);
+          wasEventProcessed = true;
+          break;
+        }
+        if (!(canUpdateInProgress(isNewService)))
+        {
+        // line 27 "../../../../../CarShopStates.ump"
+          rejectUpdateInProgress();
           setAppStatus(AppStatus.InProgress);
           wasEventProcessed = true;
           break;
@@ -492,8 +500,8 @@ public class Appointment implements Serializable
   }
 
   // line 74 "../../../../../CarShopStates.ump"
-   private boolean canCancel(String currentDate, String sysDate){
-    return !currentDate.equals(sysDate);
+   private boolean canCancel(String currentDate, String sysDate, boolean overrideError){
+    return !currentDate.equals(sysDate) || overrideError;
   }
 
   // line 78 "../../../../../CarShopStates.ump"
@@ -502,7 +510,7 @@ public class Appointment implements Serializable
   }
 
   // line 82 "../../../../../CarShopStates.ump"
-   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService){
+   private void updateApp(List<Service> newOptServices, List<TimeSlot> timeSlots, boolean isNewService, boolean isExistingService){
     List<String> servicescopy = new ArrayList<>();
 	   for(int i=0;i<this.getServiceBookings().size();i++){
 		   servicescopy.add(this.getServiceBooking(i).getService().getName());
@@ -520,6 +528,9 @@ public class Appointment implements Serializable
 			}
 			for(int i=0;i<newOptServices.size();i++) {
 				new ServiceBooking(newOptServices.get(i),timeSlots.get(i), this);
+			}
+			if(isExistingService) {
+				this.setBookableService(newOptServices.get(0));
 			}
 		} else {
 			// adding new services to the app

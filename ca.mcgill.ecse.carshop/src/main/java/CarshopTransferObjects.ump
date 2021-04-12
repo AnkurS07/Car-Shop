@@ -14,8 +14,38 @@ class TOTimeSlot {
 	Time endTime;
 }
 
+class TOServiceCombo {
+	isA TOBookableService;
+	1 <@>- * TOComboItem services;
+}
+
+class TOComboItem {
+	boolean mandatory;
+	* -> 1 TOService service;
+}
 
 class TOService {
-  isA BookableService;
+  isA TOBookableService;
   int duration;
+}
+
+class TOCustomer {
+	lazy Integer noShowCount;
+}
+
+class TOBookableService {
+	abstract;
+	String name;
+}
+
+class TOServiceBooking {
+	* -- 1 TOService toService;
+	0..1 -> 1 TOTimeSlot toTimeSlot;
+}
+
+class TOAppointment {
+	String mainServiceName;
+	* -- 1 TOBookableService toBookableService;
+	1 <@>- * TOServiceBooking toServiceBookings;
+	
 }
