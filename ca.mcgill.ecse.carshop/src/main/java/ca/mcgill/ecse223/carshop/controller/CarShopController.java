@@ -1225,14 +1225,16 @@ public class CarShopController {
 		return hasBusinessHour;
 	}
 	
-	public static void addHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+	public static boolean addHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		boolean wasAdded = false;
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		Time start = new Time(sdf.parse(startTime).getTime());
 		Time end = new Time(sdf.parse(endTime).getTime());
+
 		
 		//add checks
 		if(start.compareTo(end)>0) {
@@ -1255,15 +1257,19 @@ public class CarShopController {
 			BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
 			garage.addBusinessHour(newBusinessHour);
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			wasAdded = true;
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
+		return wasAdded;
 	}
 	
-	public static void removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+	public static boolean removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		ArrayList<BusinessHour> toRemove = new ArrayList<BusinessHour>();
+		boolean removed = false;
 				
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
@@ -1278,15 +1284,18 @@ public class CarShopController {
 		try {
 			for(BusinessHour h: garage.getBusinessHours()) {
 				if(h.getDayOfWeek().equals(dayOfWeek) && h.getStartTime().equals(start) && h.getEndTime().equals(end)) {
-					garage.removeBusinessHour(h);
-					h.delete();
+					toRemove.add(h);
 				}
 			}
+			garage.removeBusinessHour(toRemove.get(0));
+			toRemove.get(0).delete();
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			removed = true;
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
+		return removed;
 		
 	}
 	
@@ -1351,6 +1360,7 @@ public class CarShopController {
 		}
 		return isTechnician;
 	}
+	
 }
 	
 	
