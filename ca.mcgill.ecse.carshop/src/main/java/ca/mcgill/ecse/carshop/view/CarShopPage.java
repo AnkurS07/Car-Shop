@@ -17,6 +17,12 @@ import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
+import ca.mcgill.ecse.carshop.model.BusinessHour;
+import ca.mcgill.ecse.carshop.model.Customer;
+import ca.mcgill.ecse.carshop.model.Garage;
+import ca.mcgill.ecse.carshop.model.Technician;
+import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
@@ -33,6 +39,7 @@ import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,31 +89,24 @@ public class CarShopPage extends JFrame{
 	
 	// Update Garage Hours
 	private JLabel addNewLabel;
-	private JLabel changeHoursLabel;
+	private JLabel removeHoursLabel;
 	private JLabel newHoursDayLabel;
 	private JLabel newHoursOpenLabel;
 	private JLabel newHoursCloseLabel;
-	private JLabel updateHoursDayLabel;
-	private JLabel updateHoursOpenLabel;
-	private JLabel updateHoursCloseLabel;
+	private JLabel removeHoursDayLabel;
 	private JLabel newGarageHoursErrorMessage;
-	private JLabel updateGarageHoursErrorMessage;
+	private JLabel removeGarageHoursErrorMessage;
+	private JLabel newGarageHoursSuccessMessage;
+	private JLabel removeGarageHoursSuccessMessage;
 	private JLabel timeSeparator1;
 	private JLabel timeSeparator2;
-	private JLabel timeSeparator3;
-	private JLabel timeSeparator4;
 	private JComboBox<String> newHoursDayBox;
-	private JComboBox<String> updateHoursDayBox;
+	private JComboBox<String> removeHoursDayBox;
 	private JComboBox<String> newHoursOpenHBox;
 	private JComboBox<String> newHoursOpenMBox;
 	private JComboBox<String> newHoursCloseHBox;
 	private JComboBox<String> newHoursCloseMBox;
-	private JComboBox<String> updateHoursOpenHBox;
-	private JComboBox<String> updateHoursOpenMBox;
-	private JComboBox<String> updateHoursCloseHBox;
-	private JComboBox<String> updateHoursCloseMBox;
 	private JButton addGarageHoursButton;
-	private JButton updateGarageHoursButton;
 	private JButton removeGarageHoursButton;
 	private JSeparator garageOpeningHoursTopSeparator;
 	
@@ -150,6 +150,10 @@ public class CarShopPage extends JFrame{
 	private String signupError = null;
 	private String updateAccountError = null;
 	private String updateAccountSuccess = null;
+	private String newGarageHoursError = null;
+	private String newGarageHoursSuccess = null;
+	private String removeGarageHoursError = null;
+	private String removeGarageHoursSuccess = null;
 	// toggle sick status
 	// private HashMap<Integer, Integer> drivers;
 	// toggle repairs status
@@ -320,6 +324,38 @@ public class CarShopPage extends JFrame{
 			}
 		});
 		
+		newHoursDayBox.addActionListener (new java.awt.event.ActionListener() {
+		    public void actionPerformed(java.awt.event.ActionEvent evt) {
+		    	newGarageHoursError = "";
+				newGarageHoursSuccess = "";
+				newGarageHoursErrorMessage.setText(newGarageHoursError);
+				newGarageHoursSuccessMessage.setText(newGarageHoursSuccess);
+				refreshData();
+		    }
+		});
+		
+		removeHoursDayBox.addActionListener (new java.awt.event.ActionListener() {
+		    public void actionPerformed(java.awt.event.ActionEvent evt) {
+		    	removeGarageHoursError = "";
+		    	removeGarageHoursSuccess = "";
+		    	removeGarageHoursErrorMessage.setText(removeGarageHoursError);
+		    	removeGarageHoursSuccessMessage.setText(removeGarageHoursSuccess);
+				refreshData();
+		    }
+		});
+		
+		addGarageHoursButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addGarageHoursButtonActionPerformed(evt);
+			}
+		});
+		
+		removeGarageHoursButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				updateGarageHoursButtonActionPerformed(evt);
+			}
+		});
+		
 		// listeners for apptList
 		cancelApptButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -440,32 +476,23 @@ public class CarShopPage extends JFrame{
 														.addComponent(newHoursCloseMBox)
 														)
 												.addComponent(addGarageHoursButton)
+												.addComponent(newGarageHoursSuccessMessage)
+												.addComponent(newGarageHoursErrorMessage)
 												)
 										)
 								)
 						.addGap(150)
 						.addGroup(layout.createParallelGroup()
-								.addComponent(changeHoursLabel)
+								.addComponent(removeHoursLabel)
 								.addGroup(layout.createSequentialGroup()
 										.addGroup(layout.createParallelGroup()
-												.addComponent(updateHoursDayLabel)
-												.addComponent(updateHoursOpenLabel)
-												.addComponent(updateHoursCloseLabel)
+												.addComponent(removeHoursDayLabel)
 												)
 										.addGroup(layout.createParallelGroup()
-												.addComponent(updateHoursDayBox)
-												.addGroup(layout.createSequentialGroup()
-														.addComponent(updateHoursOpenHBox)
-														.addComponent(timeSeparator3)
-														.addComponent(updateHoursOpenMBox)
-														)
-												.addGroup(layout.createSequentialGroup()
-														.addComponent(updateHoursCloseHBox)
-														.addComponent(timeSeparator4)
-														.addComponent(updateHoursCloseMBox)
-														)
-												.addComponent(updateGarageHoursButton)
+												.addComponent(removeHoursDayBox)
 												.addComponent(removeGarageHoursButton)
+												.addComponent(removeGarageHoursErrorMessage)
+												.addComponent(removeGarageHoursSuccessMessage)
 												)
 										)
 								)
@@ -501,7 +528,7 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signupUsernameField, signupPasswordField, signupButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updateAccountButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {newHoursDayBox, addGarageHoursButton});
-		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateHoursDayBox, updateGarageHoursButton, removeGarageHoursButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {removeHoursDayBox, removeGarageHoursButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelAppt});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, updateApptButton});
@@ -573,39 +600,37 @@ public class CarShopPage extends JFrame{
 				.addComponent(garageOpeningHoursTopSeparator)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(addNewLabel)
-						.addComponent(changeHoursLabel)
+						.addComponent(removeHoursLabel)
 						)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(newHoursDayLabel)
 						.addComponent(newHoursDayBox)
-						.addComponent(updateHoursDayLabel)
-						.addComponent(updateHoursDayBox)
+						.addComponent(removeHoursDayLabel)
+						.addComponent(removeHoursDayBox)
 						)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(newHoursOpenLabel)
 						.addComponent(newHoursOpenHBox)
 						.addComponent(timeSeparator1)
 						.addComponent(newHoursOpenMBox)
-						.addComponent(updateHoursOpenLabel)
-						.addComponent(updateHoursOpenHBox)
-						.addComponent(timeSeparator3)
-						.addComponent(updateHoursOpenMBox)
+						.addComponent(removeGarageHoursButton)
 						)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(newHoursCloseLabel)
 						.addComponent(newHoursCloseHBox)
 						.addComponent(timeSeparator2)
 						.addComponent(newHoursCloseMBox)
-						.addComponent(updateHoursCloseLabel)
-						.addComponent(updateHoursCloseHBox)
-						.addComponent(timeSeparator4)
-						.addComponent(updateHoursCloseMBox)
+						.addComponent(removeGarageHoursErrorMessage)
+						.addComponent(removeGarageHoursSuccessMessage)
 						)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(addGarageHoursButton)
-						.addComponent(updateGarageHoursButton)
 						)
-				.addComponent(removeGarageHoursButton)
+				.addGroup(layout.createParallelGroup()
+						.addComponent(newGarageHoursSuccessMessage)
+						.addComponent(newGarageHoursErrorMessage)
+						)
+				
 				// Make-Update-Cancel Appointment Section
 				.addGroup(layout.createParallelGroup()
 						.addComponent(horizontalLineTop))
@@ -768,6 +793,74 @@ public class CarShopPage extends JFrame{
 		}
 		updateAccountErrorMessage.setText(updateAccountError);
 		updateAccountSuccessMessage.setText(updateAccountSuccess);
+		refreshData();
+	}
+	
+	private void addGarageHoursButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		newGarageHoursError = "";
+		newGarageHoursSuccess = "";
+		// Check for other errors here //
+		if (newGarageHoursError.length() == 0) {
+			try {
+				String day = (String)newHoursDayBox.getSelectedItem();
+				String inputStartTime = newHoursOpenHBox.getSelectedItem() + ":" + newHoursOpenMBox.getSelectedItem();
+				String inputEndTime = newHoursCloseHBox.getSelectedItem() + ":" + newHoursCloseMBox.getSelectedItem();
+				String type = "";
+				User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+				if (user instanceof Technician) {
+					type = String.valueOf(((Technician) user).getType());
+				}
+				if (CarShopController.addHoursToGarageOfTechnicianType(day, inputStartTime, inputEndTime, type)) {
+					newGarageHoursSuccess = "Business hours successfully added!";
+				}
+			} catch (Exception e) {
+				newGarageHoursError = e.getMessage();
+			}
+		}
+		newGarageHoursErrorMessage.setText(newGarageHoursError);
+		newGarageHoursSuccessMessage.setText(newGarageHoursSuccess);
+		refreshData();
+	}
+	
+	private void updateGarageHoursButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		removeGarageHoursError = "";
+		removeGarageHoursSuccess = "";
+		// Check for other errors here //
+		if (removeGarageHoursError.length() == 0) {
+			try {
+				String day = (String)newHoursDayBox.getSelectedItem();
+				String type = "";
+				ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+				User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+				if (user instanceof Technician) {
+					type = String.valueOf(((Technician) user).getType());
+					for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
+						if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
+							bhOnThatDay.add(bh);
+						}
+					}
+					if (bhOnThatDay.size() == 0) {
+						removeGarageHoursError = "No existing hours on that day.";
+					}
+					else {
+						for (BusinessHour bh : bhOnThatDay) {
+							DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+							String start = dateFormat.format(bh.getStartTime());
+							String end = dateFormat.format(bh.getEndTime());
+							if (CarShopController.removeHoursToGarageOfTechnicianType(day, start, end, type)) {
+								removeGarageHoursSuccess = "Business hours removed successfully!";
+								System.out.println(removeGarageHoursSuccess);
+							}
+						}
+					}
+				}				
+			} catch (Exception e) {
+				e.printStackTrace();
+				removeGarageHoursError = e.getMessage();
+			}
+		}
+		removeGarageHoursErrorMessage.setText(removeGarageHoursError);
+		removeGarageHoursSuccessMessage.setText(removeGarageHoursSuccess);
 		refreshData();
 	}
 	
@@ -993,58 +1086,49 @@ public class CarShopPage extends JFrame{
 		underlinedAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 		underlinedAttributes.put(TextAttribute.SIZE, 14);
 		addNewLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
-		changeHoursLabel = new JLabel();
-		changeHoursLabel.setText("Change Garage Hours");
-		changeHoursLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		removeHoursLabel = new JLabel();
+		removeHoursLabel.setText("Remove Garage Hours");
+		removeHoursLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
 		newHoursDayLabel = new JLabel();
 		newHoursDayLabel.setText("Day");
 		newHoursOpenLabel = new JLabel();
 		newHoursOpenLabel.setText("Open");
 		newHoursCloseLabel = new JLabel();
 		newHoursCloseLabel.setText("Close");
-		updateHoursDayLabel = new JLabel();
-		updateHoursDayLabel.setText("Day");
-		updateHoursOpenLabel = new JLabel();
-		updateHoursOpenLabel.setText("Open");
-		updateHoursCloseLabel = new JLabel();
-		updateHoursCloseLabel.setText("Close");
+		removeHoursDayLabel = new JLabel();
+		removeHoursDayLabel.setText("Day");
 		newGarageHoursErrorMessage = new JLabel();
 		newGarageHoursErrorMessage.setForeground(Color.RED);
-		updateGarageHoursErrorMessage = new JLabel();
-		updateGarageHoursErrorMessage.setForeground(Color.RED);
+		removeGarageHoursErrorMessage = new JLabel();
+		removeGarageHoursErrorMessage.setForeground(Color.RED);
+		newGarageHoursSuccessMessage = new JLabel();
+		newGarageHoursSuccessMessage.setForeground(new Color(0, 153, 0));
+		removeGarageHoursSuccessMessage = new JLabel();
+		removeGarageHoursSuccessMessage.setForeground(new Color(0, 153, 0));
 		timeSeparator1 = new JLabel();
 		timeSeparator1.setText(":");
 		timeSeparator2 = new JLabel();
 		timeSeparator2.setText(":");
-		timeSeparator3 = new JLabel();
-		timeSeparator3.setText(":");
-		timeSeparator4 = new JLabel();
-		timeSeparator4.setText(":");
 		Dimension bigBox = new Dimension(150, 20);
 		Dimension smallBox = new Dimension(20, 20);
 		newHoursDayBox = new JComboBox<String>(new String[0]);
 		newHoursDayBox.setSize(bigBox);
 		newHoursDayBox.setMaximumSize(bigBox);
 		newHoursDayBox.setPreferredSize(bigBox);
-		updateHoursDayBox = new JComboBox<String>(new String[0]);
-		updateHoursDayBox.setSize(bigBox);
-		updateHoursDayBox.setMaximumSize(bigBox);
-		updateHoursDayBox.setPreferredSize(bigBox);
+		removeHoursDayBox = new JComboBox<String>(new String[0]);
+		removeHoursDayBox.setSize(bigBox);
+		removeHoursDayBox.setMaximumSize(bigBox);
+		removeHoursDayBox.setPreferredSize(bigBox);
 		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 		for (String day : days) {
 			newHoursDayBox.addItem(day);
-			updateHoursDayBox.addItem(day);
+			removeHoursDayBox.addItem(day);
 		}
 		newHoursOpenHBox = new JComboBox<String>(new String[0]);
 		newHoursOpenMBox = new JComboBox<String>(new String[0]);
 		newHoursCloseHBox = new JComboBox<String>(new String[0]);
 		newHoursCloseMBox = new JComboBox<String>(new String[0]);
-		updateHoursOpenHBox = new JComboBox<String>(new String[0]);
-		updateHoursOpenMBox = new JComboBox<String>(new String[0]);
-		updateHoursCloseHBox = new JComboBox<String>(new String[0]);
-		updateHoursCloseMBox = new JComboBox<String>(new String[0]);
-		JComboBox[] smallBoxes = {newHoursOpenHBox, newHoursOpenMBox, newHoursCloseHBox, newHoursCloseMBox, 
-				updateHoursOpenHBox, updateHoursOpenMBox, updateHoursCloseHBox, updateHoursCloseMBox};
+		JComboBox[] smallBoxes = {newHoursOpenHBox, newHoursOpenMBox, newHoursCloseHBox, newHoursCloseMBox};
 		for (JComboBox box : smallBoxes) {
 			box.setSize(smallBox);
 			box.setMaximumSize(smallBox);
@@ -1053,19 +1137,13 @@ public class CarShopPage extends JFrame{
 		for(int i = 0; i< 24; i++) {
 			newHoursOpenHBox.addItem(String.valueOf(i));
 			newHoursCloseHBox.addItem(String.valueOf(i));
-			updateHoursOpenHBox.addItem(String.valueOf(i));
-			updateHoursCloseHBox.addItem(String.valueOf(i));
 		}
 		for(int i = 0; i< 60; i++) {
 			newHoursOpenMBox.addItem(String.valueOf(i));
 			newHoursCloseMBox.addItem(String.valueOf(i));
-			updateHoursOpenMBox.addItem(String.valueOf(i));
-			updateHoursCloseMBox.addItem(String.valueOf(i));
 		}
 		addGarageHoursButton = new JButton();
 		addGarageHoursButton.setText("Add business hours");
-		updateGarageHoursButton = new JButton();
-		updateGarageHoursButton.setText("Confirm changes");
 		removeGarageHoursButton = new JButton();
 		removeGarageHoursButton.setText("Remove on that day");
 		garageOpeningHoursTopSeparator = new JSeparator();
@@ -1133,62 +1211,50 @@ public class CarShopPage extends JFrame{
 	
 	private void hideUpdateGarageSection() {
 		addNewLabel.setVisible(false);
-		changeHoursLabel.setVisible(false);
+		removeHoursLabel.setVisible(false);
 		newHoursDayLabel.setVisible(false);
 		newHoursOpenLabel.setVisible(false);
 		newHoursCloseLabel.setVisible(false);
-		updateHoursDayLabel.setVisible(false);
-		updateHoursOpenLabel.setVisible(false);
-		updateHoursCloseLabel.setVisible(false);
+		removeHoursDayLabel.setVisible(false);
 		newGarageHoursErrorMessage.setVisible(false);
-		updateGarageHoursErrorMessage.setVisible(false);
+		newGarageHoursSuccessMessage.setVisible(false);
+		removeGarageHoursErrorMessage.setVisible(false);
+		removeGarageHoursSuccessMessage.setVisible(false);
 		timeSeparator1.setVisible(false);
 		timeSeparator2.setVisible(false);
-		timeSeparator3.setVisible(false);
-		timeSeparator4.setVisible(false);
 		newHoursDayBox.setVisible(false);
-		updateHoursDayBox.setVisible(false);
+		removeHoursDayBox.setVisible(false);
 		newHoursOpenHBox.setVisible(false);
 		newHoursOpenMBox.setVisible(false);
 		newHoursCloseHBox.setVisible(false);
 		newHoursCloseMBox.setVisible(false);
-		updateHoursOpenHBox.setVisible(false);
-		updateHoursOpenMBox.setVisible(false);
-		updateHoursCloseHBox.setVisible(false);
-		updateHoursCloseMBox.setVisible(false);
 		addGarageHoursButton.setVisible(false);
-		updateGarageHoursButton.setVisible(false);
+		removeGarageHoursButton.setVisible(false);
 		removeGarageHoursButton.setVisible(false);
 		garageOpeningHoursTopSeparator.setVisible(false);
 	}
 	
 	private void showUpdateGarageSection() {
 		addNewLabel.setVisible(true);
-		changeHoursLabel.setVisible(true);
+		removeHoursLabel.setVisible(true);
 		newHoursDayLabel.setVisible(true);
 		newHoursOpenLabel.setVisible(true);
 		newHoursCloseLabel.setVisible(true);
-		updateHoursDayLabel.setVisible(true);
-		updateHoursOpenLabel.setVisible(true);
-		updateHoursCloseLabel.setVisible(true);
+		removeHoursDayLabel.setVisible(true);
 		newGarageHoursErrorMessage.setVisible(true);
-		updateGarageHoursErrorMessage.setVisible(true);
+		newGarageHoursSuccessMessage.setVisible(true);
+		removeGarageHoursErrorMessage.setVisible(true);
+		removeGarageHoursSuccessMessage.setVisible(true);
 		timeSeparator1.setVisible(true);
 		timeSeparator2.setVisible(true);
-		timeSeparator3.setVisible(true);
-		timeSeparator4.setVisible(true);
 		newHoursDayBox.setVisible(true);
-		updateHoursDayBox.setVisible(true);
+		removeHoursDayBox.setVisible(true);
 		newHoursOpenHBox.setVisible(true);
 		newHoursOpenMBox.setVisible(true);
 		newHoursCloseHBox.setVisible(true);
 		newHoursCloseMBox.setVisible(true);
-		updateHoursOpenHBox.setVisible(true);
-		updateHoursOpenMBox.setVisible(true);
-		updateHoursCloseHBox.setVisible(true);
-		updateHoursCloseMBox.setVisible(true);
 		addGarageHoursButton.setVisible(true);
-		updateGarageHoursButton.setVisible(true);
+		removeGarageHoursButton.setVisible(true);
 		removeGarageHoursButton.setVisible(true);
 		garageOpeningHoursTopSeparator.setVisible(true);
 	}
