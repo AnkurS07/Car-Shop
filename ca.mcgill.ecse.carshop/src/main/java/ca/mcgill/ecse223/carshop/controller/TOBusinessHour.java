@@ -2,32 +2,35 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse223.carshop.controller;
-import java.sql.Date;
 import java.sql.Time;
 
-// line 11 "../../../../../CarshopTransferObjects.ump"
-public class TOTimeSlot
+// line 68 "../../../../../CarshopTransferObjects.ump"
+public class TOBusinessHour
 {
+
+  //------------------------
+  // ENUMERATIONS
+  //------------------------
+
+  public enum DayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
 
-  //TOTimeSlot Attributes
-  private Date startDate;
+  //TOBusinessHour Attributes
+  private DayOfWeek dayOfWeek;
   private Time startTime;
-  private Date endDate;
   private Time endTime;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TOTimeSlot(Date aStartDate, Time aStartTime, Date aEndDate, Time aEndTime)
+  public TOBusinessHour(DayOfWeek aDayOfWeek, Time aStartTime, Time aEndTime)
   {
-    startDate = aStartDate;
+    dayOfWeek = aDayOfWeek;
     startTime = aStartTime;
-    endDate = aEndDate;
     endTime = aEndTime;
   }
 
@@ -35,10 +38,10 @@ public class TOTimeSlot
   // INTERFACE
   //------------------------
 
-  public boolean setStartDate(Date aStartDate)
+  public boolean setDayOfWeek(DayOfWeek aDayOfWeek)
   {
     boolean wasSet = false;
-    startDate = aStartDate;
+    dayOfWeek = aDayOfWeek;
     wasSet = true;
     return wasSet;
   }
@@ -51,14 +54,6 @@ public class TOTimeSlot
     return wasSet;
   }
 
-  public boolean setEndDate(Date aEndDate)
-  {
-    boolean wasSet = false;
-    endDate = aEndDate;
-    wasSet = true;
-    return wasSet;
-  }
-
   public boolean setEndTime(Time aEndTime)
   {
     boolean wasSet = false;
@@ -67,19 +62,14 @@ public class TOTimeSlot
     return wasSet;
   }
 
-  public Date getStartDate()
+  public DayOfWeek getDayOfWeek()
   {
-    return startDate;
+    return dayOfWeek;
   }
 
   public Time getStartTime()
   {
     return startTime;
-  }
-
-  public Date getEndDate()
-  {
-    return endDate;
   }
 
   public Time getEndTime()
@@ -94,9 +84,8 @@ public class TOTimeSlot
   public String toString()
   {
     return super.toString() + "["+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "startDate" + "=" + (getStartDate() != null ? !getStartDate().equals(this)  ? getStartDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+            "  " + "dayOfWeek" + "=" + (getDayOfWeek() != null ? !getDayOfWeek().equals(this)  ? getDayOfWeek().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "endDate" + "=" + (getEndDate() != null ? !getEndDate().equals(this)  ? getEndDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null");
   }
 }

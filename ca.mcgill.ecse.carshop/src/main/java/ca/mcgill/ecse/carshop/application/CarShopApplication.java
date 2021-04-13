@@ -49,8 +49,8 @@ public class CarShopApplication {
     	//   (Don't use the UI and the console demo at the same time to avoid duplicate problems)
     	//	 (Always clear the save before the console demo to avoid duplicate problems)
     	boolean clearSave = true;
-    	boolean consoleDemo = true;
-    	boolean runUI = false;
+    	boolean consoleDemo = false;
+    	boolean runUI = true;
     	
         System.out.println(new CarShopApplication().getGreeting() + "\n");
         System.out.println(

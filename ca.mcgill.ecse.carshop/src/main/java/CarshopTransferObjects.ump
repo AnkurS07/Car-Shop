@@ -1,5 +1,6 @@
 namespace ca.mcgill.ecse223.carshop.controller;
 
+
 class TOBusiness {
 	String name;
 	String address;
@@ -49,3 +50,7 @@ class TOAppointment {
 	1 <@>- * TOServiceBooking toServiceBookings;
 	
 }
+
+
+
+
