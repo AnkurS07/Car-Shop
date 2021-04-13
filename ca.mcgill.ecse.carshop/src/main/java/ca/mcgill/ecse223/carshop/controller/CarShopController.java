@@ -770,14 +770,30 @@ public class CarShopController {
 		String currentUserName = getLoggedInUser();
 		checkValidityOfCustomerUpdate(newUserName, newPassword);
 		try {
-			for (Customer customer : carShop.getCustomers()) {
-				if (customer.getUsername().equals(currentUserName)) {
-					customer.setUsername(newUserName);
-					customer.setPassword(newPassword);
+			if (carShop.getOwner().getUsername().equals(currentUserName)) {
+				carShop.getOwner().setUsername(newUserName);
+				carShop.getOwner().setPassword(newPassword);
+				isUpdated = true;
+			}
+			if(!isUpdated) {
+				for (Customer customer : carShop.getCustomers()) {
+					if (customer.getUsername().equals(currentUserName)) {
+						customer.setUsername(newUserName);
+						customer.setPassword(newPassword);
+						isUpdated = true;
+					}
+				}
+			}
+			if(!isUpdated) {
+				for (Technician tech : carShop.getTechnicians()) {
+					if (tech.getUsername().equals(currentUserName)) {
+						tech.setUsername(newUserName);
+						tech.setPassword(newPassword);
+						isUpdated = true;
+					}
 				}
 			}
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
-			isUpdated = true;
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
