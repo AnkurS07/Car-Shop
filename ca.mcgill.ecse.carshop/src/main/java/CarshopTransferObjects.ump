@@ -51,6 +51,13 @@ class TOAppointment {
 	
 }
 
+class TOTechnician {
+  enum TechnicianType {
+    Tire, Engine, Transmission, Electronics, Fluids
+  }
+  TechnicianType totype;
+
+}
 
 
 

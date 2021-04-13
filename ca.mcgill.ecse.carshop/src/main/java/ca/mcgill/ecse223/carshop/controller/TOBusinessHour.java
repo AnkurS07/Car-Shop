@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.controller;
 import java.sql.Time;
 
-// line 68 "../../../../../CarshopTransferObjects.ump"
+// line 74 "../../../../../CarshopTransferObjects.ump"
 public class TOBusinessHour
 {
 
