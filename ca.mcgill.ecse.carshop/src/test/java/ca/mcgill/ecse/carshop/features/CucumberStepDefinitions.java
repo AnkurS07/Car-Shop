@@ -1068,9 +1068,7 @@ public class CucumberStepDefinitions {
 
 		if (User.hasWithUsername(string)) {
 			currentUser = User.getWithUsername(string);
-			if (currentUser.getPassword().equals(string2)) {
-				assertTrue(currentUser.getPassword().equals(string2));
-			}
+			assertTrue(currentUser.getPassword().equals(string2));
 		}
 	}
 

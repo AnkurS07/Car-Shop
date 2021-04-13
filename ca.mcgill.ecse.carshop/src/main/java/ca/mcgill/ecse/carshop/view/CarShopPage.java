@@ -7,6 +7,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -69,9 +70,9 @@ public class CarShopPage extends JFrame{
 	private JLabel signupUsername;
 	private JLabel signupPassword;
 	private JTextField loginUsernameField;
-	private JTextField loginPasswordField;
+	private JPasswordField loginPasswordField;
 	private JTextField signupUsernameField;
-	private JTextField signupPasswordField;
+	private JPasswordField signupPasswordField;
 	private JButton loginButton;
 	private JButton signupButton;
 	private JSeparator loginTopSeparator;
@@ -204,14 +205,14 @@ public class CarShopPage extends JFrame{
 		loginPassword = new JLabel();
 		loginPassword.setText("Password: ");
 		loginUsernameField = new JTextField(15);
-		loginPasswordField = new JTextField(15);
+		loginPasswordField = new JPasswordField(15);
 		loginButton = new JButton();
 		loginButton.setText("Login");
 		loginTopSeparator = new JSeparator();
 		
 		// sign up
 		signup = new JLabel();
-		signup.setText("Sign Up");
+		signup.setText("Customer Sign Up");
 		signup.setFont(underlinedFont.deriveFont(underlinedAttributes));
 		signupErrorMessage = new JLabel();
 		signupErrorMessage.setForeground(Color.RED);
@@ -220,7 +221,7 @@ public class CarShopPage extends JFrame{
 		signupPassword = new JLabel();
 		signupPassword.setText("Password: ");
 		signupUsernameField = new JTextField(15);
-		signupPasswordField = new JTextField(15);
+		signupPasswordField = new JPasswordField(15);
 		signupButton = new JButton();
 		signupButton.setText("Sign Up");
 		
@@ -411,11 +412,11 @@ public class CarShopPage extends JFrame{
 				.addComponent(loginTopSeparator)
 				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup()
-								.addComponent(login)
 								.addComponent(loginUsername)
 								.addComponent(loginPassword)
 								)
 						.addGroup(layout.createParallelGroup()
+								.addComponent(login)
 								.addComponent(loginErrorMessage)
 								.addComponent(loginUsernameField)
 								.addComponent(loginPasswordField)
@@ -425,11 +426,11 @@ public class CarShopPage extends JFrame{
 						.addComponent(orLabel)
 						.addGap(50)
 						.addGroup(layout.createParallelGroup()
-								.addComponent(signup)
 								.addComponent(signupUsername)
 								.addComponent(signupPassword)
 								)
 						.addGroup(layout.createParallelGroup()
+								.addComponent(signup)
 								.addComponent(signupErrorMessage)
 								.addComponent(signupUsernameField)
 								.addComponent(signupPasswordField)
@@ -551,10 +552,12 @@ public class CarShopPage extends JFrame{
 						.addComponent(loginTopSeparator))
 				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup()
-								.addComponent(login)
 								.addComponent(loginErrorMessage)
-								.addComponent(signup)
 								.addComponent(signupErrorMessage)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(login)
+								.addComponent(signup)
 								)
 						.addGroup(layout.createParallelGroup()
 								.addComponent(loginUsername)
@@ -713,8 +716,8 @@ public class CarShopPage extends JFrame{
 					hideLoginSection();
 					headerTitle.setText("Hi, " + CarShopController.getLoggedInUser() + "!");
 					logoutButton.setVisible(true);
+					showUpdateAccountSection();
 					if(CarShopController.isCustomerLoggedIn()) {
-						showUpdateAccountSection();
 						showAppointmentSection();
 					} else if (CarShopController.isTechnicianLoggedIn()) {
 						showUpdateGarageSection();
@@ -754,6 +757,8 @@ public class CarShopPage extends JFrame{
 		signupError = "";
 		if (signupUsernameField.getText().isBlank() || signupPasswordField.getText().isBlank()) {
 			signupError = "Username and password must not be empty.";
+		} else if (signupUsernameField.getText().toLowerCase().contains("owner") || signupUsernameField.getText().toLowerCase().contains("technician")) {
+			signupError = "Username cannot contain \"technician\" or \"owner\"";
 		}
 		// Check for other errors here //
 		if (signupError.length() == 0) {
@@ -814,6 +819,7 @@ public class CarShopPage extends JFrame{
 					newGarageHoursSuccess = "Business hours successfully added!";
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				newGarageHoursError = e.getMessage();
 			}
 		}
