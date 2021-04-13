@@ -1337,6 +1337,20 @@ public class CarShopController {
 		}
 		return isCustomer;
 	}
+	
+	public static boolean isTechnicianLoggedIn() {
+		boolean isTechnician = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Technician) {
+				isTechnician = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isTechnician;
+	}
 }
 	
 	
