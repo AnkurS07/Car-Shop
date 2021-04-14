@@ -1381,22 +1381,28 @@ public class CarShopController {
 	public static List<TOBusinessHour> getBusinessHours(String type){
 		CarShop carShop = CarShopApplication.getCarShop();
 		List<TOBusinessHour> businessHours = new ArrayList<TOBusinessHour>();
-		if(type.equals("business")){
-			for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
-				businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
-			}
-		} else {
-			for(Garage g: carShop.getGarages()) {
-				if(g.getTechnician().getType().name().toLowerCase().contains(type)) {
-					for(BusinessHour bh: g.getBusinessHours()) {
-						businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+		try {
+			
+			if(type.equals("business")){
+				for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
+					businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+				}
+			} else {
+				for(Garage g: carShop.getGarages()) {
+					if(g.getTechnician().getType().name().toLowerCase().contains(type)) {
+						for(BusinessHour bh: g.getBusinessHours()) {
+							businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+						}
+						break;
 					}
-					break;
 				}
 			}
+			businessHours.sort(new BusinessHourComparator());
+		} catch (Exception e) {
+			
 		}
-		businessHours.sort(new BusinessHourComparator());
 		return businessHours;
+
 	}
 	
 	static class BusinessHourComparator implements Comparator<TOBusinessHour>
