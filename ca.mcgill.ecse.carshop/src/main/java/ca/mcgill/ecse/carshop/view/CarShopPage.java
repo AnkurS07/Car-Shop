@@ -3,11 +3,13 @@ package ca.mcgill.ecse.carshop.view;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -28,6 +30,7 @@ import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
 import ca.mcgill.ecse223.carshop.controller.TOBookableService;
+import ca.mcgill.ecse223.carshop.controller.TOBusinessHour;
 import ca.mcgill.ecse223.carshop.controller.TOComboItem;
 import ca.mcgill.ecse223.carshop.controller.TOService;
 import ca.mcgill.ecse223.carshop.controller.TOServiceBooking;
@@ -84,7 +87,8 @@ public class CarShopPage extends JFrame{
 	private JLabel updateUsername;
 	private JLabel updatePassword;
 	private JTextField updateUsernameField;
-	private JTextField updatePasswordField;
+	private JPasswordField updatePasswordField;
+	private JPasswordField updatePasswordField2;
 	private JButton updateAccountButton;
 	private JSeparator updateAccountTopSeparator;
 	
@@ -125,6 +129,41 @@ public class CarShopPage extends JFrame{
 	
 	private JPanel optServicePanel;
 	
+	private JSeparator verticalLineRight;
+	
+	private JLabel businessHourLabel;
+	private JLabel tireGarageHourLabel;
+	private JLabel engineGarageHourLabel;
+	private JLabel transmissionGarageHourLabel;
+	private JLabel elecGarageHourLabel;
+	private JLabel fluidsGarageHourLabel;
+	
+	private JPanel businessHourPanel;
+	private List<String> businessHours;
+	private JPanel tireGarageHourPanel;
+	private List<String> tireGarageHours;
+	private JPanel engineGarageHourPanel;
+	private List<String> engineGarageHours;
+	private JPanel transmissionGarageHourPanel;
+	private List<String> transmissionGarageHours;
+	private JPanel elecGarageHourPanel;
+	private List<String> elecGarageHours;
+	private JPanel fluidsGarageHourPanel;
+	private List<String> fluidsGarageHours;
+	
+	private JLabel show1;
+	private JLabel show2;
+	private JLabel show3;
+	private JLabel show4;
+	private JLabel show5;
+	private JLabel show6;
+	private JCheckBox showBusinessHours;
+	private JCheckBox showtireGarageHours;
+	private JCheckBox showengineGarageHours;
+	private JCheckBox showtransmissionGarageHours;
+	private JCheckBox showelecGarageHours;
+	private JCheckBox showfluidsGarageHours;
+	
 	private HashMap<Integer, TOAppointment> appts;
 	private HashMap<Integer, TOBookableService> bookableServices;
 	private List<OptServiceVisualizer> optServices;
@@ -141,8 +180,6 @@ public class CarShopPage extends JFrame{
 	private List<OptServiceVisualizer> optServicesUpdate;
 	private JSeparator horizontalLineTop;
 	private JSeparator horizontalLineBottom;
-	
-	
 	
 	
 	// data elements
@@ -205,7 +242,9 @@ public class CarShopPage extends JFrame{
 		loginPassword = new JLabel();
 		loginPassword.setText("Password: ");
 		loginUsernameField = new JTextField(15);
+		loginUsernameField.setMaximumSize(getPreferredSize());
 		loginPasswordField = new JPasswordField(15);
+		loginPasswordField.setMaximumSize(getPreferredSize());
 		loginButton = new JButton();
 		loginButton.setText("Login");
 		loginTopSeparator = new JSeparator();
@@ -221,7 +260,9 @@ public class CarShopPage extends JFrame{
 		signupPassword = new JLabel();
 		signupPassword.setText("Password: ");
 		signupUsernameField = new JTextField(15);
+		signupUsernameField.setMaximumSize(getPreferredSize());
 		signupPasswordField = new JPasswordField(15);
+		signupPasswordField.setMaximumSize(getPreferredSize());
 		signupButton = new JButton();
 		signupButton.setText("Sign Up");
 		
@@ -238,7 +279,11 @@ public class CarShopPage extends JFrame{
 		updatePassword = new JLabel();
 		updatePassword.setText("New password: ");
 		updateUsernameField = new JTextField(15);
-		updatePasswordField = new JTextField(15);
+		updateUsernameField.setMaximumSize(getPreferredSize());
+		updatePasswordField = new JPasswordField(15);
+		updatePasswordField.setMaximumSize(getPreferredSize());
+		updatePasswordField2 = new JPasswordField(15);
+		updatePasswordField2.setMaximumSize(getPreferredSize());
 		updateAccountButton = new JButton();
 		updateAccountButton.setText("Confirm changes");
 		updateAccountTopSeparator = new JSeparator();
@@ -260,6 +305,7 @@ public class CarShopPage extends JFrame{
 		cancelApptButton = new JButton();
 		cancelApptButton.setText("Cancel");
 		apptList = new JComboBox<String>(new String[0]);
+		apptList.setMaximumSize(getPreferredSize());
 		
 		// Make appt
 		makeApptLabel = new JLabel();
@@ -268,6 +314,7 @@ public class CarShopPage extends JFrame{
 		bookableServiceLabel = new JLabel();
 		bookableServiceLabel.setText("Bookable Service:");
 		bookableServiceList = new JComboBox<String>(new String[0]);
+		bookableServiceList.setMaximumSize(getPreferredSize());
 		optServicePanel = new JPanel();
 		optServicePanel.setLayout(new BoxLayout(optServicePanel, BoxLayout.PAGE_AXIS));
 		makeApptButton = new JButton();
@@ -296,6 +343,80 @@ public class CarShopPage extends JFrame{
 		updateApptButton.setText("Update");
 		horizontalLineTop = new JSeparator();
 		horizontalLineBottom = new JSeparator();
+		
+		verticalLineRight = new JSeparator(SwingConstants.VERTICAL);
+		
+		 businessHourLabel = new JLabel();
+		 businessHourLabel.setText("Business Hours");
+		 businessHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		 tireGarageHourLabel = new JLabel();
+		 tireGarageHourLabel.setText("Tire Garage Hours");
+		 tireGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		 engineGarageHourLabel = new JLabel();
+		 engineGarageHourLabel.setText("Engine Garage Hours");
+		 engineGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		 transmissionGarageHourLabel = new JLabel();
+		 transmissionGarageHourLabel.setText("Transmission Garage Hours");
+		 transmissionGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		 elecGarageHourLabel = new JLabel();
+		 elecGarageHourLabel.setText("Electronics Garage Hours");
+		 elecGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		 fluidsGarageHourLabel = new JLabel();
+		 fluidsGarageHourLabel.setText("Fluids Garage Hours");
+		 fluidsGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		
+		 businessHourPanel = new JPanel();
+		 businessHourPanel.setLayout(new BoxLayout(businessHourPanel, BoxLayout.PAGE_AXIS));
+		 businessHourPanel.setVisible(false);
+		 tireGarageHourPanel = new JPanel();
+		 tireGarageHourPanel.setLayout(new BoxLayout(tireGarageHourPanel, BoxLayout.PAGE_AXIS));
+		 tireGarageHourPanel.setVisible(false);
+		 engineGarageHourPanel = new JPanel();
+		 engineGarageHourPanel.setLayout(new BoxLayout(engineGarageHourPanel, BoxLayout.PAGE_AXIS));
+		 engineGarageHourPanel.setVisible(false);
+		 transmissionGarageHourPanel = new JPanel();
+		 transmissionGarageHourPanel.setLayout(new BoxLayout(transmissionGarageHourPanel, BoxLayout.PAGE_AXIS));
+		 transmissionGarageHourPanel.setVisible(false);
+		 elecGarageHourPanel = new JPanel();
+		 elecGarageHourPanel.setLayout(new BoxLayout(elecGarageHourPanel, BoxLayout.PAGE_AXIS));
+		 elecGarageHourPanel.setVisible(false);
+		 fluidsGarageHourPanel = new JPanel();
+		 fluidsGarageHourPanel.setLayout(new BoxLayout(fluidsGarageHourPanel, BoxLayout.PAGE_AXIS));
+		 fluidsGarageHourPanel.setVisible(false);
+		 
+		 businessHours = new ArrayList<String>();
+		 tireGarageHours = new ArrayList<String>();
+		 engineGarageHours = new ArrayList<String>();
+		 transmissionGarageHours = new ArrayList<String>();
+		 elecGarageHours = new ArrayList<String>();
+		 fluidsGarageHours = new ArrayList<String>();
+		 
+		 show1 = new JLabel();
+		 show1.setText("Show");
+		 show2 = new JLabel();
+		 show2.setText("Show");
+		 show3 = new JLabel();
+		 show3.setText("Show");
+		 show4 = new JLabel();
+		 show4.setText("Show");
+		 show5 = new JLabel();
+		 show5.setText("Show");
+		 show6 = new JLabel();
+		 show6.setText("Show");
+		 showBusinessHours = new JCheckBox();
+		 showBusinessHours.setSelected(false);
+		 showtireGarageHours = new JCheckBox();
+		 showtireGarageHours.setSelected(false);
+		 showengineGarageHours = new JCheckBox();
+		 showengineGarageHours.setSelected(false);
+		 showtransmissionGarageHours = new JCheckBox();
+		 showtransmissionGarageHours.setSelected(false);
+		 showelecGarageHours = new JCheckBox();
+		 showelecGarageHours.setSelected(false);
+		 showfluidsGarageHours = new JCheckBox();
+		 showfluidsGarageHours.setSelected(false);
+
+
 		
 		hideAppointmentSection();
 		
@@ -387,6 +508,48 @@ public class CarShopPage extends JFrame{
 				showOptionalServicesForUpdate(evt);
 			}
 		});
+		
+		showBusinessHours.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				businessHourPanel.setVisible(!businessHourPanel.isVisible());
+				pack();
+			}
+		});
+		
+		showtireGarageHours.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				tireGarageHourPanel.setVisible(!tireGarageHourPanel.isVisible());
+				pack();
+			}
+		});
+		
+		showengineGarageHours.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				engineGarageHourPanel.setVisible(!engineGarageHourPanel.isVisible());
+				pack();
+			}
+		});
+		
+		showtransmissionGarageHours.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				transmissionGarageHourPanel.setVisible(!transmissionGarageHourPanel.isVisible());
+				pack();
+			}
+		});
+		
+		showelecGarageHours.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				elecGarageHourPanel.setVisible(!elecGarageHourPanel.isVisible());
+				pack();
+			}
+		});
+		
+		showfluidsGarageHours.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				fluidsGarageHourPanel.setVisible(!fluidsGarageHourPanel.isVisible());
+				pack();
+			}
+		});
 	
 		
 		// global settings
@@ -400,134 +563,178 @@ public class CarShopPage extends JFrame{
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		// Horizontal Layout
-		layout.setHorizontalGroup(
-				layout.createParallelGroup()
-				// Header Section
-				.addGroup(layout.createSequentialGroup()
-						.addComponent(headerTitle)
-						.addGap(50)
-						.addComponent(logoutButton)
-						)
-				// Login - Setup Section
-				.addComponent(loginTopSeparator)
-				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup()
-								.addComponent(loginUsername)
-								.addComponent(loginPassword)
+		layout.setHorizontalGroup( layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						// Header Section
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(headerTitle)
+								.addGap(50)
+								.addComponent(logoutButton)
 								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(login)
-								.addComponent(loginErrorMessage)
-								.addComponent(loginUsernameField)
-								.addComponent(loginPasswordField)
-								.addComponent(loginButton)
+						// Login - Setup Section
+						.addComponent(loginTopSeparator)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(loginUsername)
+										.addComponent(loginPassword)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(login)
+										.addComponent(loginErrorMessage)
+										.addComponent(loginUsernameField)
+										.addComponent(loginPasswordField)
+										.addComponent(loginButton)
+										)
+								.addGap(50)
+								.addComponent(orLabel)
+								.addGap(50)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(signupUsername)
+										.addComponent(signupPassword)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(signup)
+										.addComponent(signupErrorMessage)
+										.addComponent(signupUsernameField)
+										.addComponent(signupPasswordField)
+										.addComponent(signupButton)
+										)
 								)
-						.addGap(50)
-						.addComponent(orLabel)
-						.addGap(50)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(signupUsername)
-								.addComponent(signupPassword)
+						// Update Account Section
+						.addComponent(updateAccountTopSeparator)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateAccount)
+										.addComponent(updateUsername)
+										.addComponent(updatePassword)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateAccountErrorMessage)
+										.addComponent(updateUsernameField)
+										.addComponent(updatePasswordField)
+										.addComponent(updatePasswordField2)
+										.addComponent(updateAccountButton)
+										)
+								.addComponent(updateAccountSuccessMessage)
 								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(signup)
-								.addComponent(signupErrorMessage)
-								.addComponent(signupUsernameField)
-								.addComponent(signupPasswordField)
-								.addComponent(signupButton)
-								)
-						)
-				// Update Account Section
-				.addComponent(updateAccountTopSeparator)
-				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup()
-								.addComponent(updateAccount)
-								.addComponent(updateUsername)
-								.addComponent(updatePassword)
-								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(updateAccountErrorMessage)
-								.addComponent(updateUsernameField)
-								.addComponent(updatePasswordField)
-								.addComponent(updateAccountButton)
-								)
-						.addComponent(updateAccountSuccessMessage)
-						)
-				// Update Garage Hours Section
-				.addComponent(garageOpeningHoursTopSeparator)
-				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup()
-								.addComponent(addNewLabel)
-								.addGroup(layout.createSequentialGroup()
-										.addGroup(layout.createParallelGroup()
-												.addComponent(newHoursDayLabel)
-												.addComponent(newHoursOpenLabel)
-												.addComponent(newHoursCloseLabel)
+						// Update Garage Hours Section
+						.addComponent(garageOpeningHoursTopSeparator)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addNewLabel)
+										.addGroup(layout.createSequentialGroup()
+												.addGroup(layout.createParallelGroup()
+														.addComponent(newHoursDayLabel)
+														.addComponent(newHoursOpenLabel)
+														.addComponent(newHoursCloseLabel)
+														)
+												.addGroup(layout.createParallelGroup()
+														.addComponent(newHoursDayBox)
+														.addGroup(layout.createSequentialGroup()
+																.addComponent(newHoursOpenHBox)
+																.addComponent(timeSeparator1)
+																.addComponent(newHoursOpenMBox)
+																)
+														.addGroup(layout.createSequentialGroup()
+																.addComponent(newHoursCloseHBox)
+																.addComponent(timeSeparator2)
+																.addComponent(newHoursCloseMBox)
+																)
+														.addComponent(addGarageHoursButton)
+														.addComponent(newGarageHoursSuccessMessage)
+														.addComponent(newGarageHoursErrorMessage)
+														)
 												)
-										.addGroup(layout.createParallelGroup()
-												.addComponent(newHoursDayBox)
-												.addGroup(layout.createSequentialGroup()
-														.addComponent(newHoursOpenHBox)
-														.addComponent(timeSeparator1)
-														.addComponent(newHoursOpenMBox)
+										)
+								.addGap(150)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(removeHoursLabel)
+										.addGroup(layout.createSequentialGroup()
+												.addGroup(layout.createParallelGroup()
+														.addComponent(removeHoursDayLabel)
 														)
-												.addGroup(layout.createSequentialGroup()
-														.addComponent(newHoursCloseHBox)
-														.addComponent(timeSeparator2)
-														.addComponent(newHoursCloseMBox)
+												.addGroup(layout.createParallelGroup()
+														.addComponent(removeHoursDayBox)
+														.addComponent(removeGarageHoursButton)
+														.addComponent(removeGarageHoursErrorMessage)
+														.addComponent(removeGarageHoursSuccessMessage)
 														)
-												.addComponent(addGarageHoursButton)
-												.addComponent(newGarageHoursSuccessMessage)
-												.addComponent(newGarageHoursErrorMessage)
 												)
 										)
 								)
-						.addGap(150)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(removeHoursLabel)
-								.addGroup(layout.createSequentialGroup()
-										.addGroup(layout.createParallelGroup()
-												.addComponent(removeHoursDayLabel)
-												)
-										.addGroup(layout.createParallelGroup()
-												.addComponent(removeHoursDayBox)
-												.addComponent(removeGarageHoursButton)
-												.addComponent(removeGarageHoursErrorMessage)
-												.addComponent(removeGarageHoursSuccessMessage)
-												)
-										)
-								)
+						
+						// Make-Update-Cancel Appointment Section
+						.addComponent(errorMessage)
+						.addComponent(horizontalLineTop)
+						.addComponent(horizontalLineBottom)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(bookableServiceLabel))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(makeApptLabel)
+										.addComponent(bookableServiceList)
+										.addComponent(optServicePanel)
+										.addComponent(apptDatePicker)
+										.addComponent(makeApptButton))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(apptLabel))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(cancelAppt)
+										.addComponent(apptList)
+										.addComponent(optServicePanelUpdate)
+										.addComponent(apptDatePickerUpdate)
+										.addComponent(updateApptButton)
+										.addComponent(cancelApptButton)))
 						)
-				
-				// Make-Update-Cancel Appointment Section
-				.addComponent(errorMessage)
-				.addComponent(horizontalLineTop)
-				.addComponent(horizontalLineBottom)
-				/*.addComponent(horizontalLineMiddle1)
-				.addComponent(horizontalLineMiddle2)
-				.addComponent(horizontalLineBottom)*/
+					
+				.addGroup(layout.createSequentialGroup()
+						.addComponent(verticalLineRight)
+						)
+					
 				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup()
-								.addComponent(bookableServiceLabel))
-						.addGroup(layout.createParallelGroup()
-								.addComponent(makeApptLabel)
-								.addComponent(bookableServiceList)
-								.addComponent(optServicePanel)
-								.addComponent(apptDatePicker)
-								.addComponent(makeApptButton))
-						.addGroup(layout.createParallelGroup()
-								.addComponent(apptLabel))
-						.addGroup(layout.createParallelGroup()
-								.addComponent(cancelAppt)
-								.addComponent(apptList)
-								.addComponent(optServicePanelUpdate)
-								.addComponent(apptDatePickerUpdate)
-								.addComponent(updateApptButton)
-								.addComponent(cancelApptButton)))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(businessHourLabel)
+										.addComponent(showBusinessHours)
+										.addComponent(show1)
+										)
+								.addComponent(businessHourPanel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(tireGarageHourLabel)
+										.addComponent(showtireGarageHours)
+										.addComponent(show2)
+										)
+								.addComponent(tireGarageHourPanel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(engineGarageHourLabel)
+										.addComponent(showengineGarageHours)
+										.addComponent(show3)
+										)
+								.addComponent(engineGarageHourPanel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(transmissionGarageHourLabel)
+										.addComponent(showtransmissionGarageHours)
+										.addComponent(show4)
+										)
+								.addComponent(transmissionGarageHourPanel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(elecGarageHourLabel)
+										.addComponent(showelecGarageHours)
+										.addComponent(show5)
+										)
+								.addComponent(elecGarageHourPanel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(fluidsGarageHourLabel)
+										.addComponent(showfluidsGarageHours)
+										.addComponent(show6)
+										)
+								.addComponent(fluidsGarageHourPanel)
+								)
+						)
 				);
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {loginUsernameField, loginPasswordField, loginButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signupUsernameField, signupPasswordField, signupButton});
-		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updateAccountButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updatePasswordField2, updateAccountButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {newHoursDayBox, addGarageHoursButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {removeHoursDayBox, removeGarageHoursButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelApptButton});
@@ -539,126 +746,174 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
 
 		// Vertical Layout
-		layout.setVerticalGroup(
-				layout.createSequentialGroup()
-				// Header
-				.addGroup(layout.createParallelGroup()
-						.addComponent(headerTitle)
-						.addComponent(logoutButton)
-						)
-				.addGap(20)
-				// Login - Sign up Section
-				.addGroup(layout.createParallelGroup()
-						.addComponent(loginTopSeparator))
+		layout.setVerticalGroup( layout.createParallelGroup()
 				.addGroup(layout.createSequentialGroup()
+						// Header
 						.addGroup(layout.createParallelGroup()
-								.addComponent(loginErrorMessage)
-								.addComponent(signupErrorMessage)
+								.addComponent(headerTitle)
+								.addComponent(logoutButton)
+								)
+						.addGap(20)
+						// Login - Sign up Section
+						.addGroup(layout.createParallelGroup()
+								.addComponent(loginTopSeparator))
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(loginErrorMessage)
+										.addComponent(signupErrorMessage)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(login)
+										.addComponent(signup)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(loginUsername)
+										.addComponent(loginUsernameField)
+										.addComponent(signupUsername)
+										.addComponent(signupUsernameField)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(loginPassword)
+										.addComponent(loginPasswordField)
+										.addComponent(orLabel)
+										
+										.addComponent(signupPassword)
+										.addComponent(signupPasswordField)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(loginButton)
+										.addComponent(signupButton)
+										)
+								)
+						// Update Account Section
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateAccountTopSeparator))
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateAccount)
+										.addComponent(updateAccountErrorMessage)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateUsername)
+										.addComponent(updateUsernameField)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updatePassword)
+										.addComponent(updatePasswordField)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updatePasswordField2)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateAccountButton)
+										.addComponent(updateAccountSuccessMessage)
+										)
+								)
+						// Update Garage Hours Section
+						.addComponent(garageOpeningHoursTopSeparator)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(addNewLabel)
+								.addComponent(removeHoursLabel)
 								)
 						.addGroup(layout.createParallelGroup()
-								.addComponent(login)
-								.addComponent(signup)
+								.addComponent(newHoursDayLabel)
+								.addComponent(newHoursDayBox)
+								.addComponent(removeHoursDayLabel)
+								.addComponent(removeHoursDayBox)
 								)
 						.addGroup(layout.createParallelGroup()
-								.addComponent(loginUsername)
-								.addComponent(loginUsernameField)
-								.addComponent(signupUsername)
-								.addComponent(signupUsernameField)
+								.addComponent(newHoursOpenLabel)
+								.addComponent(newHoursOpenHBox)
+								.addComponent(timeSeparator1)
+								.addComponent(newHoursOpenMBox)
+								.addComponent(removeGarageHoursButton)
 								)
 						.addGroup(layout.createParallelGroup()
-								.addComponent(loginPassword)
-								.addComponent(loginPasswordField)
-								.addComponent(orLabel)
-								
-								.addComponent(signupPassword)
-								.addComponent(signupPasswordField)
+								.addComponent(newHoursCloseLabel)
+								.addComponent(newHoursCloseHBox)
+								.addComponent(timeSeparator2)
+								.addComponent(newHoursCloseMBox)
+								.addComponent(removeGarageHoursErrorMessage)
+								.addComponent(removeGarageHoursSuccessMessage)
 								)
 						.addGroup(layout.createParallelGroup()
-								.addComponent(loginButton)
-								.addComponent(signupButton)
+								.addComponent(addGarageHoursButton)
 								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(newGarageHoursSuccessMessage)
+								.addComponent(newGarageHoursErrorMessage)
+								)
+						
+						// Make-Update-Cancel Appointment Section
+						.addGroup(layout.createParallelGroup()
+								.addComponent(horizontalLineTop))
+						.addComponent(errorMessage)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(makeApptLabel)
+								.addComponent(cancelAppt))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(bookableServiceLabel)
+								.addComponent(bookableServiceList)
+								.addComponent(apptLabel)
+								.addComponent(apptList))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(optServicePanel)
+								.addComponent(optServicePanelUpdate))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(apptDatePicker)
+								.addComponent(apptDatePickerUpdate))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(updateApptButton)
+								.addComponent(makeApptButton))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(cancelApptButton))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(horizontalLineBottom))
+						
 						)
-				// Update Account Section
-				.addGroup(layout.createParallelGroup()
-						.addComponent(updateAccountTopSeparator))
-				.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup()
-								.addComponent(updateAccount)
-								.addComponent(updateAccountErrorMessage)
-								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(updateUsername)
-								.addComponent(updateUsernameField)
-								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(updatePassword)
-								.addComponent(updatePasswordField)
-								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(updateAccountButton)
-								.addComponent(updateAccountSuccessMessage)
-								)
+					
+					.addGroup(layout.createSequentialGroup()
+							.addComponent(verticalLineRight)
+							)
+					
+					.addGroup(layout.createSequentialGroup()
+							.addGroup(layout.createParallelGroup()
+									.addComponent(businessHourLabel)
+									.addComponent(showBusinessHours)
+									.addComponent(show1)
+									)
+							.addComponent(businessHourPanel)
+							.addGroup(layout.createParallelGroup()
+									.addComponent(tireGarageHourLabel)
+									.addComponent(showtireGarageHours)
+									.addComponent(show2)
+									)
+							.addComponent(tireGarageHourPanel)
+							.addGroup(layout.createParallelGroup()
+									.addComponent(engineGarageHourLabel)
+									.addComponent(showengineGarageHours)
+									.addComponent(show3)
+									)
+							.addComponent(engineGarageHourPanel)
+							.addGroup(layout.createParallelGroup()
+									.addComponent(transmissionGarageHourLabel)
+									.addComponent(showtransmissionGarageHours)
+									.addComponent(show4)
+									)
+							.addComponent(transmissionGarageHourPanel)
+							.addGroup(layout.createParallelGroup()
+									.addComponent(elecGarageHourLabel)
+									.addComponent(showelecGarageHours)
+									.addComponent(show5)
+									)
+							.addComponent(elecGarageHourPanel)
+							.addGroup(layout.createParallelGroup()
+									.addComponent(fluidsGarageHourLabel)
+									.addComponent(showfluidsGarageHours)
+									.addComponent(show6)
+									)
+							.addComponent(fluidsGarageHourPanel)
 						)
-				// Update Garage Hours Section
-				.addComponent(garageOpeningHoursTopSeparator)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(addNewLabel)
-						.addComponent(removeHoursLabel)
-						)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(newHoursDayLabel)
-						.addComponent(newHoursDayBox)
-						.addComponent(removeHoursDayLabel)
-						.addComponent(removeHoursDayBox)
-						)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(newHoursOpenLabel)
-						.addComponent(newHoursOpenHBox)
-						.addComponent(timeSeparator1)
-						.addComponent(newHoursOpenMBox)
-						.addComponent(removeGarageHoursButton)
-						)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(newHoursCloseLabel)
-						.addComponent(newHoursCloseHBox)
-						.addComponent(timeSeparator2)
-						.addComponent(newHoursCloseMBox)
-						.addComponent(removeGarageHoursErrorMessage)
-						.addComponent(removeGarageHoursSuccessMessage)
-						)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(addGarageHoursButton)
-						)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(newGarageHoursSuccessMessage)
-						.addComponent(newGarageHoursErrorMessage)
-						)
-				
-				// Make-Update-Cancel Appointment Section
-				.addGroup(layout.createParallelGroup()
-						.addComponent(horizontalLineTop))
-				.addComponent(errorMessage)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(makeApptLabel)
-						.addComponent(cancelAppt))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(bookableServiceLabel)
-						.addComponent(bookableServiceList)
-						.addComponent(apptLabel)
-						.addComponent(apptList))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(optServicePanel)
-						.addComponent(optServicePanelUpdate))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(apptDatePicker)
-						.addComponent(apptDatePickerUpdate))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(updateApptButton)
-						.addComponent(makeApptButton))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(cancelApptButton))
-				.addGroup(layout.createParallelGroup()
-						.addComponent(horizontalLineBottom))
 				);
 		
 		pack();
@@ -698,6 +953,45 @@ public class CarShopPage extends JFrame{
 			
 			apptDatePicker.getModel().setValue(null);
 			apptDatePickerUpdate.getModel().setValue(null);
+			
+			//update hours for each type
+			businessHourPanel.removeAll();
+			businessHours.clear();
+			for(TOBusinessHour toHour: CarShopController.getBusinessHours("business")) {
+				businessHourPanel.add(new BusinessHoursVisualizer(toHour));
+				businessHours.add(toHour.getDayOfWeek());
+			}
+			tireGarageHourPanel.removeAll();
+			tireGarageHours.clear();
+			for(TOBusinessHour toHour: CarShopController.getBusinessHours("tire")) {
+				tireGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
+				tireGarageHours.add(toHour.getDayOfWeek());
+			}
+			engineGarageHourPanel.removeAll();
+			engineGarageHours.clear();
+			for(TOBusinessHour toHour: CarShopController.getBusinessHours("engine")) {
+				engineGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
+				engineGarageHours.add(toHour.getDayOfWeek());
+			}
+			transmissionGarageHourPanel.removeAll();
+			transmissionGarageHours.clear();
+			for(TOBusinessHour toHour: CarShopController.getBusinessHours("transmission")) {
+				transmissionGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
+				transmissionGarageHours.add(toHour.getDayOfWeek());
+			}
+			elecGarageHourPanel.removeAll();
+			elecGarageHours.clear();
+			for(TOBusinessHour toHour: CarShopController.getBusinessHours("electronics")) {
+				elecGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
+				elecGarageHours.add(toHour.getDayOfWeek());
+			}
+			fluidsGarageHourPanel.removeAll();
+			fluidsGarageHours.clear();
+			for(TOBusinessHour toHour: CarShopController.getBusinessHours("fluids")) {
+				fluidsGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
+				fluidsGarageHours.add(toHour.getDayOfWeek());
+			}
+
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
@@ -744,6 +1038,7 @@ public class CarShopPage extends JFrame{
 				loginPasswordField.setText("");
 				updateUsernameField.setText("");
 				updatePasswordField.setText("");
+				updatePasswordField2.setText("");
 				updateAccountErrorMessage.setText("");
 				updateAccountSuccessMessage.setText("");
 			}
@@ -783,6 +1078,8 @@ public class CarShopPage extends JFrame{
 		updateAccountSuccess = "";
 		if (updateUsernameField.getText().isBlank() || updatePasswordField.getText().isBlank()) {
 			updateAccountError = "Username and password must not be empty.";
+		} else if(!updatePasswordField.getText().equals(updatePasswordField.getText())) {
+			updateAccountError = "New password does not match";
 		}
 		// Check for other errors here //
 		if (updateAccountError.length() == 0) {
@@ -791,6 +1088,7 @@ public class CarShopPage extends JFrame{
 					updateAccountSuccess = "Account successfully updated!";
 					updateUsernameField.setText("");
 					updatePasswordField.setText("");
+					updatePasswordField2.setText("");
 				}
 			} catch (Exception e) {
 				updateAccountError = e.getMessage();
@@ -805,6 +1103,32 @@ public class CarShopPage extends JFrame{
 		newGarageHoursError = "";
 		newGarageHoursSuccess = "";
 		// Check for other errors here //
+		if(CarShopController.isTechnicianLoggedIn()) {
+			if(CarShopController.getLoggedInTechnicianType().toLowerCase().contains("tire")) {
+				if(tireGarageHours.contains((String)newHoursDayBox.getSelectedItem())) {
+					newGarageHoursError = "Business Hours already exist on that day.";
+				}
+			} else if (CarShopController.getLoggedInTechnicianType().toLowerCase().contains("engine")) {
+				if(engineGarageHours.contains((String)newHoursDayBox.getSelectedItem())) {
+					newGarageHoursError = "Business Hours already exist on that day.";
+				}
+			} else if (CarShopController.getLoggedInTechnicianType().toLowerCase().contains("transmission")) {
+				if(transmissionGarageHours.contains((String)newHoursDayBox.getSelectedItem())) {
+					newGarageHoursError = "Business Hours already exist on that day.";
+				}
+			} else if (CarShopController.getLoggedInTechnicianType().toLowerCase().contains("electronics")) {
+				if(elecGarageHours.contains((String)newHoursDayBox.getSelectedItem())) {
+					newGarageHoursError = "Business Hours already exist on that day.";
+				}
+			} else if (CarShopController.getLoggedInTechnicianType().toLowerCase().contains("fluids")) {
+				if(fluidsGarageHours.contains((String)newHoursDayBox.getSelectedItem())) {
+					newGarageHoursError = "Business Hours already exist on that day.";
+				}
+			}
+		}
+			
+		
+		
 		if (newGarageHoursError.length() == 0) {
 			try {
 				String day = (String)newHoursDayBox.getSelectedItem();
@@ -819,7 +1143,7 @@ public class CarShopPage extends JFrame{
 					newGarageHoursSuccess = "Business hours successfully added!";
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				newGarageHoursError = e.getMessage();
 			}
 		}
@@ -861,7 +1185,7 @@ public class CarShopPage extends JFrame{
 					}
 				}				
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				removeGarageHoursError = e.getMessage();
 			}
 		}
@@ -1200,6 +1524,7 @@ public class CarShopPage extends JFrame{
 		updatePassword.setVisible(false);
 		updateUsernameField.setVisible(false);
 		updatePasswordField.setVisible(false);
+		updatePasswordField2.setVisible(false);
 		updateAccountButton.setVisible(false);
 	}
 	
@@ -1212,6 +1537,7 @@ public class CarShopPage extends JFrame{
 		updatePassword.setVisible(true);
 		updateUsernameField.setVisible(true);
 		updatePasswordField.setVisible(true);
+		updatePasswordField2.setVisible(true);
 		updateAccountButton.setVisible(true);
 	}
 	

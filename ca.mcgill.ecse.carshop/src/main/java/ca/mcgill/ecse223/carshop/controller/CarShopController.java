@@ -5,6 +5,7 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1375,6 +1376,60 @@ public class CarShopController {
 			e.printStackTrace();
 		}
 		return isTechnician;
+	}
+	
+	public static List<TOBusinessHour> getBusinessHours(String type){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOBusinessHour> businessHours = new ArrayList<TOBusinessHour>();
+		if(type.equals("business")){
+			for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
+				businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+			}
+		} else {
+			for(Garage g: carShop.getGarages()) {
+				if(g.getTechnician().getType().name().toLowerCase().contains(type)) {
+					for(BusinessHour bh: g.getBusinessHours()) {
+						businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+					}
+					break;
+				}
+			}
+		}
+		businessHours.sort(new BusinessHourComparator());
+		return businessHours;
+	}
+	
+	static class BusinessHourComparator implements Comparator<TOBusinessHour>
+	 {
+		private List<String> days = new ArrayList<String>() {
+            {
+                add("Monday");
+                add("Tuesday");
+                add("Wednesday");
+                add("Thursday");
+                add("Friday");
+                add("Saturday");
+                add("Sunday");
+            }
+        };
+		@Override
+		public int compare(TOBusinessHour o1, TOBusinessHour o2) {
+			return days.indexOf(o1.getDayOfWeek()) - days.indexOf(o2.getDayOfWeek());
+		}
+	 }
+	
+	public static String getLoggedInTechnicianType() {
+		String type = "";
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Technician) {
+				type = ((Technician)user).getType().name();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return type;
 	}
 	
 }
