@@ -1120,7 +1120,7 @@ public class CarShopPage extends JFrame{
 	
 	private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		loginError = "";
-		if (loginUsernameField.getText().isBlank() || loginPasswordField.getText().isBlank()) {
+		if (loginUsernameField.getText().isEmpty()|| loginPasswordField.getText().isEmpty()) {
 			loginError = "Username and password must not be empty.";
 		}
 		// Check for other errors here //
@@ -1173,7 +1173,7 @@ public class CarShopPage extends JFrame{
 	
 	private void signupButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		signupError = "";
-		if (signupUsernameField.getText().isBlank() || signupPasswordField.getText().isBlank()) {
+		if (signupUsernameField.getText().isEmpty() || signupPasswordField.getText().isEmpty()) {
 			signupError = "Username and password must not be empty.";
 		} else if (signupUsernameField.getText().toLowerCase().contains("owner") || signupUsernameField.getText().toLowerCase().contains("technician")) {
 			signupError = "Username cannot contain \"technician\" or \"owner\"";
@@ -1199,7 +1199,7 @@ public class CarShopPage extends JFrame{
 	private void updateAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		updateAccountError = "";
 		updateAccountSuccess = "";
-		if (updateUsernameField.getText().isBlank() || updatePasswordField.getText().isBlank()) {
+		if (updateUsernameField.getText().isEmpty() || updatePasswordField.getText().isEmpty()) {
 			updateAccountError = "Username and password must not be empty.";
 		} else if(!Arrays.equals( updatePasswordField.getPassword(),  updatePasswordField2.getPassword())) {
 			updateAccountError = "New passwords do not match";
