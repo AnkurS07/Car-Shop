@@ -1466,6 +1466,10 @@ public class CarShopController {
 		return service;
 	}
 	
+	public static String getLoggedInUsername() throws Exception {
+		return CarShopApplication.getLoggedInUser();
+	}
+	
 }
 	
 	

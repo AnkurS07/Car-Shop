@@ -9,7 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -19,10 +18,7 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
-import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
-import ca.mcgill.ecse.carshop.model.Customer;
-import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
@@ -1256,7 +1252,7 @@ public class CarShopPage extends JFrame{
 				String inputStartTime = newHoursOpenHBox.getSelectedItem() + ":" + newHoursOpenMBox.getSelectedItem();
 				String inputEndTime = newHoursCloseHBox.getSelectedItem() + ":" + newHoursCloseMBox.getSelectedItem();
 				String type = "";
-				User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+				User user = User.getWithUsername(CarShopController.getLoggedInUsername());
 				if (user instanceof Technician) {
 					type = String.valueOf(((Technician) user).getType());
 				}
@@ -1282,7 +1278,7 @@ public class CarShopPage extends JFrame{
 				String day = (String)newHoursDayBox.getSelectedItem();
 				String type = "";
 				ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
-				User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+				User user = User.getWithUsername(CarShopController.getLoggedInUsername());
 				if (user instanceof Technician) {
 					type = String.valueOf(((Technician) user).getType());
 					for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
@@ -1327,7 +1323,7 @@ public class CarShopPage extends JFrame{
 			// call the controller
 			try {
 				TOAppointment app = appts.get(selectedAppt);
-				AppointmentController.cancelAppointment(CarShopApplication.getLoggedInUser(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
+				AppointmentController.cancelAppointment(CarShopController.getLoggedInUsername(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
 			} catch (Exception e) {
 				error = e.getMessage();
 			}
@@ -1368,7 +1364,7 @@ public class CarShopPage extends JFrame{
 					}
 				}
 
-				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots, new ArrayList<TOTimeSlot>());
+				AppointmentController.makeAppointmentFromView(false, CarShopController.getLoggedInUsername(), toBs, services, timeSlots, new ArrayList<TOTimeSlot>());
 			} catch (Exception e) {
 				error = e.getMessage();
 			}
@@ -1515,9 +1511,9 @@ public class CarShopPage extends JFrame{
 					toExclude.add(toServiceBooking.getToTimeSlot());
 				}
 				
-				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots, toExclude);
+				AppointmentController.makeAppointmentFromView(false, CarShopController.getLoggedInUsername(), toBs, services, timeSlots, toExclude);
 				TOAppointment app = appts.get(selectedAppt);
-				AppointmentController.deleteAppt(CarShopApplication.getLoggedInUser(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
+				AppointmentController.deleteAppt(CarShopController.getLoggedInUsername(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
 			
 			} catch (Exception e) {
 				error = e.getMessage();
