@@ -40,6 +40,7 @@ import ca.mcgill.ecse223.carshop.controller.TOTimeSlot;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.font.TextAttribute;
 import java.sql.Date;
 import java.sql.Time;
@@ -192,13 +193,27 @@ public class CarShopPage extends JFrame{
 	private String newGarageHoursSuccess = null;
 	private String removeGarageHoursError = null;
 	private String removeGarageHoursSuccess = null;
-	// toggle sick status
-	// private HashMap<Integer, Integer> drivers;
-	// toggle repairs status
-	// private HashMap<Integer, String> buses;
-	// bus assignment
-	// private HashMap<Integer, String> availableBuses;
-	// private HashMap<Integer, TORoute> routes;
+
+	//add service
+	private List<TOService> services;
+	
+	//add service combo
+	private JLabel addComboLabel;
+	private JLabel nameLabel;
+	private JTextField comboName;
+	private JLabel mainServiceLabel;
+	private HashMap<Integer, String> mainServiceMap;
+	private JComboBox<String> mainService;
+	private JLabel optService;
+	private List<ComboVisualizer> comboVisualizerList;
+	private JPanel optComboItemPanel;
+	private JButton addOptComboItemButton;
+	private JButton addComboButton;
+	private JSeparator serviceComboTopSeparator;
+	private JLabel serviceComboErrorMessage;
+	
+	//update service combo
+	
 
 	/** Creates new form BtmsPage */
 	public CarShopPage() {
@@ -346,79 +361,105 @@ public class CarShopPage extends JFrame{
 		
 		verticalLineRight = new JSeparator(SwingConstants.VERTICAL);
 		
-		 businessHourLabel = new JLabel();
-		 businessHourLabel.setText("Business Hours");
-		 businessHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 tireGarageHourLabel = new JLabel();
-		 tireGarageHourLabel.setText("Tire Garage Hours");
-		 tireGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 engineGarageHourLabel = new JLabel();
-		 engineGarageHourLabel.setText("Engine Garage Hours");
-		 engineGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 transmissionGarageHourLabel = new JLabel();
-		 transmissionGarageHourLabel.setText("Transmission Garage Hours");
-		 transmissionGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 elecGarageHourLabel = new JLabel();
-		 elecGarageHourLabel.setText("Electronics Garage Hours");
-		 elecGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 fluidsGarageHourLabel = new JLabel();
-		 fluidsGarageHourLabel.setText("Fluids Garage Hours");
-		 fluidsGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		businessHourLabel = new JLabel();
+		businessHourLabel.setText("Business Hours");
+		businessHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		tireGarageHourLabel = new JLabel();
+		tireGarageHourLabel.setText("Tire Garage Hours");
+		tireGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		engineGarageHourLabel = new JLabel();
+		engineGarageHourLabel.setText("Engine Garage Hours");
+		engineGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		transmissionGarageHourLabel = new JLabel();
+		transmissionGarageHourLabel.setText("Transmission Garage Hours");
+		transmissionGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		elecGarageHourLabel = new JLabel();
+		elecGarageHourLabel.setText("Electronics Garage Hours");
+		elecGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		fluidsGarageHourLabel = new JLabel();
+		fluidsGarageHourLabel.setText("Fluids Garage Hours");
+		fluidsGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
 		
-		 businessHourPanel = new JPanel();
-		 businessHourPanel.setLayout(new BoxLayout(businessHourPanel, BoxLayout.PAGE_AXIS));
-		 businessHourPanel.setVisible(false);
-		 tireGarageHourPanel = new JPanel();
-		 tireGarageHourPanel.setLayout(new BoxLayout(tireGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 tireGarageHourPanel.setVisible(false);
-		 engineGarageHourPanel = new JPanel();
-		 engineGarageHourPanel.setLayout(new BoxLayout(engineGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 engineGarageHourPanel.setVisible(false);
-		 transmissionGarageHourPanel = new JPanel();
-		 transmissionGarageHourPanel.setLayout(new BoxLayout(transmissionGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 transmissionGarageHourPanel.setVisible(false);
-		 elecGarageHourPanel = new JPanel();
-		 elecGarageHourPanel.setLayout(new BoxLayout(elecGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 elecGarageHourPanel.setVisible(false);
-		 fluidsGarageHourPanel = new JPanel();
-		 fluidsGarageHourPanel.setLayout(new BoxLayout(fluidsGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 fluidsGarageHourPanel.setVisible(false);
+		businessHourPanel = new JPanel();
+		businessHourPanel.setLayout(new BoxLayout(businessHourPanel, BoxLayout.PAGE_AXIS));
+		businessHourPanel.setVisible(false);
+		tireGarageHourPanel = new JPanel();
+		tireGarageHourPanel.setLayout(new BoxLayout(tireGarageHourPanel, BoxLayout.PAGE_AXIS));
+		tireGarageHourPanel.setVisible(false);
+		engineGarageHourPanel = new JPanel();
+		engineGarageHourPanel.setLayout(new BoxLayout(engineGarageHourPanel, BoxLayout.PAGE_AXIS));
+		engineGarageHourPanel.setVisible(false);
+		transmissionGarageHourPanel = new JPanel();
+		transmissionGarageHourPanel.setLayout(new BoxLayout(transmissionGarageHourPanel, BoxLayout.PAGE_AXIS));
+		transmissionGarageHourPanel.setVisible(false);
+		elecGarageHourPanel = new JPanel();
+		elecGarageHourPanel.setLayout(new BoxLayout(elecGarageHourPanel, BoxLayout.PAGE_AXIS));
+		elecGarageHourPanel.setVisible(false);
+		fluidsGarageHourPanel = new JPanel();
+		fluidsGarageHourPanel.setLayout(new BoxLayout(fluidsGarageHourPanel, BoxLayout.PAGE_AXIS));
+		fluidsGarageHourPanel.setVisible(false);
 		 
-		 businessHours = new ArrayList<String>();
-		 tireGarageHours = new ArrayList<String>();
-		 engineGarageHours = new ArrayList<String>();
-		 transmissionGarageHours = new ArrayList<String>();
-		 elecGarageHours = new ArrayList<String>();
-		 fluidsGarageHours = new ArrayList<String>();
+		businessHours = new ArrayList<String>();
+		tireGarageHours = new ArrayList<String>();
+		engineGarageHours = new ArrayList<String>();
+		transmissionGarageHours = new ArrayList<String>();
+		elecGarageHours = new ArrayList<String>();
+		fluidsGarageHours = new ArrayList<String>();
 		 
-		 show1 = new JLabel();
-		 show1.setText("Show");
-		 show2 = new JLabel();
-		 show2.setText("Show");
-		 show3 = new JLabel();
-		 show3.setText("Show");
-		 show4 = new JLabel();
-		 show4.setText("Show");
-		 show5 = new JLabel();
-		 show5.setText("Show");
-		 show6 = new JLabel();
-		 show6.setText("Show");
-		 showBusinessHours = new JCheckBox();
-		 showBusinessHours.setSelected(false);
-		 showtireGarageHours = new JCheckBox();
-		 showtireGarageHours.setSelected(false);
-		 showengineGarageHours = new JCheckBox();
-		 showengineGarageHours.setSelected(false);
-		 showtransmissionGarageHours = new JCheckBox();
-		 showtransmissionGarageHours.setSelected(false);
-		 showelecGarageHours = new JCheckBox();
-		 showelecGarageHours.setSelected(false);
-		 showfluidsGarageHours = new JCheckBox();
-		 showfluidsGarageHours.setSelected(false);
-
-
+		show1 = new JLabel();
+		show1.setText("Show");
+		show2 = new JLabel();
+		show2.setText("Show");
+		show3 = new JLabel();
+		show3.setText("Show");
+		show4 = new JLabel();
+		show4.setText("Show");
+		show5 = new JLabel();
+		show5.setText("Show");
+		show6 = new JLabel();
+		show6.setText("Show");
+		showBusinessHours = new JCheckBox();
+		showBusinessHours.setSelected(false);
+		showtireGarageHours = new JCheckBox();
+		showtireGarageHours.setSelected(false);
+		showengineGarageHours = new JCheckBox();
+		showengineGarageHours.setSelected(false);
+		showtransmissionGarageHours = new JCheckBox();
+		showtransmissionGarageHours.setSelected(false);
+		showelecGarageHours = new JCheckBox();
+		showelecGarageHours.setSelected(false);
+		showfluidsGarageHours = new JCheckBox();
+		showfluidsGarageHours.setSelected(false);
+		
+		services = new ArrayList<TOService>();
+		 
+		addComboLabel = new JLabel();
+		addComboLabel.setText("Create Service Combo");
+		addComboLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		nameLabel = new JLabel();
+		nameLabel.setText("Name: ");
+		comboName = new JTextField(15);
+		comboName.setMaximumSize(getPreferredSize());
+		mainServiceLabel = new JLabel();
+		mainServiceLabel.setText("Main service: ");
+		mainServiceMap = new HashMap<Integer, String>();
+		mainService = new JComboBox<String>(new String[0]);
+		mainService.setMaximumSize(getPreferredSize());
+		optService = new JLabel();
+		optService.setText("Optional services: ");
+		comboVisualizerList = new ArrayList<ComboVisualizer>();
+		optComboItemPanel = new JPanel();
+		optComboItemPanel.setLayout(new BoxLayout(optComboItemPanel, BoxLayout.PAGE_AXIS));
+		addOptComboItemButton = new JButton();
+		addOptComboItemButton.setText("+");
+		addComboButton = new JButton();
+		addComboButton.setText("Add Service Combo");
+		serviceComboTopSeparator = new JSeparator();
+		serviceComboErrorMessage = new JLabel();
+		serviceComboErrorMessage.setForeground(Color.RED);
 		
 		hideAppointmentSection();
+		hideServiceComboSection();
 		
 		// Action Listeners
 		// Listeners for Login - Sign up
@@ -550,6 +591,18 @@ public class CarShopPage extends JFrame{
 				pack();
 			}
 		});
+		
+		addOptComboItemButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addOptServiceActionPerformed(evt);
+			}
+		});
+		
+		addComboButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addComboActionPerformed(evt);
+			}
+		});
 	
 		
 		// global settings
@@ -616,6 +669,23 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccountButton)
 										)
 								.addComponent(updateAccountSuccessMessage)
+								)
+						.addComponent(serviceComboTopSeparator)
+						.addComponent(serviceComboErrorMessage)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(nameLabel)
+										.addComponent(mainServiceLabel)
+										.addComponent(optService)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addComboLabel)
+										.addComponent(comboName)
+										.addComponent(mainService)
+										.addComponent(optComboItemPanel)
+										.addComponent(addOptComboItemButton)
+										.addComponent(addComboButton)
+										)
 								)
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
@@ -744,7 +814,9 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptLabel});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
-
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {optComboItemPanel, addComboButton, mainService, comboName});
+		
+		
 		// Vertical Layout
 		layout.setVerticalGroup( layout.createParallelGroup()
 				.addGroup(layout.createSequentialGroup()
@@ -808,6 +880,31 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccountButton)
 										.addComponent(updateAccountSuccessMessage)
 										)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(serviceComboTopSeparator)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(serviceComboErrorMessage)
+								)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addComboLabel)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(nameLabel)
+										.addComponent(comboName)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(mainServiceLabel)
+										.addComponent(mainService)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(optService)
+										.addComponent(optComboItemPanel)
+										)
+								.addComponent(addOptComboItemButton)
+								.addComponent(addComboButton)
 								)
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
@@ -951,6 +1048,27 @@ public class CarShopPage extends JFrame{
 			}
 			bookableServiceList.setSelectedIndex(-1);
 			
+			services.clear();
+			for(TOBookableService s: AppointmentController.getBookableServices()) {
+				if(s instanceof TOService) {
+					services.add((TOService) s);
+				}
+			}
+			
+			idx = 0;
+			mainService.removeAllItems();
+			mainServiceMap.clear();
+			for(TOService s: services) {
+				mainService.addItem(s.getName());
+				mainServiceMap.put(idx, s.getName());
+				idx++;
+			}
+			mainService.setSelectedIndex(-1);
+			
+			serviceComboErrorMessage.setText("");
+			comboName.setText("");
+			optComboItemPanel.removeAll();
+			
 			apptDatePicker.getModel().setValue(null);
 			apptDatePickerUpdate.getModel().setValue(null);
 			
@@ -1015,6 +1133,8 @@ public class CarShopPage extends JFrame{
 						showAppointmentSection();
 					} else if (CarShopController.isTechnicianLoggedIn()) {
 						showUpdateGarageSection();
+					} else {
+						showServiceComboSection();
 					}
 				}
 			} catch (Exception e) {
@@ -1032,6 +1152,7 @@ public class CarShopPage extends JFrame{
 				hideUpdateAccountSection();
 				hideUpdateGarageSection();
 				hideAppointmentSection();
+				hideServiceComboSection();
 				headerTitle.setText("CarShop");
 				logoutButton.setVisible(false);
 				loginUsernameField.setText("");
@@ -1407,6 +1528,54 @@ public class CarShopPage extends JFrame{
 		refreshData();	
 	}
 	
+	private void addOptServiceActionPerformed(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			ComboVisualizer visualizer = new ComboVisualizer(services, this);
+			optComboItemPanel.add(visualizer);
+			comboVisualizerList.add(visualizer);
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		serviceComboErrorMessage.setText(err);
+		pack();
+		
+	}
+	
+	private void addComboActionPerformed(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			
+			int selectedMainService = mainService.getSelectedIndex();
+			if(selectedMainService < 0) {
+				throw new Exception("A main service needs to be selected");
+			} else if (comboName.getText().length() == 0) {
+				throw new Exception("The service combo must have a name");
+			}
+			
+			TOServiceCombo sc = new TOServiceCombo(comboName.getText());
+			TOService service = CarShopController.getTOService(mainServiceMap.get(selectedMainService));
+			new TOComboItem(true, service, sc);
+			
+			for(ComboVisualizer visualizer : comboVisualizerList) {
+				TOService s = visualizer.getSelectedService();
+				new TOComboItem(visualizer.isMnadatory(), s, sc);
+			}
+			
+			CarShopController.addServiceComboFromView(sc);
+			refreshData();
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		serviceComboErrorMessage.setText(err);
+
+		
+	}
+	
 	@SuppressWarnings("rawtypes")
 	private void initializeGarageHoursComponent() {
 		addNewLabel = new JLabel();
@@ -1647,5 +1816,49 @@ public class CarShopPage extends JFrame{
 		horizontalLineBottom.setVisible(true);
 	}
 	
+	private void hideServiceComboSection() {
+		addComboLabel.setVisible(false);
+		nameLabel.setVisible(false);
+		comboName.setVisible(false);
+		mainServiceLabel.setVisible(false);
+		mainService.setVisible(false);
+		optService.setVisible(false);
+		optComboItemPanel.setVisible(false);
+		addOptComboItemButton.setVisible(false);
+		addComboButton.setVisible(false);
+		serviceComboTopSeparator.setVisible(false);
+		serviceComboErrorMessage.setVisible(false);
+	}
+	
+	private void showServiceComboSection() {
+		addComboLabel.setVisible(true);
+		nameLabel.setVisible(true);
+		comboName.setVisible(true);
+		mainServiceLabel.setVisible(true);
+		mainService.setVisible(true);
+		optService.setVisible(true);
+		optComboItemPanel.setVisible(true);
+		addOptComboItemButton.setVisible(true);
+		addComboButton.setVisible(true);
+		serviceComboTopSeparator.setVisible(true);
+		serviceComboErrorMessage.setVisible(true);
+	}
+	
+	// helper methods
+	
+	public void removeOptComboItem(ComboVisualizer combo) {
+		int idx = -1;
+		for (int i = 0; i < comboVisualizerList.size(); i++) {
+			if(combo.equals(comboVisualizerList.get(i))) {
+				idx = i;
+				break;
+			}
+		}
+		if(idx >= 0) {
+			comboVisualizerList.remove(idx);
+			optComboItemPanel.remove(idx);
+		}
+		pack();
+	}
 
 }
