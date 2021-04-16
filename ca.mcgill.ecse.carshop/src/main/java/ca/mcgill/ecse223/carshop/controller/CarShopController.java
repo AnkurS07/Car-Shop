@@ -945,6 +945,22 @@ public class CarShopController {
 		// returns true if the service already exists else returns false
 		return serviceUpdate1;
 	}
+	
+	public static void addServiceComboFromView(TOServiceCombo toCombo) throws Exception {
+
+		String services = "";
+		String mandatory = "";
+		for(int i=0 ; i< toCombo.getServices().size(); i++) {
+			services += toCombo.getService(i).getService().getName();
+			mandatory += Boolean.toString(toCombo.getService(i).getMandatory());
+			if (i < toCombo.getServices().size() - 1) {
+				services += ",";
+				mandatory += ",";
+			}
+		}
+		
+		defineServiceCombo(CarShopApplication.getLoggedInUser(), toCombo.getName(), services, mandatory, toCombo.getService(0).getService().getName());
+	}
 
 	/**
 	 * Allows the owner to define a service combo
@@ -1436,6 +1452,18 @@ public class CarShopController {
 			e.printStackTrace();
 		} 
 		return type;
+	}
+	
+	public static TOService getTOService(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		TOService service = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs.getName().equals(name)) {
+				service = new TOService(name, ((Service) bs).getDuration());
+				break;
+			}
+		}
+		return service;
 	}
 	
 }
