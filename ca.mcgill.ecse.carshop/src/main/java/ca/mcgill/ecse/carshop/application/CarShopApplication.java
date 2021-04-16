@@ -13,19 +13,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.mcgill.ecse.carshop.model.Appointment;
-import ca.mcgill.ecse.carshop.model.BookableService;
-import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.model.CarShop;
-import ca.mcgill.ecse.carshop.model.ComboItem;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
-import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
-import ca.mcgill.ecse.carshop.model.ServiceBooking;
-import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
@@ -147,8 +140,8 @@ public class CarShopApplication {
             
             // Creating Technicians Accounts
             System.out.println("Action: Creating technicians accounts.");
-            CarShopController.createTechnician("Engine-Technician", "tech_pass1", TechnicianType.Engine);
             CarShopController.createTechnician("Tire-Technician", "tech_pass2", TechnicianType.Tire);
+            CarShopController.createTechnician("Engine-Technician", "tech_pass1", TechnicianType.Engine);
             CarShopController.createTechnician("Transmission-Technician", "tech_pass3", TechnicianType.Transmission);
             CarShopController.createTechnician("Electronics-Technician", "tech_pass4", TechnicianType.Electronics);
             CarShopController.createTechnician("Fluids-Technician", "tech_pass5", TechnicianType.Fluids);
@@ -161,9 +154,9 @@ public class CarShopApplication {
             
             // Adding Services
             System.out.println("Action: Adding new services.");
-            CarShopController.addService("tire-change", 20, carShop.getGarage(1));
+            CarShopController.addService("tire-change", 20, carShop.getGarage(0));
             CarShopController.addService("transmission-check", 40, carShop.getGarage(2));
-            CarShopController.addService("engine-check", 60, carShop.getGarage(0));
+            CarShopController.addService("engine-check", 60, carShop.getGarage(1));
             CarShopController.addService("electronics-repair", 30, carShop.getGarage(3));
             System.out.println("Result: Registered services: ");
             for (Garage g : carShop.getGarages()) {
@@ -270,7 +263,7 @@ public class CarShopApplication {
             
             // Adding a service to the combo
             List<Service> newServices = new ArrayList<Service>();
-    		newServices.add(carShop.getGarage(1).getService(0));
+    		newServices.add(carShop.getGarage(0).getService(0));
     		Time startTime3 = new Time((parseDate("11:10", "HH:mm")).getTime());
             Time endTime3 = new Time((parseDate("11:30", "HH:mm")).getTime());
     		TimeSlot ts3 = new TimeSlot(startDate, startTime3, endDate, endTime3, carShop);

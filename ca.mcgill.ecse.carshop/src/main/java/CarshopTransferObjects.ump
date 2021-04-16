@@ -48,6 +48,7 @@ class TOAppointment {
 	String mainServiceName;
 	* -- 1 TOBookableService toBookableService;
 	1 <@>- * TOServiceBooking toServiceBookings;
+<<<<<<< HEAD
 	
 }
 
@@ -77,6 +78,12 @@ class TOGarage {
 class TOBusinessHour {
   enum DayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
   DayOfWeek dayOfWeek;
+=======
+}
+
+class TOBusinessHour {
+  String dayOfWeek;
+>>>>>>> master
   Time startTime;
   Time endTime;
 }
