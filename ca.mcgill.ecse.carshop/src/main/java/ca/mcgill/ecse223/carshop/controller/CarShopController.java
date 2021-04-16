@@ -960,7 +960,7 @@ public class CarShopController {
 			}
 		}
 		
-		defineServiceCombo(CarShopApplication.getLoggedInUser(), toCombo.getName(), services, mandatory, toCombo.getService(0).getService().getName());
+		defineServiceCombo(CarShopApplication.getLoggedInUser(), toCombo.getName(), services, mandatory, toCombo.getMainService());
 	}
 
 	/**
@@ -1027,6 +1027,104 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 		
+	}
+	
+	public static void cancelServiceComboFromView(TOServiceCombo toCombo) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		ServiceCombo current = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof ServiceCombo && bs.getName().equals(toCombo.getName())) {
+				current = (ServiceCombo) bs;
+			}
+		}
+		
+		try {	
+			current.delete();	
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static void updateServiceComboFromView(TOServiceCombo toCombo, String previousName) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service service;
+		boolean mandatoryToSet;
+		ComboItem item;
+		String services = "";
+		String mandatory = "";
+		for(int i=0 ; i< toCombo.getServices().size(); i++) {
+			services += toCombo.getService(i).getService().getName();
+			mandatory += Boolean.toString(toCombo.getService(i).getMandatory());
+			if (i < toCombo.getServices().size() - 1) {
+				services += ",";
+				mandatory += ",";
+			}
+		}
+		
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(toCombo.getName()))!=null && !toCombo.getName().equals(previousName)) {
+			throw new Exception ("Service Combo "+toCombo.getName()+" already exists");
+		}
+		if((serviceCheck(toCombo.getMainService()))==null) {
+			throw new Exception ("Service " + toCombo.getMainService() + " does not exist");
+		}
+		if(!(services.contains(toCombo.getMainService()))) {
+			throw new Exception("Main service must be included in the services");
+		}
+		/*for(int i=0; i<serviceList.length; i++) {
+			if(!(BookableService.hasWithName(serviceList[i]))) {
+				throw new Exception ("Service" + serviceList[i] + "does not exist");
+			}
+		}*/
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}		
+		}
+		if(serviceList.length<2) {
+			throw new Exception("A service Combo must contain at least 2 services");
+		}
+		for(int j=0; j<serviceList.length; j++) {
+			if(serviceList[j].equals(toCombo.getMainService())) {
+				if(!(Boolean.parseBoolean(mandatoryList[j]))) {
+					throw new Exception ("Main service must be mandatory");
+				}
+			}
+		}
+		
+		ServiceCombo current = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof ServiceCombo && bs.getName().equals(toCombo.getName())) {
+				current = (ServiceCombo) bs;
+			}
+		}
+		
+		try {
+			
+			current.delete();
+			ServiceCombo combo = new ServiceCombo(toCombo.getName(), carShop);
+			for(int i=0; i<serviceList.length; i++) {
+				service = serviceCheck(serviceList[i]);
+				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+				item = new ComboItem(mandatoryToSet, service, combo);
+				if(item.getService().getName().equals(toCombo.getMainService())) {
+					combo.setMainService(item);
+				}
+				combo.addService(item);
+			}
+			
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
 	/**
