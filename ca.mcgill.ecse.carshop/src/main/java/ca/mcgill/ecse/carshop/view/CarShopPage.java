@@ -20,12 +20,15 @@ import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
+import ca.mcgill.ecse.carshop.model.Appointment;
+import ca.mcgill.ecse.carshop.model.Appointment.AppStatus;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
+import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
@@ -45,6 +48,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,6 +125,21 @@ public class CarShopPage extends JFrame{
 	private JLabel apptLabel;
 	private JButton cancelApptButton;
 	
+	// Start appointment
+	private JLabel startAppointment;
+	private JLabel startAppointmentLabel;
+	private JComboBox<String> appointmentsBooked;
+	private JButton startAppointmentButton;
+	private JButton registerNoShowButton;
+	private JSeparator startAppointmentTopSeparator;
+	
+	// End appointment
+	private JLabel endAppointment;
+	private JLabel endAppointmentLabel;
+	private JComboBox<String> appointmentsInProgress;
+	private JButton endAppointmentButton;
+	private JSeparator endAppointmentTopSeparator;
+	
 	// Make Appt
 	private JLabel makeApptLabel;
 	private JComboBox<String> bookableServiceList;
@@ -165,6 +184,7 @@ public class CarShopPage extends JFrame{
 	private JCheckBox showfluidsGarageHours;
 	
 	private HashMap<Integer, TOAppointment> appts;
+	private HashMap<Integer, TOAppointment> bookedAppts;
 	private HashMap<Integer, TOBookableService> bookableServices;
 	private List<OptServiceVisualizer> optServices;
 	
@@ -180,7 +200,6 @@ public class CarShopPage extends JFrame{
 	private List<OptServiceVisualizer> optServicesUpdate;
 	private JSeparator horizontalLineTop;
 	private JSeparator horizontalLineBottom;
-	
 	
 	// data elements
 	private String error = null;
@@ -320,6 +339,29 @@ public class CarShopPage extends JFrame{
 		makeApptButton = new JButton();
 		makeApptButton.setText("Make appointment");
 		
+		// Start appointment
+		startAppointment = new JLabel("Start Appointment");
+		startAppointment.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		startAppointmentLabel = new JLabel("Appointment: ");
+		appointmentsBooked = new JComboBox<String>(new String[0]);
+		appointmentsBooked.setMaximumSize(getPreferredSize());
+		startAppointmentButton = new JButton();
+		startAppointmentButton.setText("Start");
+		registerNoShowButton = new JButton();
+		registerNoShowButton.setText("Register no show");
+		startAppointmentTopSeparator = new JSeparator();
+
+		// End appointment
+		endAppointment = new JLabel("End Appointment");
+		endAppointment.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		endAppointmentLabel = new JLabel("Appointment: ");
+		appointmentsInProgress = new JComboBox<String>(new String[0]);
+		appointmentsInProgress.setMaximumSize(getPreferredSize());
+		endAppointmentButton = new JButton();
+		endAppointmentButton.setText("End");
+		endAppointmentTopSeparator = new JSeparator();
+		
+		
 		SqlDateModel model = new SqlDateModel();
 		Properties p = new Properties();
 		p.put("text.today", "Today");
@@ -419,6 +461,8 @@ public class CarShopPage extends JFrame{
 
 		
 		hideAppointmentSection();
+		hideStartEndRegisterSection();
+
 		
 		// Action Listeners
 		// Listeners for Login - Sign up
@@ -482,6 +526,36 @@ public class CarShopPage extends JFrame{
 		cancelApptButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				cancelApptButtonActionPerformed(evt);
+			}
+		});
+		
+		appointmentsBooked.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				showAppointmentsToStart(evt);
+			}
+		});
+		
+		appointmentsInProgress.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				showAppointmentsToEnd(evt);
+			}
+		});
+		
+		startAppointmentButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				startAppointmentButtonActionPerformed(evt);
+			}
+		});
+		
+		endAppointmentButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				endAppointmentButtonActionPerformed(evt);
+			}
+		});
+		
+		registerNoShowButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				registerNoShowButtonActionPerformed(evt);
 			}
 		});
 		
@@ -600,6 +674,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(signupButton)
 										)
 								)
+						
 						// Update Account Section
 						.addComponent(updateAccountTopSeparator)
 						.addGroup(layout.createSequentialGroup()
@@ -617,6 +692,35 @@ public class CarShopPage extends JFrame{
 										)
 								.addComponent(updateAccountSuccessMessage)
 								)
+
+						// Start Appointment Section
+						.addComponent(startAppointmentTopSeparator)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(startAppointment)
+										.addComponent(startAppointmentLabel)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(appointmentsBooked)
+										.addComponent(startAppointmentButton)
+										.addComponent(registerNoShowButton)
+										)
+								)
+						
+						// End Appointment Section
+						.addComponent(endAppointmentTopSeparator)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(endAppointment)
+										.addComponent(endAppointmentLabel)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(appointmentsInProgress)
+										.addComponent(endAppointmentButton)
+										)
+								)
+						
+						
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
 						.addGroup(layout.createSequentialGroup()
@@ -741,6 +845,7 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelAppt});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, updateApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, apptDatePickerUpdate});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {startAppointmentButton, registerNoShowButton, endAppointmentButton, appointmentsBooked, appointmentsInProgress});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptLabel});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
@@ -785,6 +890,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(signupButton)
 										)
 								)
+						
 						// Update Account Section
 						.addGroup(layout.createParallelGroup()
 								.addComponent(updateAccountTopSeparator))
@@ -809,6 +915,32 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccountSuccessMessage)
 										)
 								)
+						// Start Appointment Section
+						.addGroup(layout.createParallelGroup()
+								.addComponent(startAppointmentTopSeparator))
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(startAppointment)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(startAppointmentLabel)
+										.addComponent(appointmentsBooked)
+										)
+								.addComponent(startAppointmentButton)
+								.addComponent(registerNoShowButton)
+								)
+						
+						// End Appointment Section
+						.addGroup(layout.createParallelGroup()
+								.addComponent(endAppointmentTopSeparator))
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(endAppointment)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(endAppointmentLabel)
+										.addComponent(appointmentsInProgress)
+										)
+								.addComponent(endAppointmentButton)
+								)
+						
+						
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
 						.addGroup(layout.createParallelGroup()
@@ -926,6 +1058,9 @@ public class CarShopPage extends JFrame{
 			
 			appts = new HashMap<Integer, TOAppointment>();
 			apptList.removeAllItems();
+			appointmentsBooked.removeAllItems();
+			appointmentsInProgress.removeAllItems();
+
 			Integer idx = 0;
 			for(TOAppointment a: AppointmentController.getAppointments()) {
 				Date sd = a.getToServiceBooking(0).getToTimeSlot().getStartDate();
@@ -936,10 +1071,14 @@ public class CarShopPage extends JFrame{
 				String apptDate = sdf.format(sd)+"+"+appTime;
 				appts.put(idx, a);
 				apptList.addItem(a.getMainServiceName() + " " + apptDate);
+				appointmentsBooked.addItem(a.getMainServiceName() + " " + apptDate);
+				appointmentsInProgress.addItem(a.getMainServiceName() + " " + apptDate);
 				idx++;
 			}
 			apptList.setSelectedIndex(-1);
-			
+			appointmentsBooked.setSelectedIndex(-1);
+			appointmentsInProgress.setSelectedIndex(-1);
+
 			
 			bookableServices = new HashMap<Integer, TOBookableService>();
 			bookableServiceList.removeAllItems();
@@ -1015,6 +1154,8 @@ public class CarShopPage extends JFrame{
 						showAppointmentSection();
 					} else if (CarShopController.isTechnicianLoggedIn()) {
 						showUpdateGarageSection();
+					} else if (CarShopController.isOwnerLoggedIn()) {
+						showStartEndRegisterSection();
 					}
 				}
 			} catch (Exception e) {
@@ -1032,6 +1173,7 @@ public class CarShopPage extends JFrame{
 				hideUpdateAccountSection();
 				hideUpdateGarageSection();
 				hideAppointmentSection();
+				hideStartEndRegisterSection();
 				headerTitle.setText("CarShop");
 				logoutButton.setVisible(false);
 				loginUsernameField.setText("");
@@ -1216,6 +1358,72 @@ public class CarShopPage extends JFrame{
 		refreshData();	
 	}
 	
+	private void startAppointmentButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		error = "";
+		int selectedAppt = appointmentsBooked.getSelectedIndex();
+		if(selectedAppt < 0) {
+			error = "Appointment needs to be selected to start";
+		}
+		error = error.trim();
+		
+		if (error.length() == 0) {
+			// call the controller
+			try {
+				TOAppointment app = appts.get(selectedAppt);
+				//AppointmentController.startAppointment(date, app);
+			} catch (Exception e) {
+				error = e.getMessage();
+			}
+		}
+
+		// update visuals
+		refreshData();	
+	}
+	
+	private void endAppointmentButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		error = "";
+		int selectedAppt = appointmentsInProgress.getSelectedIndex();
+		if(selectedAppt < 0) {
+			error = "Appointment needs to be selected to end";
+		}
+		error = error.trim();
+		
+		if (error.length() == 0) {
+			// call the controller
+			try {
+				TOAppointment app = appts.get(selectedAppt);
+				//AppointmentController.endAppointment(date, app);
+			} catch (Exception e) {
+				error = e.getMessage();
+			}
+		}
+
+		// update visuals
+		refreshData();	
+	}
+	
+	private void registerNoShowButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		error = "";
+		int selectedAppt = appointmentsBooked.getSelectedIndex();
+		if(selectedAppt < 0) {
+			error = "Appointment needs to be selected to register no show";
+		}
+		error = error.trim();
+		
+		if (error.length() == 0) {
+			// call the controller
+			try {
+				TOAppointment app = appts.get(selectedAppt);
+				//AppointmentController.registerNoShow(date, app);
+			} catch (Exception e) {
+				error = e.getMessage();
+			}
+		}
+
+		// update visuals
+		refreshData();	
+	}
+	
 	private void makeApptButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		error = "";
 		int selectedBs = bookableServiceList.getSelectedIndex();
@@ -1292,6 +1500,138 @@ public class CarShopPage extends JFrame{
 	
 	private void showOptionalServicesForUpdate(java.awt.event.ActionEvent evt) {
 		int selectedApp = apptList.getSelectedIndex();
+		try {
+			optServicePanelUpdate.removeAll();
+			optServicesUpdate = new ArrayList<OptServiceVisualizer>();
+		
+		
+			if(selectedApp >= 0) {
+				SimpleDateFormat sdf = new SimpleDateFormat("HH");
+				SimpleDateFormat sdf2 = new SimpleDateFormat("mm");
+				
+				Date sd = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartDate();
+				int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(sd));
+				int month = Integer.parseInt(new SimpleDateFormat("MM").format(sd)) - 1;
+				int day = Integer.parseInt(new SimpleDateFormat("dd").format(sd));
+				apptDatePickerUpdate.getModel().setDate(year, month, day);
+				apptDatePickerUpdate.getModel().setSelected(true);
+				
+				
+				TOBookableService toBs =  appts.get(selectedApp).getToBookableService();
+				if(toBs instanceof TOServiceCombo) {
+					TOServiceCombo toSc = (TOServiceCombo) toBs;
+					List<String> selectedServiceNames = AppointmentController.getSelectedServiceNames(appts.get(selectedApp));
+					int idx = 0;
+					for(int i = 0 ; i < toSc.getServices().size();i++) {
+						OptServiceVisualizer visualizer = new OptServiceVisualizer(toSc.getService(i));
+						if(selectedServiceNames.contains(visualizer.getTOService().getName())) {
+							visualizer.setIsSelected(true);
+							TOTimeSlot toTimeSlots = appts.get(selectedApp).getToServiceBooking(idx).getToTimeSlot();
+							
+							Time st = toTimeSlots.getStartTime();
+							
+							int startHour = Integer.parseInt(sdf.format(st));
+							int startMin = Integer.parseInt(sdf2.format(st));
+							visualizer.setStartTime(startHour, startMin);
+							
+							idx++;
+						}
+						
+							
+						optServicePanelUpdate.add(visualizer); 
+						optServicesUpdate.add(visualizer);
+					}
+				} else {
+					TOService toS = (TOService) toBs;
+					OptServiceVisualizer visualizer = new OptServiceVisualizer(toS);
+					
+					Time st = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartTime();
+					
+					int startHour = Integer.parseInt(sdf.format(st));
+					int startMin = Integer.parseInt(sdf2.format(st));
+					visualizer.setStartTime(startHour, startMin);
+					
+					optServicePanelUpdate.add(visualizer); 
+					optServicesUpdate.add(visualizer);
+				}
+			}
+		} catch (Exception e) {
+			error = e.getMessage();
+		}
+		
+		// update visuals
+		//refreshData();
+		pack();
+	}
+	
+	private void showAppointmentsToStart(java.awt.event.ActionEvent evt) {
+		int selectedApp = appointmentsBooked.getSelectedIndex();
+		try {
+			optServicePanelUpdate.removeAll();
+			optServicesUpdate = new ArrayList<OptServiceVisualizer>();
+		
+		
+			if(selectedApp >= 0) {
+				SimpleDateFormat sdf = new SimpleDateFormat("HH");
+				SimpleDateFormat sdf2 = new SimpleDateFormat("mm");
+				
+				Date sd = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartDate();
+				int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(sd));
+				int month = Integer.parseInt(new SimpleDateFormat("MM").format(sd)) - 1;
+				int day = Integer.parseInt(new SimpleDateFormat("dd").format(sd));
+				apptDatePickerUpdate.getModel().setDate(year, month, day);
+				apptDatePickerUpdate.getModel().setSelected(true);
+				
+				
+				TOBookableService toBs =  appts.get(selectedApp).getToBookableService();
+				if(toBs instanceof TOServiceCombo) {
+					TOServiceCombo toSc = (TOServiceCombo) toBs;
+					List<String> selectedServiceNames = AppointmentController.getSelectedServiceNames(appts.get(selectedApp));
+					int idx = 0;
+					for(int i = 0 ; i < toSc.getServices().size();i++) {
+						OptServiceVisualizer visualizer = new OptServiceVisualizer(toSc.getService(i));
+						if(selectedServiceNames.contains(visualizer.getTOService().getName())) {
+							visualizer.setIsSelected(true);
+							TOTimeSlot toTimeSlots = appts.get(selectedApp).getToServiceBooking(idx).getToTimeSlot();
+							
+							Time st = toTimeSlots.getStartTime();
+							
+							int startHour = Integer.parseInt(sdf.format(st));
+							int startMin = Integer.parseInt(sdf2.format(st));
+							visualizer.setStartTime(startHour, startMin);
+							
+							idx++;
+						}
+						
+							
+						optServicePanelUpdate.add(visualizer); 
+						optServicesUpdate.add(visualizer);
+					}
+				} else {
+					TOService toS = (TOService) toBs;
+					OptServiceVisualizer visualizer = new OptServiceVisualizer(toS);
+					
+					Time st = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartTime();
+					
+					int startHour = Integer.parseInt(sdf.format(st));
+					int startMin = Integer.parseInt(sdf2.format(st));
+					visualizer.setStartTime(startHour, startMin);
+					
+					optServicePanelUpdate.add(visualizer); 
+					optServicesUpdate.add(visualizer);
+				}
+			}
+		} catch (Exception e) {
+			error = e.getMessage();
+		}
+		
+		// update visuals
+		//refreshData();
+		pack();
+	}
+	
+	private void showAppointmentsToEnd(java.awt.event.ActionEvent evt) {
+		int selectedApp = appointmentsInProgress.getSelectedIndex();
 		try {
 			optServicePanelUpdate.removeAll();
 			optServicesUpdate = new ArrayList<OptServiceVisualizer>();
@@ -1647,5 +1987,37 @@ public class CarShopPage extends JFrame{
 		horizontalLineBottom.setVisible(true);
 	}
 	
+	private void showStartEndRegisterSection() {
+		// Start appointment
+		startAppointment.setVisible(true);
+		startAppointmentLabel.setVisible(true);
+		appointmentsBooked.setVisible(true);
+		startAppointmentButton.setVisible(true);
+		registerNoShowButton.setVisible(true);
+		startAppointmentTopSeparator.setVisible(true);
 
+		// End appointment
+		endAppointment.setVisible(true);
+		endAppointmentLabel.setVisible(true);
+		appointmentsInProgress.setVisible(true);
+		endAppointmentButton.setVisible(true);		
+		endAppointmentTopSeparator.setVisible(true);
+	}
+	
+	private void hideStartEndRegisterSection() {
+		// Start appointment
+		startAppointment.setVisible(false);
+		startAppointmentLabel.setVisible(false);
+		appointmentsBooked.setVisible(false);
+		startAppointmentButton.setVisible(false);
+		registerNoShowButton.setVisible(false);
+		startAppointmentTopSeparator.setVisible(false);
+		
+		// End appointment
+		endAppointment.setVisible(false);
+		endAppointmentLabel.setVisible(false);
+		appointmentsInProgress.setVisible(false);
+		endAppointmentButton.setVisible(false);		
+		endAppointmentTopSeparator.setVisible(false);
+	}
 }

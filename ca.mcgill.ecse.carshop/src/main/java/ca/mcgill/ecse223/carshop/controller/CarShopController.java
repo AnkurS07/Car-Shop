@@ -1378,6 +1378,20 @@ public class CarShopController {
 		return isTechnician;
 	}
 	
+	public static boolean isOwnerLoggedIn() {
+		boolean isOwner = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Owner) {
+				isOwner = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isOwner;
+	}
+	
 	public static List<TOBusinessHour> getBusinessHours(String type){
 		CarShop carShop = CarShopApplication.getCarShop();
 		List<TOBusinessHour> businessHours = new ArrayList<TOBusinessHour>();
