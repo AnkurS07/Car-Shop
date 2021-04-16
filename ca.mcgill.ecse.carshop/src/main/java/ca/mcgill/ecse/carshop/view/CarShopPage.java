@@ -43,6 +43,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,7 @@ public class CarShopPage extends JFrame{
 	private JLabel updateAccountSuccessMessage;
 	private JLabel updateUsername;
 	private JLabel updatePassword;
+	private JLabel updatePasswordConfirm;
 	private JTextField updateUsernameField;
 	private JPasswordField updatePasswordField;
 	private JPasswordField updatePasswordField2;
@@ -289,6 +291,8 @@ public class CarShopPage extends JFrame{
 		updateUsername.setText("New username: ");
 		updatePassword = new JLabel();
 		updatePassword.setText("New password: ");
+		updatePasswordConfirm = new JLabel();
+		updatePasswordConfirm.setText("Confirm: ");
 		updateUsernameField = new JTextField(15);
 		updateUsernameField.setMaximumSize(getPreferredSize());
 		updatePasswordField = new JPasswordField(15);
@@ -656,6 +660,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccount)
 										.addComponent(updateUsername)
 										.addComponent(updatePassword)
+										.addComponent(updatePasswordConfirm)
 										)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(updateAccountErrorMessage)
@@ -870,6 +875,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(updatePasswordField)
 										)
 								.addGroup(layout.createParallelGroup()
+										.addComponent(updatePasswordConfirm)
 										.addComponent(updatePasswordField2)
 										)
 								.addGroup(layout.createParallelGroup()
@@ -1195,8 +1201,8 @@ public class CarShopPage extends JFrame{
 		updateAccountSuccess = "";
 		if (updateUsernameField.getText().isBlank() || updatePasswordField.getText().isBlank()) {
 			updateAccountError = "Username and password must not be empty.";
-		} else if(!updatePasswordField.getText().equals(updatePasswordField.getText())) {
-			updateAccountError = "New password does not match";
+		} else if(!Arrays.equals( updatePasswordField.getPassword(),  updatePasswordField2.getPassword())) {
+			updateAccountError = "New passwords do not match";
 		}
 		// Check for other errors here //
 		if (updateAccountError.length() == 0) {
@@ -1687,6 +1693,7 @@ public class CarShopPage extends JFrame{
 		updateAccountSuccessMessage.setVisible(false);
 		updateUsername.setVisible(false);
 		updatePassword.setVisible(false);
+		updatePasswordConfirm.setVisible(false);
 		updateUsernameField.setVisible(false);
 		updatePasswordField.setVisible(false);
 		updatePasswordField2.setVisible(false);
@@ -1700,6 +1707,7 @@ public class CarShopPage extends JFrame{
 		updateAccountSuccessMessage.setVisible(true);
 		updateUsername.setVisible(true);
 		updatePassword.setVisible(true);
+		updatePasswordConfirm.setVisible(true);
 		updateUsernameField.setVisible(true);
 		updatePasswordField.setVisible(true);
 		updatePasswordField2.setVisible(true);
