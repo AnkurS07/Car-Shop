@@ -2,6 +2,7 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1468,6 +1469,38 @@ public class CarShopController {
 	
 	public static String getLoggedInUsername() throws Exception {
 		return CarShopApplication.getLoggedInUser();
+	}
+	
+	public static boolean removeGarageHoursOnDay(String day) throws Exception{
+		boolean updated = false;
+		String type = "";
+		ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+		try {
+			User user = User.getWithUsername(CarShopController.getLoggedInUsername());
+			type = CarShopController.getLoggedInTechnicianType();
+			for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
+				if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
+					bhOnThatDay.add(bh);
+				}
+			}
+			if (bhOnThatDay.size() == 0) {
+				throw new Exception("No existing hours on that day.");
+			}
+			else {
+				for (BusinessHour bh : bhOnThatDay) {
+					DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+					String start = dateFormat.format(bh.getStartTime());
+					String end = dateFormat.format(bh.getEndTime());
+					if (CarShopController.removeHoursToGarageOfTechnicianType(day, start, end, type)) {
+					}
+				}
+			}
+			updated = true;
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return updated;
 	}
 	
 }

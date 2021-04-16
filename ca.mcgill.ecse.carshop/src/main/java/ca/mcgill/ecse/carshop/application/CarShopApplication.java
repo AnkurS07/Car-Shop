@@ -92,7 +92,7 @@ public class CarShopApplication {
             
             // Setting up the business
             System.out.println("Action: Setting up business informations.");
-            CarShopController.SetUpBusinessInformation("CarShop 27", "27 Garage Av.", "027-111-2233", "carshop27@carshop.ca");
+            CarShopController.SetUpBusinessInformation("CarShop 15", "15 Garage Av.", "027-111-2233", "carshop15@carshop.ca");
             System.out.println("Result:\tName of the business:\t\t" + carShop.getBusiness().getName() +
             				"\n\tAddress of the business:\t" + carShop.getBusiness().getAddress() +
             				"\n\tPhone number of the business:\t" + carShop.getBusiness().getPhoneNumber() +
@@ -101,7 +101,7 @@ public class CarShopApplication {
             
             // Updating business informations
             System.out.println("Action: Updating business phone number.");
-            CarShopController.updateBusinessInformation("CarShop 27", "27 Garage Av.", "777-777-7777", "carshop27@carshop.ca");
+            CarShopController.updateBusinessInformation("CarShop 15", "15 Garage Av.", "777-777-7777", "carshop15@carshop.ca");
             System.out.println("Result:\tName of the business:\t\t" + carShop.getBusiness().getName() +
             				"\n\tAddress of the business:\t" + carShop.getBusiness().getAddress() +
             				"\n\tPhone number of the business:\t" + carShop.getBusiness().getPhoneNumber() +
@@ -232,90 +232,90 @@ public class CarShopApplication {
             timeSlots.add(ts2);
             List<Service> optionalServices = new ArrayList<Service>();
             optionalServices.add(carShop.getGarage(3).getService(0));
-            for (BusinessHour bh : carShop.getBusiness().getBusinessHours()) {
-            	for (Garage g : carShop.getGarages()) {
-                	g.addBusinessHour(bh);
-                }
-            }
-            System.out.println("Action: Making an appointment.");
-            AppointmentController.makeAppointment(false, carShop.getCustomer(0), "transmission-check", startDate, startTime1, timeSlots, carShop.getBookableService(1), optionalServices, new ArrayList<TimeSlot>());
-            System.out.println("Result: Registered appointment: ");
-            System.out.println(
-            		"\t\tStatus: " + carShop.getAppointment(0).getAppStatus() + 
-            		"\n\t\tCustomer: " + carShop.getAppointment(0).getCustomer().getUsername() +
-            		"\n\t\tDate: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartDate() +
-            		"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(0).getService().getName() +
-    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartTime() +
-    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getEndTime() +
-    				"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(1).getService().getName() +
-    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getStartTime() +
-    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getEndTime() + "\n"
-    		);
-            
-            // Log out customer
-            System.out.println("Action: Logging out customer.");
-            CarShopController.logout();
-            System.out.println("Result: The logged in user is \"" + getLoggedInUser() + "\".\n");
-            
-            // Appointment Management
-            System.out.println("--------------------------------------------------------------------------\n");
-            System.out.println("========================= APPOINTMENT MANAGEMENT =========================\n");
-            
-            // Adding a service to the combo
-            List<Service> newServices = new ArrayList<Service>();
-    		newServices.add(carShop.getGarage(0).getService(0));
-    		Time startTime3 = new Time((parseDate("11:10", "HH:mm")).getTime());
-            Time endTime3 = new Time((parseDate("11:30", "HH:mm")).getTime());
-    		TimeSlot ts3 = new TimeSlot(startDate, startTime3, endDate, endTime3, carShop);
-    		List<TimeSlot> newTimeSlots = new ArrayList<TimeSlot>();
-    		newTimeSlots.add(ts3);
-            System.out.println("Action: Adding a service to the combo.");
-            AppointmentController.updateAppointment(true, false, carShop.getCustomer(0), carShop.getAppointment(0), newServices, newTimeSlots, systemDate);
-            System.out.println("Result: Registered appointment: ");
-            System.out.println(
-            		"\t\tStatus: " + carShop.getAppointment(0).getAppStatus() + 
-            		"\n\t\tCustomer: " + carShop.getAppointment(0).getCustomer().getUsername() +
-            		"\n\t\tDate: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartDate() +
-            		"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(0).getService().getName() +
-    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartTime() +
-    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getEndTime() +
-    				"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(1).getService().getName() +
-    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getStartTime() +
-    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getEndTime() +
-    				"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(2).getService().getName() +
-    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(2).getTimeSlot().getStartTime() +
-    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(2).getTimeSlot().getEndTime() + "\n"
-    		);
-            
-            // Logging in the owner
-            System.out.println("Action: Logging in with the onwer account.");
-            CarShopController.logIn("owner", "owner");
-            System.out.println("Result: The logged in user is \"" + getLoggedInUser() + "\".\n");
-            
-            // Trying to start the appointment early
-            Date earlyDate = AppointmentController.parseDate("2021-04-14+09:00", "yyyy-MM-dd+hh:mm");
-            CarShopApplication.setSystemDate(earlyDate);
-            System.out.println("Action: Trying to start the appointment early.");
-            try {
-            	AppointmentController.startAppointment(earlyDate, carShop.getAppointment(0));
-            } catch (Exception e) {
-            	System.out.println("Error: " + e.getMessage());
-            }
-            System.out.println("Result: Appointment status: " + carShop.getAppointment(0).getAppStatus() + "\n");
-            
-            // Starting the appointment
-            Date onTimeDate = AppointmentController.parseDate("2021-04-14+10:00", "yyyy-MM-dd+hh:mm");
-            CarShopApplication.setSystemDate(onTimeDate);
-            System.out.println("Action: Starting the appointment.");
-            AppointmentController.startAppointment(onTimeDate, carShop.getAppointment(0));
-            System.out.println("Result: Appointment status: " + carShop.getAppointment(0).getAppStatus() + "\n");
-            
-            // Ending the appointment
-            Date endTimeDate = AppointmentController.parseDate("2021-04-14+11:30", "yyyy-MM-dd+hh:mm");
-            CarShopApplication.setSystemDate(endTimeDate);
-            System.out.println("Action: Ending the appointment.");
-            AppointmentController.endAppointment(endTimeDate, carShop.getAppointment(0));
-            System.out.println("Result: Remaining appointments: " + carShop.getAppointments()+"\n");
+//            for (BusinessHour bh : carShop.getBusiness().getBusinessHours()) {
+//            	for (Garage g : carShop.getGarages()) {
+//                	g.addBusinessHour(bh);
+//                }
+//            }
+//            System.out.println("Action: Making an appointment.");
+//            AppointmentController.makeAppointment(false, carShop.getCustomer(0), "transmission-check", startDate, startTime1, timeSlots, carShop.getBookableService(1), optionalServices, new ArrayList<TimeSlot>());
+//            System.out.println("Result: Registered appointment: ");
+//            System.out.println(
+//            		"\t\tStatus: " + carShop.getAppointment(0).getAppStatus() + 
+//            		"\n\t\tCustomer: " + carShop.getAppointment(0).getCustomer().getUsername() +
+//            		"\n\t\tDate: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartDate() +
+//            		"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(0).getService().getName() +
+//    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartTime() +
+//    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getEndTime() +
+//    				"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(1).getService().getName() +
+//    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getStartTime() +
+//    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getEndTime() + "\n"
+//    		);
+//            
+//            // Log out customer
+//            System.out.println("Action: Logging out customer.");
+//            CarShopController.logout();
+//            System.out.println("Result: The logged in user is \"" + getLoggedInUser() + "\".\n");
+//            
+//            // Appointment Management
+//            System.out.println("--------------------------------------------------------------------------\n");
+//            System.out.println("========================= APPOINTMENT MANAGEMENT =========================\n");
+//            
+//            // Adding a service to the combo
+//            List<Service> newServices = new ArrayList<Service>();
+//    		newServices.add(carShop.getGarage(0).getService(0));
+//    		Time startTime3 = new Time((parseDate("11:10", "HH:mm")).getTime());
+//            Time endTime3 = new Time((parseDate("11:30", "HH:mm")).getTime());
+//    		TimeSlot ts3 = new TimeSlot(startDate, startTime3, endDate, endTime3, carShop);
+//    		List<TimeSlot> newTimeSlots = new ArrayList<TimeSlot>();
+//    		newTimeSlots.add(ts3);
+//            System.out.println("Action: Adding a service to the combo.");
+//            AppointmentController.updateAppointment(true, false, carShop.getCustomer(0), carShop.getAppointment(0), newServices, newTimeSlots, systemDate);
+//            System.out.println("Result: Registered appointment: ");
+//            System.out.println(
+//            		"\t\tStatus: " + carShop.getAppointment(0).getAppStatus() + 
+//            		"\n\t\tCustomer: " + carShop.getAppointment(0).getCustomer().getUsername() +
+//            		"\n\t\tDate: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartDate() +
+//            		"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(0).getService().getName() +
+//    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getStartTime() +
+//    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(0).getTimeSlot().getEndTime() +
+//    				"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(1).getService().getName() +
+//    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getStartTime() +
+//    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(1).getTimeSlot().getEndTime() +
+//    				"\n\t\tService: " + carShop.getAppointment(0).getServiceBooking(2).getService().getName() +
+//    				"\n\t\t\tStart time: " + carShop.getAppointment(0).getServiceBooking(2).getTimeSlot().getStartTime() +
+//    				"\n\t\t\tEnd time: " + carShop.getAppointment(0).getServiceBooking(2).getTimeSlot().getEndTime() + "\n"
+//    		);
+//            
+//            // Logging in the owner
+//            System.out.println("Action: Logging in with the onwer account.");
+//            CarShopController.logIn("owner", "owner");
+//            System.out.println("Result: The logged in user is \"" + getLoggedInUser() + "\".\n");
+//            
+//            // Trying to start the appointment early
+//            Date earlyDate = AppointmentController.parseDate("2021-04-14+09:00", "yyyy-MM-dd+hh:mm");
+//            CarShopApplication.setSystemDate(earlyDate);
+//            System.out.println("Action: Trying to start the appointment early.");
+//            try {
+//            	AppointmentController.startAppointment(earlyDate, carShop.getAppointment(0));
+//            } catch (Exception e) {
+//            	System.out.println("Error: " + e.getMessage());
+//            }
+//            System.out.println("Result: Appointment status: " + carShop.getAppointment(0).getAppStatus() + "\n");
+//            
+//            // Starting the appointment
+//            Date onTimeDate = AppointmentController.parseDate("2021-04-14+10:00", "yyyy-MM-dd+hh:mm");
+//            CarShopApplication.setSystemDate(onTimeDate);
+//            System.out.println("Action: Starting the appointment.");
+//            AppointmentController.startAppointment(onTimeDate, carShop.getAppointment(0));
+//            System.out.println("Result: Appointment status: " + carShop.getAppointment(0).getAppStatus() + "\n");
+//            
+//            // Ending the appointment
+//            Date endTimeDate = AppointmentController.parseDate("2021-04-14+11:30", "yyyy-MM-dd+hh:mm");
+//            CarShopApplication.setSystemDate(endTimeDate);
+//            System.out.println("Action: Ending the appointment.");
+//            AppointmentController.endAppointment(endTimeDate, carShop.getAppointment(0));
+//            System.out.println("Result: Remaining appointments: " + carShop.getAppointments()+"\n");
         }
         
         if (clearSave && !consoleDemo) CarShopController.createOwner("owner", "owner");
