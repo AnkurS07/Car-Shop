@@ -18,6 +18,7 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
+import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
@@ -55,6 +56,9 @@ public class CarShopPage extends JFrame{
 	// Header
 	private JLabel headerTitle;
 	private JButton logoutButton;
+	private JLabel timeLabel;
+	private JLabel dateLabel;
+	private JButton refreshButton;
 	
 	// Login - Sign up
 	private JLabel login;
@@ -233,6 +237,17 @@ public class CarShopPage extends JFrame{
 		logoutButton = new JButton();
 		logoutButton.setText("Log out");
 		logoutButton.setVisible(false);
+		dateLabel = new JLabel();
+		timeLabel = new JLabel();
+		try {
+			dateLabel.setText(CarShopController.getSystemDate());
+			timeLabel.setText(CarShopController.getSystemTime());
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		refreshButton = new JButton();
+		refreshButton.setText("Refresh");
+		
 		
 		// login
 		login = new JLabel();
@@ -458,6 +473,14 @@ public class CarShopPage extends JFrame{
 		hideServiceComboSection();
 		
 		// Action Listeners
+		// Listeners for header
+		refreshButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				refreshButtonActionPerformed(evt);
+			}
+		});
+		
+		
 		// Listeners for Login - Sign up
 		loginButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -619,6 +642,12 @@ public class CarShopPage extends JFrame{
 								.addComponent(headerTitle)
 								.addGap(50)
 								.addComponent(logoutButton)
+								.addGap(300)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(dateLabel)
+										.addComponent(timeLabel)
+										)
+								.addComponent(refreshButton)
 								)
 						// Login - Setup Section
 						.addComponent(loginTopSeparator)
@@ -821,6 +850,11 @@ public class CarShopPage extends JFrame{
 						.addGroup(layout.createParallelGroup()
 								.addComponent(headerTitle)
 								.addComponent(logoutButton)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(dateLabel)
+										.addComponent(timeLabel)
+										)
+								.addComponent(refreshButton)
 								)
 						.addGap(20)
 						// Login - Sign up Section
@@ -1118,10 +1152,22 @@ public class CarShopPage extends JFrame{
 				fluidsGarageHours.add(toHour.getDayOfWeek());
 			}
 			fluidsGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			// Refresh time
+			try {
+				CarShopController.setToCurrentDate();
+				dateLabel.setText(CarShopController.getSystemDate());
+				timeLabel.setText(CarShopController.getSystemTime());
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
 		pack();
+	}
+	
+	private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		refreshData();
 	}
 	
 	private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {

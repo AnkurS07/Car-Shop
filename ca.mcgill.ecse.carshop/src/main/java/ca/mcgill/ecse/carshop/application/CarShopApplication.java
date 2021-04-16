@@ -57,12 +57,11 @@ public class CarShopApplication {
             clearCarShopSave();
         }
         
+        // Set System date and time
+        setToCurrentDate();
+        
         // Console Demo
         if (consoleDemo) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+hh:mm");  
-            LocalDateTime now = LocalDateTime.now();  
-            Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+hh:mm");
-            CarShopApplication.setSystemDate(systemDate);
             
             // Initiating CarShop
             System.out.println("Initiating the CarShop...\n");
@@ -375,6 +374,22 @@ public class CarShopApplication {
 	public static java.util.Date getSystemDate() throws Exception {
 		try {
 			return systemDate;
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Sets the system date to the current local time
+	 * @throws Exception
+	 */
+	public static void setToCurrentDate() throws Exception {
+		try {
+	        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+hh:mm");  
+	        LocalDateTime now = LocalDateTime.now();  
+	        Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+hh:mm");
+	        CarShopApplication.setSystemDate(systemDate);
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
