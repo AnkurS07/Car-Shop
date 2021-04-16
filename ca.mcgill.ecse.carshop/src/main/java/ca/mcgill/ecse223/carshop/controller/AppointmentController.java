@@ -628,17 +628,17 @@ public class AppointmentController {
 
 	private static DayOfWeek getDayOfWeek(int i) {
 		DayOfWeek d;
-		if (i == 0) {
+		if (i == 1) {
 			d = DayOfWeek.Sunday;
-		} else if (i == 1) {
-			d = DayOfWeek.Monday;
 		} else if (i == 2) {
-			d = DayOfWeek.Tuesday;
+			d = DayOfWeek.Monday;
 		} else if (i == 3) {
-			d = DayOfWeek.Wednesday;
+			d = DayOfWeek.Tuesday;
 		} else if (i == 4) {
-			d = DayOfWeek.Thursday;
+			d = DayOfWeek.Wednesday;
 		} else if (i == 5) {
+			d = DayOfWeek.Thursday;
+		} else if (i == 6) {
 			d = DayOfWeek.Friday;
 		} else {
 			d = DayOfWeek.Saturday;
@@ -709,7 +709,7 @@ public class AppointmentController {
 							toBs = new TOService(s.getName(), s.getDuration());
 						} else {
 							ServiceCombo sc = (ServiceCombo) a.getBookableService();
-							toBs = new TOServiceCombo(sc.getName());
+							toBs = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 							for(ComboItem ci: sc.getServices()) {
 								new TOComboItem(ci.getMandatory(), 
 										new TOService(ci.getService().getName(), 
@@ -744,7 +744,7 @@ public class AppointmentController {
 				toBs.add(new TOService(s.getName(), s.getDuration()));
 			} else {
 				ServiceCombo sc = (ServiceCombo) bs;
-				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 				
 				for(ComboItem ci: sc.getServices()) {
 					new TOComboItem(ci.getMandatory(), 
@@ -763,7 +763,7 @@ public class AppointmentController {
 		for(BookableService bs: carShop.getBookableServices()) {
 			if(bs instanceof ServiceCombo) {
 				ServiceCombo sc = (ServiceCombo) bs;
-				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 				
 				for(ComboItem ci: sc.getServices()) {
 					new TOComboItem(ci.getMandatory(), 

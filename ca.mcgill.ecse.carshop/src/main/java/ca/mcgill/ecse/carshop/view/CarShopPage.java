@@ -194,6 +194,7 @@ public class CarShopPage extends JFrame{
 
 	//add service
 	private List<TOService> services;
+	private List<TOServiceCombo> combos;
 	
 	//add service combo
 	private JLabel addComboLabel;
@@ -211,7 +212,21 @@ public class CarShopPage extends JFrame{
 	private JLabel serviceComboErrorMessage;
 	
 	//update service combo
-	
+	private JLabel updateComboLabel;
+	private HashMap<Integer, TOServiceCombo> serviceComboMap;
+	private JComboBox<String> serviceComboList;
+	private JLabel nameLabel2;
+	private JTextField comboName2;
+	private JLabel mainServiceLabel2;
+	private HashMap<Integer, String> mainServiceMap2;
+	private JComboBox<String> mainService2;
+	private JLabel optService2;
+	private List<ComboVisualizer> comboVisualizerList2;
+	private JPanel optComboItemPanel2;
+	private JButton addOptComboItemButton2;
+	private JButton updateComboButton;
+	private JButton cancelComboButton;
+	private JLabel updateserviceComboErrorMessage;
 
 	/** Creates new form BtmsPage */
 	public CarShopPage() {
@@ -443,9 +458,10 @@ public class CarShopPage extends JFrame{
 		showfluidsGarageHours.setSelected(false);
 		
 		services = new ArrayList<TOService>();
+		combos = new ArrayList<TOServiceCombo>();
 		 
 		addComboLabel = new JLabel();
-		addComboLabel.setText("Create Service Combo");
+		addComboLabel.setText("Add Service Combo");
 		addComboLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
 		nameLabel = new JLabel();
 		nameLabel.setText("Name: ");
@@ -457,7 +473,7 @@ public class CarShopPage extends JFrame{
 		mainService = new JComboBox<String>(new String[0]);
 		mainService.setMaximumSize(getPreferredSize());
 		optService = new JLabel();
-		optService.setText("Optional services: ");
+		optService.setText("Services: ");
 		comboVisualizerList = new ArrayList<ComboVisualizer>();
 		optComboItemPanel = new JPanel();
 		optComboItemPanel.setLayout(new BoxLayout(optComboItemPanel, BoxLayout.PAGE_AXIS));
@@ -469,8 +485,37 @@ public class CarShopPage extends JFrame{
 		serviceComboErrorMessage = new JLabel();
 		serviceComboErrorMessage.setForeground(Color.RED);
 		
+		updateComboLabel = new JLabel();
+		updateComboLabel.setText("Update Service Combo");
+		updateComboLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		serviceComboMap = new HashMap<Integer, TOServiceCombo>();
+		serviceComboList = new JComboBox<String>(new String[0]);
+		nameLabel2 = new JLabel();
+		nameLabel2.setText("Name: ");
+		comboName2 = new JTextField(15);
+		comboName2.setMaximumSize(getPreferredSize());
+		mainServiceLabel2 = new JLabel();
+		mainServiceLabel2.setText("Main service: ");
+		mainServiceMap2 = new HashMap<Integer, String>();
+		mainService2 = new JComboBox<String>(new String[0]);
+		mainService2.setMaximumSize(getPreferredSize());
+		optService2 = new JLabel();
+		optService2.setText("Services: ");
+		comboVisualizerList2 = new ArrayList<ComboVisualizer>();
+		optComboItemPanel2 = new JPanel();
+		optComboItemPanel2.setLayout(new BoxLayout(optComboItemPanel2, BoxLayout.PAGE_AXIS));
+		addOptComboItemButton2 = new JButton();
+		addOptComboItemButton2.setText("+");
+		updateComboButton = new JButton();
+		updateComboButton.setText("Update Service Combo");
+		cancelComboButton = new JButton();
+		cancelComboButton.setText("Delete Service Combo");
+		updateserviceComboErrorMessage = new JLabel();
+		updateserviceComboErrorMessage.setForeground(Color.RED);
+		
 		hideAppointmentSection();
 		hideServiceComboSection();
+		hideUpdateServiceComboSection();
 		
 		// Action Listeners
 		// Listeners for header
@@ -622,6 +667,30 @@ public class CarShopPage extends JFrame{
 				addComboActionPerformed(evt);
 			}
 		});
+		
+		addOptComboItemButton2.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addOptServiceActionPerformed2(evt);
+			}
+		});
+		
+		updateComboButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				updateComboActionPerformed(evt);
+			}
+		});
+		
+		cancelComboButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				cancelComboActionPerformed(evt);
+			}
+		});
+		
+		serviceComboList.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				selectedComboUpdated(evt);
+			}
+		});
 	
 		
 		// global settings
@@ -696,8 +765,8 @@ public class CarShopPage extends JFrame{
 										)
 								.addComponent(updateAccountSuccessMessage)
 								)
+						//add/update service combo
 						.addComponent(serviceComboTopSeparator)
-						.addComponent(serviceComboErrorMessage)
 						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
 										.addComponent(nameLabel)
@@ -711,6 +780,23 @@ public class CarShopPage extends JFrame{
 										.addComponent(optComboItemPanel)
 										.addComponent(addOptComboItemButton)
 										.addComponent(addComboButton)
+										.addComponent(serviceComboErrorMessage)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateComboLabel)
+										.addComponent(nameLabel2)
+										.addComponent(mainServiceLabel2)
+										.addComponent(optService2)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(serviceComboList)
+										.addComponent(comboName2)
+										.addComponent(mainService2)
+										.addComponent(optComboItemPanel2)
+										.addComponent(addOptComboItemButton2)
+										.addComponent(updateComboButton)
+										.addComponent(cancelComboButton)
+										.addComponent(updateserviceComboErrorMessage)
 										)
 								)
 						// Update Garage Hours Section
@@ -841,7 +927,7 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {optComboItemPanel, addComboButton, mainService, comboName});
-		
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {optComboItemPanel2, cancelComboButton, updateComboButton, mainService2, comboName2, serviceComboList});
 		
 		// Vertical Layout
 		layout.setVerticalGroup( layout.createParallelGroup()
@@ -913,30 +999,49 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccountSuccessMessage)
 										)
 								)
+						//add/update service combo
 						.addGroup(layout.createParallelGroup()
 								.addComponent(serviceComboTopSeparator)
-								)
-						.addGroup(layout.createParallelGroup()
-								.addComponent(serviceComboErrorMessage)
 								)
 						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
 										.addComponent(addComboLabel)
+										.addComponent(updateComboLabel)
+										.addComponent(serviceComboList)
 										)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(nameLabel)
 										.addComponent(comboName)
+										.addComponent(nameLabel2)
+										.addComponent(comboName2)
 										)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(mainServiceLabel)
 										.addComponent(mainService)
+										.addComponent(mainServiceLabel2)
+										.addComponent(mainService2)
 										)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(optService)
 										.addComponent(optComboItemPanel)
+										.addComponent(optService2)
+										.addComponent(optComboItemPanel2)
 										)
-								.addComponent(addOptComboItemButton)
-								.addComponent(addComboButton)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addOptComboItemButton)
+										.addComponent(addOptComboItemButton2)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addComboButton)
+										.addComponent(updateComboButton)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(serviceComboErrorMessage)
+										.addComponent(cancelComboButton)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(updateserviceComboErrorMessage)
+										)
 								)
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
@@ -1101,6 +1206,39 @@ public class CarShopPage extends JFrame{
 			comboName.setText("");
 			optComboItemPanel.removeAll();
 			
+			combos.clear();
+			for(TOBookableService s: AppointmentController.getBookableServices()) {
+				if(s instanceof TOServiceCombo) {
+					combos.add((TOServiceCombo) s);
+				}
+			}
+			
+			idx = 0;
+			mainService2.removeAllItems();
+			mainServiceMap2.clear();
+			for(TOService s: services) {
+				mainService2.addItem(s.getName());
+				mainServiceMap2.put(idx, s.getName());
+				idx++;
+			}
+			mainService2.setSelectedIndex(-1);
+			
+			idx = 0;
+			serviceComboList.removeAllItems();
+			serviceComboMap.clear();
+			for(TOServiceCombo sc: combos) {
+				serviceComboList.addItem(sc.getName());
+				serviceComboMap.put(idx, sc);
+				idx++;
+			}
+			serviceComboList.setSelectedIndex(-1);
+			
+			updateserviceComboErrorMessage.setText("");
+			comboName2.setText("");
+			optComboItemPanel2.removeAll();
+			
+			hideServiceComboFieldsUpdate();
+			
 			apptDatePicker.getModel().setValue(null);
 			apptDatePickerUpdate.getModel().setValue(null);
 			
@@ -1189,7 +1327,16 @@ public class CarShopPage extends JFrame{
 						showUpdateGarageSection();
 					} else {
 						showServiceComboSection();
+						showUpdateServiceComboSection();
 					}
+					errorMessage.setText("");
+					loginErrorMessage.setText("");
+					signupErrorMessage.setText("");
+					updateAccountErrorMessage.setText("");
+					newGarageHoursErrorMessage.setText("");
+					removeGarageHoursErrorMessage.setText("");
+					serviceComboErrorMessage.setText("");
+					updateserviceComboErrorMessage.setText("");
 				}
 			} catch (Exception e) {
 				loginError = e.getMessage();
@@ -1207,6 +1354,7 @@ public class CarShopPage extends JFrame{
 				hideUpdateGarageSection();
 				hideAppointmentSection();
 				hideServiceComboSection();
+				hideUpdateServiceComboSection();
 				headerTitle.setText("CarShop");
 				logoutButton.setVisible(false);
 				loginUsernameField.setText("");
@@ -1582,9 +1730,8 @@ public class CarShopPage extends JFrame{
 				throw new Exception("The service combo must have a name");
 			}
 			
-			TOServiceCombo sc = new TOServiceCombo(comboName.getText());
 			TOService service = CarShopController.getTOService(mainServiceMap.get(selectedMainService));
-			new TOComboItem(true, service, sc);
+			TOServiceCombo sc = new TOServiceCombo(comboName.getText(), service.getName());
 			
 			for(ComboVisualizer visualizer : comboVisualizerList) {
 				TOService s = visualizer.getSelectedService();
@@ -1599,6 +1746,143 @@ public class CarShopPage extends JFrame{
 		}
 		serviceComboErrorMessage.setText(err);
 
+		
+	}
+	
+	private void selectedComboUpdated(ActionEvent evt) {
+		int selectedCombo = serviceComboList.getSelectedIndex();
+		try {
+			if(selectedCombo >= 0) {
+				TOServiceCombo sc = serviceComboMap.get(selectedCombo);
+				
+				comboName2.setText(sc.getName());
+				TOComboItem mainService = sc.getService(0);
+				int idx = -1;
+				for(int j = 0; j< services.size();j++) {
+					if(services.get(j).getName().equals(sc.getMainService())) {
+						idx = j;
+						break;
+					}
+				}
+				mainService2.setSelectedIndex(idx);
+				
+				optComboItemPanel2.removeAll();
+				comboVisualizerList2.clear();
+				
+				for(int i = 0; i<sc.getServices().size(); i++) {
+					
+					ComboVisualizer visualizer = new ComboVisualizer(services, this);
+					String serviceName = sc.getService(i).getService().getName();
+					idx = -1;
+					for(int j = 0; j< services.size();j++) {
+						if(services.get(j).getName().equals(serviceName)) {
+							idx = j;
+							break;
+						}
+					}
+					visualizer.setSelectedService(idx);
+					visualizer.setMandatory(sc.getService(i).getMandatory());
+					optComboItemPanel2.add(visualizer);
+					comboVisualizerList2.add(visualizer);
+				}
+				showServiceComboFieldsUpdate();
+			}
+		} catch (Exception e) {
+			error = e.getMessage();
+		}
+		
+		// update visuals
+		//refreshData();	
+		pack();
+		
+	}
+	
+	private void addOptServiceActionPerformed2(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			ComboVisualizer visualizer = new ComboVisualizer(services, this);
+			optComboItemPanel2.add(visualizer);
+			comboVisualizerList2.add(visualizer);
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		updateserviceComboErrorMessage.setText(err);
+		pack();
+		
+	}
+
+	private void updateComboActionPerformed(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			int selectedComboIdx = serviceComboList.getSelectedIndex();
+			if(selectedComboIdx < 0) {
+				throw new Exception("A service combo needs to be selected");
+			}
+			TOServiceCombo previous = serviceComboMap.get(selectedComboIdx);
+			
+			int selectedMainService = mainService2.getSelectedIndex();
+			if(selectedMainService < 0) {
+				throw new Exception("A main service needs to be selected");
+			} else if (comboName2.getText().length() == 0) {
+				throw new Exception("The service combo must have a name");
+			}
+			
+			TOService service = CarShopController.getTOService(mainServiceMap2.get(selectedMainService));
+			
+			TOServiceCombo sc = new TOServiceCombo(comboName2.getText(), service.getName());
+			
+			for(ComboVisualizer visualizer : comboVisualizerList2) {
+				TOService s = visualizer.getSelectedService();
+				new TOComboItem(visualizer.isMnadatory(), s, sc);
+			}
+
+			CarShopController.updateServiceComboFromView(sc, previous.getName());
+			refreshData();
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		updateserviceComboErrorMessage.setText(err);
+		pack();
+		
+	}
+	
+	private void cancelComboActionPerformed(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			int selectedComboIdx = serviceComboList.getSelectedIndex();
+			if(selectedComboIdx < 0) {
+				throw new Exception("A service combo needs to be selected");
+			}
+			
+			int selectedMainService = mainService2.getSelectedIndex();
+			if(selectedMainService < 0) {
+				throw new Exception("A main service needs to be selected");
+			} else if (comboName2.getText().length() == 0) {
+				throw new Exception("The service combo must have a name");
+			}
+			
+			TOService service = CarShopController.getTOService(mainServiceMap2.get(selectedMainService));
+			
+			TOServiceCombo sc = new TOServiceCombo(comboName2.getText(), service.getName());
+			
+			for(ComboVisualizer visualizer : comboVisualizerList2) {
+				TOService s = visualizer.getSelectedService();
+				new TOComboItem(visualizer.isMnadatory(), s, sc);
+			}
+
+			CarShopController.cancelServiceComboFromView(sc);
+			refreshData();
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		updateserviceComboErrorMessage.setText(err);
+		pack();
 		
 	}
 	
@@ -1872,6 +2156,44 @@ public class CarShopPage extends JFrame{
 		serviceComboErrorMessage.setVisible(true);
 	}
 	
+	private void hideServiceComboFieldsUpdate() {
+		nameLabel2.setVisible(false);
+		comboName2.setVisible(false);
+		mainServiceLabel2.setVisible(false);
+		mainService2.setVisible(false);
+		optService2.setVisible(false);
+		optComboItemPanel2.setVisible(false);
+		addOptComboItemButton2.setVisible(false);
+		updateComboButton.setVisible(false);
+		cancelComboButton.setVisible(false);
+		updateserviceComboErrorMessage.setVisible(false);
+	}
+	
+	private void showServiceComboFieldsUpdate() {
+		nameLabel2.setVisible(true);
+		comboName2.setVisible(true);
+		mainServiceLabel2.setVisible(true);
+		mainService2.setVisible(true);
+		optService2.setVisible(true);
+		optComboItemPanel2.setVisible(true);
+		addOptComboItemButton2.setVisible(true);
+		updateComboButton.setVisible(true);
+		cancelComboButton.setVisible(true);
+		updateserviceComboErrorMessage.setVisible(true);
+	}
+	
+	private void hideUpdateServiceComboSection() {
+		updateComboLabel.setVisible(false);
+		serviceComboList.setVisible(false);
+		showServiceComboFieldsUpdate();
+	}
+	
+	private void showUpdateServiceComboSection() {
+		updateComboLabel.setVisible(true);
+		serviceComboList.setVisible(true);
+	}
+	
+	
 	// helper methods
 	
 	public void removeOptComboItem(ComboVisualizer combo) {
@@ -1885,6 +2207,17 @@ public class CarShopPage extends JFrame{
 		if(idx >= 0) {
 			comboVisualizerList.remove(idx);
 			optComboItemPanel.remove(idx);
+		} else {
+			for (int i = 0; i < comboVisualizerList2.size(); i++) {
+				if(combo.equals(comboVisualizerList2.get(i))) {
+					idx = i;
+					break;
+				}
+			}
+			if(idx >= 0) {
+				comboVisualizerList2.remove(idx);
+				optComboItemPanel2.remove(idx);
+			}
 		}
 		pack();
 	}

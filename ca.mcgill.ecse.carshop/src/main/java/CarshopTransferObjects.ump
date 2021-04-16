@@ -16,6 +16,7 @@ class TOTimeSlot {
 
 class TOServiceCombo {
 	isA TOBookableService;
+	String mainService;
 	1 <@>- * TOComboItem services;
 }
 
