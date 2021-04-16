@@ -18,10 +18,6 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
-import ca.mcgill.ecse.carshop.model.BusinessHour;
-import ca.mcgill.ecse.carshop.model.Technician;
-import ca.mcgill.ecse.carshop.model.User;
-import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
@@ -1249,19 +1245,12 @@ public class CarShopPage extends JFrame{
 				}
 			}
 		}
-			
-		
-		
 		if (newGarageHoursError.length() == 0) {
 			try {
 				String day = (String)newHoursDayBox.getSelectedItem();
 				String inputStartTime = newHoursOpenHBox.getSelectedItem() + ":" + newHoursOpenMBox.getSelectedItem();
 				String inputEndTime = newHoursCloseHBox.getSelectedItem() + ":" + newHoursCloseMBox.getSelectedItem();
-				String type = "";
-				User user = User.getWithUsername(CarShopController.getLoggedInUsername());
-				if (user instanceof Technician) {
-					type = String.valueOf(((Technician) user).getType());
-				}
+				String type = CarShopController.getLoggedInTechnicianType();
 				if (CarShopController.addHoursToGarageOfTechnicianType(day, inputStartTime, inputEndTime, type)) {
 					newGarageHoursSuccess = "Business hours successfully added!";
 				}
@@ -1274,6 +1263,7 @@ public class CarShopPage extends JFrame{
 		newGarageHoursSuccessMessage.setText(newGarageHoursSuccess);
 		refreshData();
 	}
+
 	
 	private void updateGarageHoursButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		removeGarageHoursError = "";
@@ -1282,33 +1272,11 @@ public class CarShopPage extends JFrame{
 		if (removeGarageHoursError.length() == 0) {
 			try {
 				String day = (String)newHoursDayBox.getSelectedItem();
-				String type = "";
-				ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
-				User user = User.getWithUsername(CarShopController.getLoggedInUsername());
-				if (user instanceof Technician) {
-					type = String.valueOf(((Technician) user).getType());
-					for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
-						if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
-							bhOnThatDay.add(bh);
-						}
-					}
-					if (bhOnThatDay.size() == 0) {
-						removeGarageHoursError = "No existing hours on that day.";
-					}
-					else {
-						for (BusinessHour bh : bhOnThatDay) {
-							DateFormat dateFormat = new SimpleDateFormat("HH:mm");
-							String start = dateFormat.format(bh.getStartTime());
-							String end = dateFormat.format(bh.getEndTime());
-							if (CarShopController.removeHoursToGarageOfTechnicianType(day, start, end, type)) {
-								removeGarageHoursSuccess = "Business hours removed successfully!";
-								System.out.println(removeGarageHoursSuccess);
-							}
-						}
-					}
-				}				
+				if (CarShopController.removeGarageHoursOnDay(day)) {
+					removeGarageHoursSuccess = "Business hours succesfully updated!";
+				}
 			} catch (Exception e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 				removeGarageHoursError = e.getMessage();
 			}
 		}
