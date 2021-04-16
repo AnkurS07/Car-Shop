@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.Appointment;
 import ca.mcgill.ecse.carshop.model.Appointment.AppStatus;
@@ -26,6 +27,7 @@ import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.ServiceBooking;
 import ca.mcgill.ecse.carshop.model.ServiceCombo;
+import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
@@ -706,14 +708,14 @@ public class AppointmentController {
 						TOBookableService toBs;
 						if(a.getBookableService() instanceof Service) {
 							Service s = (Service) a.getBookableService();
-							toBs = new TOService(s.getName(), s.getDuration());
+						toBs = new TOService(s.getName(), s.getDuration());
 						} else {
 							ServiceCombo sc = (ServiceCombo) a.getBookableService();
 							toBs = new TOServiceCombo(sc.getName());
 							for(ComboItem ci: sc.getServices()) {
 								new TOComboItem(ci.getMandatory(), 
-										new TOService(ci.getService().getName(), 
-												ci.getService().getDuration()), (TOServiceCombo)toBs);
+									new TOService(ci.getService().getName(), 
+											ci.getService().getDuration()), (TOServiceCombo)toBs);
 							}
 						}
 						TOAppointment app = new TOAppointment(a.getBookableService().getName(), toBs);
@@ -805,6 +807,14 @@ public class AppointmentController {
 			}
 		}
 		return null;
+	}
+	
+	public static List<TechnicianType> getTechnicianValues() {
+		List<TechnicianType> technicians = new ArrayList<TechnicianType>();
+		for (TechnicianType shift : Technician.TechnicianType.values()) {
+			technicians.add(shift);
+		}
+		return technicians;
 	}
 	
 }

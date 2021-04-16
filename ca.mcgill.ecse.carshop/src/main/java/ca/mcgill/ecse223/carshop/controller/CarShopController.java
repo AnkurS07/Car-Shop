@@ -5,6 +5,7 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +27,7 @@ import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
+
 
 /**
  * Controller class. Implements all controller methods as static methods. The controller should be stateless. It interacts with the View and the Model.
@@ -1337,6 +1339,80 @@ public class CarShopController {
 		}
 		return isCustomer;
 	}
+	
+	public static boolean isOwnerLoggedIn() {
+		CarShop carShop = CarShopApplication.getCarShop();
+		TOOwner owner = new TOOwner("owner","owner");
+		if (carShop.hasOwner()) {
+			if (carShop.getOwner().getUsername().equalsIgnoreCase("owner")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	public static void addServiceView(String name, int duration, TOGarage garage) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		
+		// getTechnicians = empty list
+		for (Technician t : carShop.getTechnicians()) {
+			if (t.getType().name().equals(garage.getTOTechnician().getType().toString())) {
+				Garage g = t.getGarage();
+				try {
+					CarShopController.addService(name,duration , g);
+				
+				} catch (Exception e) {
+				
+					e.printStackTrace();
+					
+				}
+		
+				
+			}
+		}
+	}
+	
+	public static void updateServiceView(String name, String changedName, int duration, TOGarage garage) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		
+		for (Technician t : carShop.getTechnicians()) {
+			if (t.getType().name().equals(garage.getTOTechnician().getType().toString())) {
+				Garage g = t.getGarage();
+				try {
+					CarShopController.updateService(name,changedName, duration , g);
+				} catch (Exception e) {
+				
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
+
+	public static ArrayList<TOService> getExistingServices(){
+		ArrayList<TOService> existingServices = new ArrayList<TOService>();
+		CarShop carShop = CarShopApplication.getCarShop();
+
+		for(BookableService service : CarShopApplication.getCarShop().getBookableServices()) {
+			if(service instanceof Service) {
+				Garage g = ((Service) service).getGarage();
+				TOService toservice = new TOService(service.getName(),((Service) service).getDuration());
+				existingServices.add(toservice);
+			}
+		}
+		
+		CarshopPersistence.save(CarShopApplication.getCarShop());
+		return existingServices;
+	}
+	
+	 public List<TOTechnician> getTOTechnicians()
+	  {
+		 List<TOTechnician> technicians = new ArrayList<>();
+	    List<TOTechnician> newTechnicians = Collections.unmodifiableList(technicians);
+	    return newTechnicians;
+	  }
+
 }
 	
 	

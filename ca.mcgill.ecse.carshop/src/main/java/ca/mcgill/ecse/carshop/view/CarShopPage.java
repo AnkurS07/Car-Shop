@@ -3,23 +3,32 @@ package ca.mcgill.ecse.carshop.view;
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
+
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
+import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Garage;
+import ca.mcgill.ecse.carshop.model.Owner;
+import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.view.CarShopPage.TechnicianType;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
@@ -27,6 +36,8 @@ import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
 import ca.mcgill.ecse223.carshop.controller.TOBookableService;
 import ca.mcgill.ecse223.carshop.controller.TOComboItem;
+import ca.mcgill.ecse223.carshop.controller.TOGarage;
+import ca.mcgill.ecse223.carshop.controller.TOOwner;
 import ca.mcgill.ecse223.carshop.controller.TOService;
 import ca.mcgill.ecse223.carshop.controller.TOServiceBooking;
 import ca.mcgill.ecse223.carshop.controller.TOServiceCombo;
@@ -115,24 +126,42 @@ public class CarShopPage extends JFrame{
 	private List<OptServiceVisualizer> optServicesUpdate;
 
 	//add service
-	private JLabel serviceError;
+	private JLabel serviceErrorMessage;
+	private JLabel durationErrorMessage;
 	private JTextField serviceName;
 	private JLabel serviceNameLabel;
 	private JTextField duration;
 	private JLabel durationLabel;
 	private JButton addServiceButton;
 	private JLabel garage;
-	private JComboBox<TechnicianType> technician;
+	private JComboBox<TOTechnician.TechnicianType> technician;
 
+	//update Service
+	private JLabel servicetoerror;
+	private JLabel changedname2error;
+	private JLabel durationnameerror;
+	private JLabel updateService;
+	private JLabel serviceToBeUpdated;
+	private JLabel changedName;
+	private JLabel duration2;
+	private JLabel garage2;
+	private JComboBox<String> serviceto;
+	private JTextField changedname2;
+	private JComboBox<TOTechnician.TechnicianType> garagename;
+	private JTextField durationname;
+	private JButton updateServiceButton;
 
+	
+	
 	// data elements
 	private String error = null;
 	private String loginError = null;
 	private String signupError = null;
 	private String updateAccountError = null;
 	private String updateAccountSuccess = null;
-	private HashMap<Integer, String> technicians;
+	private HashMap<Integer, TOTechnician> technicians;
 	enum TechnicianType { Tire, Engine, Transmission, Electronics, Fluids }
+	private HashMap<Integer, TOService> existingServices;
 	// toggle sick status
 	// private HashMap<Integer, Integer> drivers;
 	// toggle repairs status
@@ -187,9 +216,9 @@ public class CarShopPage extends JFrame{
 		loginButton = new JButton();
 		loginButton.setText("Login");
 		loginTopSeparator = new JSeparator();
-		
-		
-		
+
+
+
 		// sign up
 		signup = new JLabel();
 		signup.setText("Sign Up");
@@ -281,13 +310,39 @@ public class CarShopPage extends JFrame{
 		addServiceButton.setText("Add Service");
 		serviceName = new JTextField();
 		duration = new JTextField();
-		serviceError = new JLabel();
-		serviceError.setForeground(Color.RED);
+		serviceErrorMessage = new JLabel();
+		serviceErrorMessage.setForeground(Color.RED);
 		garage = new JLabel();
 		garage.setText("Technician");
-				
-		technician = new JComboBox<TechnicianType>();
-		technician.setModel(new DefaultComboBoxModel<>(TechnicianType.values()));
+
+		technician = new JComboBox<TOTechnician.TechnicianType>();
+		technician.setModel(new DefaultComboBoxModel<>(TOTechnician.TechnicianType.values()));
+		durationErrorMessage = new JLabel();
+		durationErrorMessage.setForeground(Color.RED);
+
+		//update Service
+		updateService = new JLabel();
+		updateService.setText("Choose Service");
+		changedName = new JLabel();
+		changedName.setText("New Service");
+		duration2 = new JLabel();
+		duration2.setText("Duration");
+		garage2 = new JLabel();
+		garage2.setText("Garage");
+		changedname2 = new JTextField();
+		garagename = new JComboBox<TOTechnician.TechnicianType>();
+		garagename.setModel(new DefaultComboBoxModel<>(TOTechnician.TechnicianType.values()));
+		durationname = new JTextField();
+		serviceto = new JComboBox<String>(new String[0]);
+		updateServiceButton = new JButton();
+		updateServiceButton.setText("Update Service");
+		changedname2error = new JLabel();
+		durationnameerror = new JLabel();
+
+		servicetoerror = new JLabel();
+
+		//Service combo
+
 
 		hideAppointmentSection();
 
@@ -355,6 +410,12 @@ public class CarShopPage extends JFrame{
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			}
+		});
+
+		updateServiceButton.addActionListener(new java.awt.event.ActionListener(){
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				updateServiceButtonActionPerformed(evt);
 			}
 		});
 
@@ -435,7 +496,9 @@ public class CarShopPage extends JFrame{
 				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup()
 								.addComponent(bookableServiceLabel)
-								.addComponent(serviceNameLabel))
+								.addComponent(serviceNameLabel)
+								.addComponent(updateService)
+								.addComponent(duration2))
 						.addGroup(layout.createParallelGroup()
 								.addComponent(makeApptLabel)
 								.addComponent(bookableServiceList)
@@ -443,14 +506,23 @@ public class CarShopPage extends JFrame{
 								.addComponent(apptDatePicker)
 								.addComponent(makeApptButton)
 								.addComponent(serviceName)
-								.addComponent(addServiceButton))
+								.addComponent(serviceErrorMessage)
+								.addComponent(addServiceButton)
+								.addComponent(serviceto)
+								.addComponent(servicetoerror)
+								.addComponent(durationname))						
 						.addGroup(layout.createParallelGroup()
-								.addComponent(garage))
+								.addComponent(garage)
+								.addComponent(changedName)
+								.addComponent(updateServiceButton))
 						.addGroup(layout.createParallelGroup()
-								.addComponent(technician))
+								.addComponent(technician)
+								.addComponent(changedname2)
+								.addComponent(changedname2error))
 						.addGroup(layout.createParallelGroup()
 								.addComponent(apptLabel)
-								.addComponent(durationLabel))
+								.addComponent(durationLabel)
+								.addComponent(garage2))
 						.addGroup(layout.createParallelGroup()
 								.addComponent(cancelAppt)
 								.addComponent(apptList)
@@ -458,14 +530,16 @@ public class CarShopPage extends JFrame{
 								.addComponent(apptDatePickerUpdate)
 								.addComponent(updateApptButton)
 								.addComponent(cancelApptButton)
-								.addComponent(duration))
-
+								.addComponent(durationErrorMessage)
+								.addComponent(duration)
+								.addComponent(garagename)
+								.addComponent(durationnameerror))
 						.addGroup(layout.createSequentialGroup())
 						));
 
-		
+
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {serviceName, addServiceButton,duration, apptList, technician});
-		
+
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {loginUsernameField, loginPasswordField, loginButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signupUsernameField, signupPasswordField, signupButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updateAccountButton});
@@ -563,6 +637,10 @@ public class CarShopPage extends JFrame{
 						.addComponent(horizontalLineBottom))
 				// Add Service
 				.addGroup(layout.createParallelGroup()
+						.addComponent(serviceErrorMessage)
+						.addComponent(durationErrorMessage)
+						)
+				.addGroup(layout.createParallelGroup()
 						.addComponent(serviceName)
 						.addComponent(serviceNameLabel)
 						.addComponent(duration)
@@ -574,6 +652,23 @@ public class CarShopPage extends JFrame{
 				.addGroup(layout.createParallelGroup()
 						.addComponent(horizontalLineBottom))
 
+				//update Service
+				.addGroup(layout.createParallelGroup()
+						.addComponent(changedname2error)
+						.addComponent(servicetoerror))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(updateService)
+						.addComponent(serviceto)
+						.addComponent(changedName)
+						.addComponent(changedname2)
+						.addComponent(garage2)
+						.addComponent(garagename))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(durationnameerror))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(duration2)
+						.addComponent(durationname)
+						.addComponent(updateServiceButton))
 				);
 
 		pack();
@@ -613,6 +708,35 @@ public class CarShopPage extends JFrame{
 
 			apptDatePicker.getModel().setValue(null);
 			apptDatePickerUpdate.getModel().setValue(null);
+
+
+			technician.removeAllItems();
+			idx = 0;
+			for (TOTechnician.TechnicianType a : TOTechnician.TechnicianType.values() ) {
+
+				technician.addItem(a);
+				idx++;
+			}
+
+			existingServices = new HashMap <Integer, TOService>();
+			serviceto.removeAllItems();
+			int index=0;
+
+			for(TOService service: CarShopController.getExistingServices()) {
+				existingServices.put(index, service);
+				serviceto.addItem(service.getName());
+				index++;
+			}
+			serviceto.setSelectedIndex(-1);
+			
+			garagename.removeAllItems();
+			idx = 0;
+			for (TOTechnician.TechnicianType a : TOTechnician.TechnicianType.values() ) {
+
+				garagename.addItem(a);
+				idx++;
+			}
+
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
@@ -634,6 +758,9 @@ public class CarShopPage extends JFrame{
 					logoutButton.setVisible(true);
 					if(CarShopController.isCustomerLoggedIn()) {
 						showAppointmentSection();
+					}
+					if(CarShopController.isOwnerLoggedIn()) {
+						showAddSection();
 					}
 				}
 			} catch (Exception e) {
@@ -926,31 +1053,78 @@ public class CarShopPage extends JFrame{
 		String serviceError = "";
 		int strduration = 0;
 		String name = null;
-		Garage h = AppointmentController.findGarage(technician.getToolTipText());
-		
-		
+		String durationError = "";
+
+
+		TOTechnician c = new TOTechnician((ca.mcgill.ecse223.carshop.controller.TOTechnician.TechnicianType) technician.getSelectedItem());
+		TOGarage h = new TOGarage(c);
 
 		if(error == null || error.length() == 0) {
 			name = serviceName.getText();
 			if(name.equals("")){
 				serviceError = "Please enter a valid name";
+				serviceErrorMessage.setText(serviceError);
 			}
 		}
-		
+
 		if(error==null || error.length()==0) {
 			try {
 				strduration = Integer.parseInt(duration.getText());
 			}
 			catch(NumberFormatException e) {
-				serviceError = "Please enter a valid duration";
+				durationError = "Please enter a valid duration";
+				durationErrorMessage.setText(durationError);
 			}
 		}
-		
+
+
 		if(error==null || error.length()==0) {
-			CarShopController.addService(serviceName.getText(), strduration, h);
+			CarShopController.addServiceView(name, strduration, h);
+
+		}
+
+	}
+
+	private void updateServiceButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		int selectedServices = serviceto.getSelectedIndex();
+		String name = null;
+		String changedName = null;
+		int duration = 0;
+		String changename2errortext = null;
+		String durationnameerrortext = null;
+		String g = serviceto.getSelectedItem().toString();
+		String ser = null;
+
+		TOTechnician c = new TOTechnician((ca.mcgill.ecse223.carshop.controller.TOTechnician.TechnicianType) technician.getSelectedItem());
+		TOGarage h = new TOGarage(c);
+
+		if(serviceto.getSelectedItem().toString().length()==0||serviceto.getSelectedItem()==null) {
+			servicetoerror.setText("Choose a Service");
 		}
 
 
+		if(error == null || error.length() == 0) {
+			name = changedname2.getText();
+			if(name.equals("")){
+				changename2errortext = "Please enter a valid name";
+				changedname2error.setText(changename2errortext);
+			}
+		}
+
+		if(error==null || error.length()==0) {
+			try {
+				duration = Integer.parseInt(durationname.getText());
+			}
+			catch(NumberFormatException e) {
+				durationnameerrortext = "Please enter a valid duration";
+				durationnameerror.setText(durationnameerrortext);
+			}
+		}
+
+
+		if(error==null || error.length()==0){
+			CarShopController.updateServiceView(g,changedname2.getText(),duration, h);
+		}
 
 	}
 
@@ -1049,6 +1223,17 @@ public class CarShopPage extends JFrame{
 		durationLabel.setVisible(false);
 		garage.setVisible(false);
 		technician.setVisible(false);
+
+		//update Service
+		updateService.setVisible(false);
+		serviceto.setVisible(false);
+		changedName.setVisible(false);
+		changedname2.setVisible(false);
+		garage2.setVisible(false);
+		garagename.setVisible(false);
+		duration2.setVisible(false);
+		durationname.setVisible(false);
+		updateServiceButton.setVisible(false);
 	}
 
 	private void showAppointmentSection() {
@@ -1078,6 +1263,71 @@ public class CarShopPage extends JFrame{
 		optServicePanelUpdate.setVisible(true);
 
 		//service
+		serviceName.setVisible(false);
+		serviceNameLabel.setVisible(false);
+		addServiceButton.setVisible(false);
+		duration.setVisible(false);
+		durationLabel.setVisible(false);
+		garage.setVisible(false);
+		technician.setVisible(false);
+
+		//update Service
+		updateService.setVisible(false);
+		serviceto.setVisible(false);
+		changedName.setVisible(false);
+		changedname2.setVisible(false);
+		garage2.setVisible(false);
+		garagename.setVisible(false);
+		duration2.setVisible(false);
+		durationname.setVisible(false);
+		updateServiceButton.setVisible(false);
+	}
+
+	private void showAddSection() {
+		updateAccountTopSeparator.setVisible(false);
+		updateAccount.setVisible(false);
+		updateAccountErrorMessage.setVisible(false);
+		updateAccountSuccessMessage.setVisible(false);
+		updateUsername.setVisible(false);
+		updatePassword.setVisible(false);
+		updateUsernameField.setVisible(false);
+		updatePasswordField.setVisible(false);
+		updateAccountButton.setVisible(false);
+
+		cancelAppt.setVisible(false);
+		apptList.setVisible(false);
+		apptLabel.setVisible(false);
+		cancelApptButton.setVisible(false);
+
+		// Make Appt
+		makeApptLabel.setVisible(false);
+		bookableServiceList.setVisible(false);
+		bookableServiceLabel.setVisible(false);
+		makeApptButton.setVisible(false);
+
+		optServicePanel.setVisible(false);
+
+
+		datePanel.setVisible(false);
+		apptDatePicker.setVisible(false);
+		apptDateLabel.setVisible(false);
+
+		//update appt
+		updateApptButton.setVisible(false);
+		datePanelUpdate.setVisible(false);
+		apptDatePickerUpdate.setVisible(false);
+		optServicePanelUpdate.setVisible(false);
+
+		updateService.setVisible(true);
+		serviceto.setVisible(true);
+		changedName.setVisible(true);
+		changedname2.setVisible(true);
+		garage2.setVisible(true);
+		garagename.setVisible(true);
+		duration2.setVisible(true);
+		durationname.setVisible(true);
+
+
 		serviceName.setVisible(true);
 		serviceNameLabel.setVisible(true);
 		addServiceButton.setVisible(true);
@@ -1085,6 +1335,8 @@ public class CarShopPage extends JFrame{
 		durationLabel.setVisible(true);
 		garage.setVisible(true);
 		technician.setVisible(true);
+		updateServiceButton.setVisible(true);
+
 	}
 
 

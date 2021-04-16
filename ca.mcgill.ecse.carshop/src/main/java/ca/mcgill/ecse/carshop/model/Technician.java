@@ -46,7 +46,8 @@ public class Technician extends User implements Serializable
   // INTERFACE
   //------------------------
 
-  public boolean setType(TechnicianType aType)
+
+public boolean setType(TechnicianType aType)
   {
     boolean wasSet = false;
     type = aType;

@@ -18,41 +18,90 @@ public class TOTechnician
   //------------------------
 
   //TOTechnician Attributes
-  private TechnicianType totype;
+  private TechnicianType type;
+
+  //TOTechnician Associations
+  private TOGarage togarage;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TOTechnician(TechnicianType aTotype)
+  public TOTechnician(TechnicianType aType)
   {
-    totype = aTotype;
+    type = aType;
   }
 
   //------------------------
   // INTERFACE
   //------------------------
 
-  public boolean setTotype(TechnicianType aTotype)
+  public boolean setType(TechnicianType aType)
   {
     boolean wasSet = false;
-    totype = aTotype;
+    type = aType;
     wasSet = true;
     return wasSet;
   }
 
-  public TechnicianType getTotype()
+  public TechnicianType getType()
   {
-    return totype;
+    return type;
+  }
+  /* Code from template association_GetOne */
+  public TOGarage getTogarage()
+  {
+    return togarage;
+  }
+
+  public boolean hasTogarage()
+  {
+    boolean has = togarage != null;
+    return has;
+  }
+  /* Code from template association_SetOptionalOneToOne */
+  public boolean setTogarage(TOGarage aNewTogarage)
+  {
+    boolean wasSet = false;
+    if (togarage != null && !togarage.equals(aNewTogarage) && equals(togarage.getTOTechnician()))
+    {
+      //Unable to setTogarage, as existing togarage would become an orphan
+      return wasSet;
+    }
+
+    togarage = aNewTogarage;
+    TOTechnician anOldTOTechnician = aNewTogarage != null ? aNewTogarage.getTOTechnician() : null;
+
+    if (!this.equals(anOldTOTechnician))
+    {
+      if (anOldTOTechnician != null)
+      {
+        anOldTOTechnician.togarage = null;
+      }
+      if (togarage != null)
+      {
+        togarage.setTOTechnician(this);
+      }
+    }
+    wasSet = true;
+    return wasSet;
   }
 
   public void delete()
-  {}
+  {
+    TOGarage existingTogarage = togarage;
+    togarage = null;
+    if (existingTogarage != null)
+    {
+      existingTogarage.delete();
+    }
+  }
 
 
   public String toString()
   {
     return super.toString() + "["+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "totype" + "=" + (getTotype() != null ? !getTotype().equals(this)  ? getTotype().toString().replaceAll("  ","    ") : "this" : "null");
+            "  " + "type" + "=" + (getType() != null ? !getType().equals(this)  ? getType().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+            "  " + "togarage = "+(getTogarage()!=null?Integer.toHexString(System.identityHashCode(getTogarage())):"null");
   }
 }
