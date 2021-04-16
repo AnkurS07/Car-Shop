@@ -1077,37 +1077,47 @@ public class CarShopPage extends JFrame{
 				businessHourPanel.add(new BusinessHoursVisualizer(toHour));
 				businessHours.add(toHour.getDayOfWeek());
 			}
+			businessHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			tireGarageHourPanel.removeAll();
 			tireGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("tire")) {
 				tireGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				tireGarageHours.add(toHour.getDayOfWeek());
 			}
+			tireGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			engineGarageHourPanel.removeAll();
 			engineGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("engine")) {
 				engineGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				engineGarageHours.add(toHour.getDayOfWeek());
 			}
+			engineGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			transmissionGarageHourPanel.removeAll();
 			transmissionGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("transmission")) {
 				transmissionGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				transmissionGarageHours.add(toHour.getDayOfWeek());
 			}
+			transmissionGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			elecGarageHourPanel.removeAll();
 			elecGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("electronics")) {
 				elecGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				elecGarageHours.add(toHour.getDayOfWeek());
 			}
+			elecGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			fluidsGarageHourPanel.removeAll();
 			fluidsGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("fluids")) {
 				fluidsGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				fluidsGarageHours.add(toHour.getDayOfWeek());
 			}
-
+			fluidsGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
