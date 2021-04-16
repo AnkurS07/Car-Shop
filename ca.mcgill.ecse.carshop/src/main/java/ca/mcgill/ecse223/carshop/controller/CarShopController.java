@@ -1601,6 +1601,38 @@ public class CarShopController {
 		return updated;
 	}
 	
+	public static String getSystemDate() throws Exception{
+		String date = "";
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			date = dateFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return date;
+	}
+	
+	public static String getSystemTime() throws Exception{
+		String time = "";
+		try {
+			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+			time = timeFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return time;
+	}
+	
+	public static void setToCurrentDate() throws Exception{
+		try {
+			CarShopApplication.setToCurrentDate();
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
 }
 	
 	
