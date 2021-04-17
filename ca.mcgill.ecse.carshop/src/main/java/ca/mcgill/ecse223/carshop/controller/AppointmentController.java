@@ -934,7 +934,6 @@ public class AppointmentController {
 		return null;
 	}
 	
-<<<<<<< HEAD
 	public static List<TechnicianType> getTechnicianValues() {
 		List<TechnicianType> technicians = new ArrayList<TechnicianType>();
 		for (TechnicianType shift : Technician.TechnicianType.values()) {
@@ -942,8 +941,8 @@ public class AppointmentController {
 		}
 		return technicians;
 	}
-=======
 
->>>>>>> serviceDev
+
+
 	
 }
