@@ -17,6 +17,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -151,6 +152,20 @@ public class CarShopPage extends JFrame{
     private JTextField durationname;
     private JButton updateServiceButton;
 
+    
+    
+    //Define ServiceCombo
+    private JLabel newComboName;
+    private JLabel newMainServiceLabel;
+    private JLabel newComboItemLabel;
+    private JLabel newMandatoryComboItem;
+    private JTextField newServiceComboNameText;
+    private JButton defineServiceCombo;
+    private JComboBox<String> mainServiceComboBox;
+    private JScrollPane newMandatoryscrollpane;
+    DefaultListModel<String> newComboListModel;
+    DefaultListModel<String> newMandatoryComboItemListModel; 
+    
 
 
     // data elements
@@ -170,6 +185,11 @@ public class CarShopPage extends JFrame{
     // private HashMap<Integer, String> availableBuses;
     // private HashMap<Integer, TORoute> routes;
 
+    
+    
+    
+    
+    
     /** Creates new form BtmsPage */
     public CarShopPage() {
         initComponents();
@@ -342,8 +362,33 @@ public class CarShopPage extends JFrame{
         servicetoerror = new JLabel();
 
         //Service combo
-
-
+      newComboName = new JLabel();
+      newComboName.setText("New Service combo name");
+      newServiceComboNameText = new JTextField();
+      
+      newMainServiceLabel = new JLabel();
+      newMainServiceLabel.setText("New Main Service");
+      
+      
+      newComboItemLabel = new JLabel();
+      newComboItemLabel.setText("New Combo Item");
+      
+      newMandatoryComboItem = new JLabel();
+      newMandatoryComboItem.setText("Mandatory Services");
+      
+      defineServiceCombo = new JButton();
+      defineServiceCombo.setText("Define Service Combo");
+      
+      mainServiceComboBox = new JComboBox<String>();
+      
+      JList<String> newMandatoryList = new JList<String>(newMandatoryComboItemListModel);
+      JList<String> newComboItemList = new JList<String>(newComboListModel);
+      
+      newMandatoryscrollpane = new JScrollPane();
+      
+      newMandatoryComboItemListModel = new DefaultListModel<String>();
+      newComboListModel = new DefaultListModel<String>();
+        
         hideAppointmentSection();
 
         // Action Listeners
@@ -498,7 +543,9 @@ public class CarShopPage extends JFrame{
                                         .addComponent(bookableServiceLabel)
                                         .addComponent(serviceNameLabel)
                                         .addComponent(updateService)
-                                        .addComponent(duration2))
+                                        .addComponent(duration2)
+                                        .addComponent(newComboName)
+                                        .addComponent(newMandatoryComboItem))
                                 .addGroup(layout.createParallelGroup()
                                         .addComponent(makeApptLabel)
                                         .addComponent(bookableServiceList)
@@ -510,19 +557,24 @@ public class CarShopPage extends JFrame{
                                         .addComponent(addServiceButton)
                                         .addComponent(serviceto)
                                         .addComponent(servicetoerror)
-                                        .addComponent(durationname))
+                                        .addComponent(durationname)
+                                        .addComponent(newServiceComboNameText)
+                                        .addComponent(newMandatoryList))
                                 .addGroup(layout.createParallelGroup()
                                         .addComponent(garage)
                                         .addComponent(changedName)
-                                        .addComponent(updateServiceButton))
+                                        .addComponent(updateServiceButton)
+                                        .addComponent(newMainServiceLabel))
                                 .addGroup(layout.createParallelGroup()
                                         .addComponent(technician)
                                         .addComponent(changedname2)
-                                        .addComponent(changedname2error))
+                                        .addComponent(changedname2error)
+                                        .addComponent(mainServiceComboBox))
                                 .addGroup(layout.createParallelGroup()
                                         .addComponent(apptLabel)
                                         .addComponent(durationLabel)
-                                        .addComponent(garage2))
+                                        .addComponent(garage2)
+                                		.addComponent(newComboItemLabel))
                                 .addGroup(layout.createParallelGroup()
                                         .addComponent(cancelAppt)
                                         .addComponent(apptList)
@@ -533,7 +585,8 @@ public class CarShopPage extends JFrame{
                                         .addComponent(durationErrorMessage)
                                         .addComponent(duration)
                                         .addComponent(garagename)
-                                        .addComponent(durationnameerror))
+                                        .addComponent(durationnameerror)
+                                        .addComponent(newComboItemList))
                                 .addGroup(layout.createSequentialGroup())
                         ));
 
@@ -669,6 +722,17 @@ public class CarShopPage extends JFrame{
                                 .addComponent(duration2)
                                 .addComponent(durationname)
                                 .addComponent(updateServiceButton))
+                        
+                        .addGroup(layout.createParallelGroup()
+                        		.addComponent(newComboName)
+                        		.addComponent(newMainServiceLabel)
+                        		.addComponent(newComboItemLabel)
+                        		.addComponent(newServiceComboNameText)
+                        		.addComponent(mainServiceComboBox)
+                        		.addComponent(newComboItemList))
+                        .addGroup(layout.createParallelGroup()
+                        		.addComponent(newMandatoryComboItem)
+                        		.addComponent(newMandatoryList))
         );
 
         pack();
@@ -736,6 +800,9 @@ public class CarShopPage extends JFrame{
                 garagename.addItem(a);
                 idx++;
             }
+            
+  
+            
 
         }
 
