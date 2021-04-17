@@ -1493,6 +1493,20 @@ public class CarShopController {
 		return isTechnician;
 	}
 	
+	public static boolean isOwnerLoggedIn() {
+		boolean isOwner = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Owner) {
+				isOwner = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isOwner;
+	}
+	
 	public static List<TOBusinessHour> getBusinessHours(String type){
 		CarShop carShop = CarShopApplication.getCarShop();
 		List<TOBusinessHour> businessHours = new ArrayList<TOBusinessHour>();
@@ -1623,6 +1637,18 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 		return time;
+	}
+	
+	public static String getFullSystemDate() throws Exception{
+		String date = "";
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd+HH:mm");
+			date = dateFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return date;
 	}
 	
 	public static void setToCurrentDate() throws Exception{

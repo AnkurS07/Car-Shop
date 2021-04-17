@@ -115,7 +115,7 @@ public class CarShopApplication {
             // Adding business hours
             System.out.println("Action: Adding business hours.");
             Time openTime = new Time((parseDate("8:00", "HH:mm")).getTime());
-            Time closeTime = new Time((parseDate("17:00", "HH:mm")).getTime());
+            Time closeTime = new Time((parseDate("23:00", "HH:mm")).getTime());
             CarShopController.addBusinessHour(DayOfWeek.Monday, openTime, closeTime);
             CarShopController.addBusinessHour(DayOfWeek.Tuesday, openTime, closeTime);
             CarShopController.addBusinessHour(DayOfWeek.Wednesday, openTime, closeTime);
@@ -132,7 +132,7 @@ public class CarShopApplication {
             
             // Updating business hours
             System.out.println("Action: Updating Friday business hours.");
-            Time newCloseTime = new Time((parseDate("14:00", "HH:mm")).getTime());
+            Time newCloseTime = new Time((parseDate("22:00", "HH:mm")).getTime());
             CarShopController.updateBusinessHour(DayOfWeek.Friday, openTime, DayOfWeek.Friday, openTime, newCloseTime);
             System.out.println(
             		"Result:\tMonday:\t\t" + carShop.getBusiness().getBusinessHour(0).getStartTime() + " to " + carShop.getBusiness().getBusinessHour(0).getEndTime() +
@@ -149,9 +149,11 @@ public class CarShopApplication {
             CarShopController.createTechnician("Transmission-Technician", "tech_pass3", TechnicianType.Transmission);
             CarShopController.createTechnician("Electronics-Technician", "tech_pass4", TechnicianType.Electronics);
             CarShopController.createTechnician("Fluids-Technician", "tech_pass5", TechnicianType.Fluids);
+            
+            
             System.out.println("Result: Registered Technicians: ");
             for (Technician tech : carShop.getTechnicians()) {
-            	System.out.println("\t\tUsername: "+tech.getUsername()+" | Password: "+tech.getPassword()+" | Type: "+tech.getType());
+            	System.out.println("\t\tUsername: "+tech.getUsername() + " | Password: " + tech.getPassword()+ " | Type: " + tech.getType());
             }
             System.out.print("\n");
             
@@ -391,9 +393,9 @@ public class CarShopApplication {
 	 */
 	public static void setToCurrentDate() throws Exception {
 		try {
-	        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+hh:mm");  
+	        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");  
 	        LocalDateTime now = LocalDateTime.now();  
-	        Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+hh:mm");
+	        Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+HH:mm");
 	        CarShopApplication.setSystemDate(systemDate);
 		}
 		catch (RuntimeException e) {
