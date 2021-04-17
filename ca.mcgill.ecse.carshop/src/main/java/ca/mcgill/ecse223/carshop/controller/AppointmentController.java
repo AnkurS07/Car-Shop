@@ -766,7 +766,7 @@ public class AppointmentController {
 							toBs = new TOService(s.getName(), s.getDuration());
 						} else {
 							ServiceCombo sc = (ServiceCombo) a.getBookableService();
-							toBs = new TOServiceCombo(sc.getName());
+							toBs = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 							for(ComboItem ci: sc.getServices()) {
 								new TOComboItem(ci.getMandatory(), 
 										new TOService(ci.getService().getName(), 
@@ -803,7 +803,7 @@ public class AppointmentController {
 					toBs = new TOService(s.getName(), s.getDuration());
 				} else {
 					ServiceCombo sc = (ServiceCombo) a.getBookableService();
-					toBs = new TOServiceCombo(sc.getName());
+					toBs = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 					for(ComboItem ci: sc.getServices()) {
 						new TOComboItem(ci.getMandatory(), 
 								new TOService(ci.getService().getName(), 
@@ -838,7 +838,7 @@ public class AppointmentController {
 						toBs = new TOService(s.getName(), s.getDuration());
 					} else {
 						ServiceCombo sc = (ServiceCombo) a.getBookableService();
-						toBs = new TOServiceCombo(sc.getName());
+						toBs = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 						for(ComboItem ci: sc.getServices()) {
 							new TOComboItem(ci.getMandatory(), 
 									new TOService(ci.getService().getName(), 
@@ -871,7 +871,7 @@ public class AppointmentController {
 				toBs.add(new TOService(s.getName(), s.getDuration()));
 			} else {
 				ServiceCombo sc = (ServiceCombo) bs;
-				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 				
 				for(ComboItem ci: sc.getServices()) {
 					new TOComboItem(ci.getMandatory(), 
@@ -890,7 +890,7 @@ public class AppointmentController {
 		for(BookableService bs: carShop.getBookableServices()) {
 			if(bs instanceof ServiceCombo) {
 				ServiceCombo sc = (ServiceCombo) bs;
-				TOServiceCombo toSc = new TOServiceCombo(sc.getName());
+				TOServiceCombo toSc = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
 				
 				for(ComboItem ci: sc.getServices()) {
 					new TOComboItem(ci.getMandatory(), 

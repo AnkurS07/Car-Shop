@@ -45,6 +45,12 @@ public class CarShopApplication {
     	boolean consoleDemo = false;
     	boolean runUI = true;
     	
+    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+hh:mm");  
+        LocalDateTime now = LocalDateTime.now();  
+        String test = dtf.format(now);
+        Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+hh:mm");
+        CarShopApplication.setSystemDate(systemDate);
+        
         System.out.println(new CarShopApplication().getGreeting() + "\n");
         System.out.println(
         		"Demo parameters :\n\tClear save:\t"+clearSave+
@@ -62,7 +68,6 @@ public class CarShopApplication {
         
         // Console Demo
         if (consoleDemo) {
-            
             // Initiating CarShop
             System.out.println("Initiating the CarShop...\n");
             carShop = CarShopApplication.getCarShop();
