@@ -2403,7 +2403,6 @@ public class CarShopPage extends JFrame{
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
 			addBusinessHourErrorMessage = e.getMessage();
 		}
 		businessHourUpdateErrorLabel.setText(addBusinessHourErrorMessage);
