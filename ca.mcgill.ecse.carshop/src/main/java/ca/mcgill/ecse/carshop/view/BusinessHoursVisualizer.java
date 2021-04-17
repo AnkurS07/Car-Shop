@@ -1,6 +1,5 @@
 package ca.mcgill.ecse.carshop.view;
 
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JLabel;

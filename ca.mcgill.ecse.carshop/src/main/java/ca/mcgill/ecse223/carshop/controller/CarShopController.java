@@ -2,6 +2,7 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -609,6 +610,7 @@ public class CarShopController {
                 throw new Exception("No permission to update business information");
             }
 
+<<<<<<< HEAD
             TimeSlot timeSlotToRemove = null;
             if(type.equals("vacation")) {
                 for(TimeSlot t: carShop.getBusiness().getVacations()) {
@@ -1028,11 +1030,483 @@ public class CarShopController {
         if(!(services.contains(mainService))) {
             throw new Exception("Main service must be included in the services");
         }
+=======
+			TimeSlot timeSlotToRemove = null;
+			if(type.equals("vacation")) {
+				for(TimeSlot t: carShop.getBusiness().getVacations()) {
+					if(t.getStartDate().equals(startDate) && t.getStartTime().equals(startTime) && t.getEndDate().equals(endDate) && t.getEndTime().equals(endTime)) {
+						timeSlotToRemove = t;
+						break;
+					}
+				}
+				if(timeSlotToRemove != null) {
+					carShop.getBusiness().removeVacation(timeSlotToRemove);
+				}
+			} else {
+				for(TimeSlot t: carShop.getBusiness().getHolidays()) {
+					if(t.getStartDate().equals(startDate) && t.getStartTime().equals(startTime) && t.getEndDate().equals(endDate) && t.getEndTime().equals(endTime)) {
+						timeSlotToRemove = t;
+						break;
+					}
+				}
+				if(timeSlotToRemove != null) {
+					carShop.getBusiness().removeHoliday(timeSlotToRemove);
+				}
+			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	/**
+	 * Checks in all of the users if any of them has the specified userName
+	 * @param username
+	 * @return a boolean indicating if there is a user with that userName
+	 */
+	public static boolean hasUserWithUsername(String username) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		if (carShop.hasOwner()) {
+			if (carShop.getOwner().getUsername().equals(username)) {
+				return true;
+			}
+		}
+		if (carShop.hasTechnicians()) {
+			for (Technician tech : carShop.getTechnicians()) {
+				if (tech.getUsername().equals(username)) {
+					return true;
+				}
+			}
+		}
+		if (carShop.hasCustomers()) {
+			for (Customer customer : carShop.getCustomers()) {
+				if (customer.getUsername().equals(username)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Helper method to look if the logged in user is the owner.
+	 * @return a boolean indicating if the user is owner.
+	 */
+	private static boolean userIsOwner() {
+		String user = getLoggedInUser();
+		return user != null && user.equals("owner");
+	}
+
+	/**
+	 * Helper method to look if the logged in user is technician.
+	 * @return a boolean indicating if the user is technician.
+	 */
+	private static boolean userIsTechnician() {
+		String user = getLoggedInUser();
+		return user != null && user.contains("-Technician");
+	}
+
+	/**
+	 * Helper method to check the validity of the inputs to create a customer Account
+	 * @param userName
+	 * @param password
+	 * @throws Exception
+	 */
+	private static void checkValidityOfCustomerCreation(String userName, String password) throws Exception{
+		// If userName is already picked
+		if (hasUserWithUsername(userName)) {
+			throw new Exception("The username already exists");
+		}
+		// Can't enter empty userName or password
+		if (userName == null || userName.equals("")) {
+			throw new Exception("The user name cannot be empty");
+		}
+		if (password == null || password.equals("")) {
+			throw new Exception("The password cannot be empty");
+		}
+		// Can't create a customer account while logged in as a technician or owner
+		if (userIsOwner()) {
+			throw new Exception("You must log out of the owner account before creating a customer account");
+		}
+		if (userIsTechnician()) {
+			throw new Exception("You must log out of the technician account before creating a customer account");
+		}
+	}
+
+	/**
+	 * Helper method to get the logged in user
+	 * @throws Exception
+	 * @return the logged in user (String userName)
+	 */
+	public static String getLoggedInUser() {
+		String user = null;
+		try {
+			user = CarShopApplication.getLoggedInUser();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
+
+	/**
+	 * Helper method to check the validity of the inputs to update a customer Account
+	 * @param newUserName
+	 * @param newPassword
+	 * @throws Exception
+	 */
+	private static void checkValidityOfCustomerUpdate(String newUserName, String newPassword) throws Exception{
+		// If the user is owner, he can only change password
+		if (userIsOwner()) {
+			if (!getLoggedInUser().equals(newUserName)) {
+				throw new Exception("Changing username of owner is not allowed");
+			}
+		}
+		// If the user is technician, he can only change password
+		if (userIsTechnician()) {
+			if (!getLoggedInUser().equals(newUserName)) {
+				throw new Exception("Changing username of technician is not allowed");
+			}		
+		}
+		// If the userName already exists, and it is not his own account, userName already picked
+		if (hasUserWithUsername(newUserName) && !getLoggedInUser().equals(newUserName)) {
+			throw new Exception("Username not available");
+		}
+		// Can't enter empty userName or password
+		if (newUserName == null || newUserName.equals("")) {
+			throw new Exception("The user name cannot be empty");
+		}
+		if (newPassword == null || newPassword.equals("")) {
+			throw new Exception("The password cannot be empty");
+		}
+	}
+
+	/**
+	 * Updates the customer account.
+	 * @param newUserName
+	 * @param newPassword
+	 * @return true if account updated successfully
+	 * @throws Exception
+	 */
+	public static boolean updateCustomer(String newUserName, String newPassword) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean isUpdated = false;
+		String currentUserName = getLoggedInUser();
+		checkValidityOfCustomerUpdate(newUserName, newPassword);
+		try {
+			if (carShop.getOwner().getUsername().equals(currentUserName)) {
+				carShop.getOwner().setUsername(newUserName);
+				carShop.getOwner().setPassword(newPassword);
+				isUpdated = true;
+			}
+			if(!isUpdated) {
+				for (Customer customer : carShop.getCustomers()) {
+					if (customer.getUsername().equals(currentUserName)) {
+						customer.setUsername(newUserName);
+						customer.setPassword(newPassword);
+						isUpdated = true;
+					}
+				}
+			}
+			if(!isUpdated) {
+				for (Technician tech : carShop.getTechnicians()) {
+					if (tech.getUsername().equals(currentUserName)) {
+						tech.setUsername(newUserName);
+						tech.setPassword(newPassword);
+						isUpdated = true;
+					}
+				}
+			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		return isUpdated;
+	}
+
+
+	/**
+	 * Used to add services
+	 * @param name
+	 * @param duration
+	 * @param garage
+	 * @throws Exception
+	 */
+	public static void addService(String name, int duration, Garage garage) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		// checks if the user logged in is the owner 
+		if(!userIsOwner()) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+		try {
+			// checks if the parameters passed are true and then adds the service
+			if(checkServiceParameters(duration) && (!addExistingServices(name, garage))) {
+				garage.addService(name, carShop, duration);
+				
+			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+			
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	/**
+	 * Helper method to check if the service that has to be added is already in the model or not 
+	 * @param name
+	 * @param garage
+	 * @return
+	 * @throws Exception
+	 */
+	private static boolean addExistingServices(String name, Garage garage) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean serviceExists = false;
+		
+		// checks if service that has to be added already exists
+		for(Garage g: carShop.getGarages()) {
+			if(g.equals(garage)) {
+				for(Service s: g.getServices()) {
+					if(s.getName().equals(name)) {
+						serviceExists = true;
+						throw new Exception("Service " + name + " already exists");
+					}
+				}
+			}
+		}
+		// returns true if the service already exists else returns false
+		return serviceExists;
+
+	}
+
+	/**
+	 * Helper method to check if the duration for a service has a positive value
+	 * @param duration
+	 * @return
+	 * @throws Exception
+	 */
+	private static boolean checkServiceParameters(int duration) throws Exception {
+		boolean parameters = true;
+		if(duration<=0) {
+			parameters = false;
+			 throw new Exception("Duration must be positive");
+					
+		}
+		// returns true if the duration passed is positive else returns false
+		return parameters;
+	}
+
+	
+	/**
+	 * Method used to update services in the model
+	 * @param name
+	 * @param changedname
+	 * @param duration
+	 * @param garage
+	 * @throws Exception
+	 */
+	public static void updateService(String name,String changedname, int duration, Garage garage) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service serviceUpdate = null;
+		
+		//checks if the user logged is the owner 
+		if(!userIsOwner()) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+			
+		// checks if the service to be added exists in the system
+			for(int i=0; i < carShop.getBookableServices().size();i++) {
+				if(carShop.getBookableService(i) instanceof Service) {
+					serviceUpdate = (Service) carShop.getBookableService(i);
+					if(serviceUpdate.getName().equals(name)) {
+						break;
+					}
+					else {
+						throw new Exception("This service cannot be added");
+					}
+				}
+			}
+	
+			try {
+			
+				if(!updateExistingServices(serviceUpdate, changedname, duration) && checkServiceParameters(duration)){
+					serviceUpdate.setName(changedname);
+					serviceUpdate.setDuration(duration);
+					serviceUpdate.setGarage(garage);
+				}
+				CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			}
+		catch (RuntimeException e){
+			throw new Exception(e.getMessage());
+
+		}
+
+	}
+	
+	/**
+	 * Helper method to check is the service that has to be updated already exists 
+	 * @param serviceUpdate
+	 * @param changedName
+	 * @param duration
+	 * @return
+	 * @throws Exception
+	 */
+	private static boolean updateExistingServices(Service serviceUpdate, String changedName, int duration) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean serviceUpdate1 = false; 
+		
+		// checks for service to be update already exists or not
+		for(BookableService s: carShop.getBookableServices()) {
+			if(s instanceof Service) {
+				if(!serviceUpdate.getName().equals(changedName) && s.getName().equals(changedName)) {
+					throw new Exception("Service " + changedName + " already exists");
+				}
+			}
+			
+		}
+		// returns true if the service already exists else returns false
+		return serviceUpdate1;
+	}
+	
+	public static void addServiceComboFromView(TOServiceCombo toCombo) throws Exception {
+
+		String services = "";
+		String mandatory = "";
+		for(int i=0 ; i< toCombo.getServices().size(); i++) {
+			services += toCombo.getService(i).getService().getName();
+			mandatory += Boolean.toString(toCombo.getService(i).getMandatory());
+			if (i < toCombo.getServices().size() - 1) {
+				services += ",";
+				mandatory += ",";
+			}
+		}
+		
+		defineServiceCombo(CarShopApplication.getLoggedInUser(), toCombo.getName(), services, mandatory, toCombo.getMainService());
+	}
+
+	/**
+	 * Allows the owner to define a service combo
+	 * @param user
+	 * @param name
+	 * @param service
+	 * @param mandatory
+	 * @param mainService
+	 * @throws Exception
+	 */
+	
+	public static void defineServiceCombo(String user, String name, String services, String mandatory, String mainService) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service service;
+		boolean mandatoryToSet;
+		ComboItem Item;
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(name))!=null) {
+			throw new Exception ("Service combo "+name+" already exists");
+		}
+
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}
+		}
+		if(!(services.contains(mainService))) {
+			throw new Exception("Main service must be included in the services");
+		}
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceList[i].equals(mainService)) {
+				if(!(Boolean.parseBoolean(mandatoryList[i]))) {
+					throw new Exception ("Main service must be mandatory");
+				}
+			}
+		}
+		if(serviceList.length<2) {
+			throw new Exception("A service Combo must contain at least 2 services");
+		}
+		if((serviceCheck(mainService))==null) {
+			throw new Exception ("Service " + mainService + " does not exist");
+		}
+		
+		try {
+			ServiceCombo combo = new ServiceCombo(name, carShop);
+			for(int i=0; i<serviceList.length; i++) {
+				service = serviceCheck(serviceList[i]);
+				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+				Item = new ComboItem(mandatoryToSet, service, combo);
+				if(Item.getService().getName().equals(mainService)) {
+					combo.setMainService(Item);
+				}
+				combo.addService(Item);
+			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+	}
+	
+	public static void cancelServiceComboFromView(TOServiceCombo toCombo) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		ServiceCombo current = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof ServiceCombo && bs.getName().equals(toCombo.getName())) {
+				current = (ServiceCombo) bs;
+			}
+		}
+		
+		try {	
+			current.delete();	
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static void updateServiceComboFromView(TOServiceCombo toCombo, String previousName) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service service;
+		boolean mandatoryToSet;
+		ComboItem item;
+		String services = "";
+		String mandatory = "";
+		for(int i=0 ; i< toCombo.getServices().size(); i++) {
+			services += toCombo.getService(i).getService().getName();
+			mandatory += Boolean.toString(toCombo.getService(i).getMandatory());
+			if (i < toCombo.getServices().size() - 1) {
+				services += ",";
+				mandatory += ",";
+			}
+		}
+		
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(toCombo.getName()))!=null && !toCombo.getName().equals(previousName)) {
+			throw new Exception ("Service Combo "+toCombo.getName()+" already exists");
+		}
+		if((serviceCheck(toCombo.getMainService()))==null) {
+			throw new Exception ("Service " + toCombo.getMainService() + " does not exist");
+		}
+		if(!(services.contains(toCombo.getMainService()))) {
+			throw new Exception("Main service must be included in the services");
+		}
+>>>>>>> serviceDev
 		/*for(int i=0; i<serviceList.length; i++) {
 			if(!(BookableService.hasWithName(serviceList[i]))) {
 				throw new Exception ("Service" + serviceList[i] + "does not exist");
 			}
 		}*/
+<<<<<<< HEAD
         for(int i=0; i<serviceList.length; i++) {
             if(serviceCheck(serviceList[i])==null) {
                 throw new Exception ("Service " + serviceList[i] + " does not exist");
@@ -1048,6 +1522,371 @@ public class CarShopController {
                 }
             }
         }
+=======
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}		
+		}
+		if(serviceList.length<2) {
+			throw new Exception("A service Combo must contain at least 2 services");
+		}
+		for(int j=0; j<serviceList.length; j++) {
+			if(serviceList[j].equals(toCombo.getMainService())) {
+				if(!(Boolean.parseBoolean(mandatoryList[j]))) {
+					throw new Exception ("Main service must be mandatory");
+				}
+			}
+		}
+		
+		ServiceCombo current = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs instanceof ServiceCombo && bs.getName().equals(toCombo.getName())) {
+				current = (ServiceCombo) bs;
+			}
+		}
+		
+		try {
+			
+			current.delete();
+			ServiceCombo combo = new ServiceCombo(toCombo.getName(), carShop);
+			for(int i=0; i<serviceList.length; i++) {
+				service = serviceCheck(serviceList[i]);
+				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+				item = new ComboItem(mandatoryToSet, service, combo);
+				if(item.getService().getName().equals(toCombo.getMainService())) {
+					combo.setMainService(item);
+				}
+				combo.addService(item);
+			}
+			
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Allows the owner to update an existing service combo
+	 * @param user
+	 * @param existingCombo
+	 * @param name
+	 * @param service
+	 * @param mandatory
+	 * @param mainService
+	 * @throws Exception
+	 */
+	
+	public static void updateServiceCombo(String user, String existingCombo, String name, String services, String mandatory, String mainService) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		Service service;
+		boolean mandatoryToSet;
+		ComboItem Item;
+		String []serviceList = services.split(",");
+		String[] mandatoryList = mandatory.split(",");
+		
+		if(!userIsOwner()) {
+			throw new Exception ("You are not authorized to perform this operation");
+		}
+		if((serviceComboDuplicateCheck(name))!=null && !name.equals(existingCombo)) {
+			throw new Exception ("Service "+name+" already exists");
+		}
+		if((serviceCheck(mainService))==null) {
+			throw new Exception ("Service " + mainService + " does not exist");
+		}
+		if(!(services.contains(mainService))) {
+			throw new Exception("Main service must be included in the services");
+		}
+	
+		for(int i=0; i<serviceList.length; i++) {
+			if(serviceCheck(serviceList[i])==null) {
+				throw new Exception ("Service " + serviceList[i] + " does not exist");
+			}		
+		}
+		if(serviceList.length<2) {
+			throw new Exception("A service Combo must contain at least 2 services");
+		}
+		for(int j=0; j<serviceList.length; j++) {
+			if(serviceList[j].equals(mainService)) {
+				if(!(Boolean.parseBoolean(mandatoryList[j]))) {
+					throw new Exception ("Main service must be mandatory");
+				}
+			}
+		}
+		
+		try {
+			ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
+			combo.setName(name);
+			for (int i = 0; i < serviceList.length; i++) {
+				service = serviceCheck(serviceList[i]);
+				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
+				Item = new ComboItem(mandatoryToSet, service, combo);
+	
+				combo.addService(Item);
+				if (Item.getService().getName().equals(mainService)) {
+					combo.setMainService(Item);
+	
+				}
+			}
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+	}
+	
+	
+
+	/**
+	 * Helper method to find a service 
+	 * @param name
+	 * @return the service that is searched for
+	 */
+	private static Service serviceCheck(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		BookableService specificService = null;
+		for (BookableService service : carShop.getBookableServices()) {
+			if (service instanceof Service) {
+				if (service.getName().equals(name)) {
+					specificService = service;
+
+				}
+			}
+		}
+		return (Service) specificService;
+	}
+	
+	/**
+	 * Helper method to find a service combo
+	 * @param name
+	 * @return the service combo that is searched for
+	 */
+	private static ServiceCombo serviceComboDuplicateCheck(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		BookableService specificServiceCombo = null;
+		for (BookableService serviceCombo : carShop.getBookableServices()) {
+			if (serviceCombo instanceof ServiceCombo) {
+				if (serviceCombo.getName().equals(name)) {
+					specificServiceCombo = serviceCombo;
+				}
+			}
+		}
+		return (ServiceCombo) specificServiceCombo;
+	}
+	
+	public static boolean logIn(String username, String password) throws Exception{
+		CarShop carShop = CarShopApplication.getCarShop();
+		User currentUser = null;
+		boolean isLoggedIn = false;
+
+		
+		List<User> users = new ArrayList<User>();
+		users.addAll(carShop.getTechnicians());
+		users.addAll(carShop.getCustomers());
+		users.add(carShop.getOwner());
+		
+		try {
+			if(User.hasWithUsername(username)) {
+				currentUser = User.getWithUsername(username);
+				if(currentUser.getPassword().equals(password)) {
+					CarShopApplication.setLoggedInUser(currentUser.getUsername());
+					isLoggedIn = true;
+				}
+				else {
+					throw new Exception("Username/password not found");
+				}
+			}
+			else if (username.equals("owner")) {
+				createOwner(username, password);
+				currentUser = User.getWithUsername(username);
+				CarShopApplication.setLoggedInUser(currentUser.getUsername());
+				isLoggedIn = true;
+			}
+			else if (username.contains("Technician")) {
+				TechnicianType technicianType = null;
+				if (username.contains("Tire")) {
+					technicianType = Technician.TechnicianType.valueOf("Tire");
+				}
+				else if (username.contains("Engine")) {
+					technicianType = Technician.TechnicianType.valueOf("Engine");
+				}
+				else if (username.contains("Transmission")) {
+					technicianType = Technician.TechnicianType.valueOf("Transmission");
+				}
+				else if (username.contains("Electronics")) {
+					technicianType = Technician.TechnicianType.valueOf("Electronics");
+				}
+				else if (username.contains("Fluids")) {
+					technicianType = Technician.TechnicianType.valueOf("Fluids");
+				}
+    			createTechnician(username, password, technicianType);
+    			currentUser = User.getWithUsername(username);
+    			CarShopApplication.setLoggedInUser(currentUser.getUsername());
+    			isLoggedIn = true;
+			}
+			else {
+				throw new Exception("Username/password not found");
+			}
+		} catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return isLoggedIn;
+	}
+	
+	public static boolean logout() throws Exception{
+		boolean isLoggedOut = false;
+		try {
+			CarShopApplication.setLoggedInUser(null);
+			isLoggedOut = true;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return isLoggedOut;
+	}
+	
+	public static boolean createdAccount() throws Exception {
+		boolean createdAccount = true;
+		try {
+			/*if (User.hasWithUsername(CarShopApplication.getLoggedInUser())) {
+				createdAccount = false;
+			}*/
+		} catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return createdAccount;
+	}
+	
+	public static boolean createdGarage() throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean garageAssociatedToNewTechnician = true;
+		
+		for(Technician t: carShop.getTechnicians()) {
+			if(!t.hasGarage()) {
+				garageAssociatedToNewTechnician = false;
+			}
+		}
+		return garageAssociatedToNewTechnician;
+	}
+
+	
+	public static boolean hasOpeningHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		List<BusinessHour>businessHours = garage.getBusinessHours();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		BusinessHour aBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+		
+		boolean hasBusinessHour = false;
+		try {
+			for (BusinessHour b: businessHours) {
+				if (b == aBusinessHour) {
+					hasBusinessHour = true;
+				}
+			}
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return hasBusinessHour;
+	}
+	
+	public static boolean addHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		boolean wasAdded = false;
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+
+		
+		//add checks
+		if(start.compareTo(end)>0) {
+			throw new Exception("Start time must be before end time");
+		}
+		
+		if(intersectsWithBusinessHour(dayOfWeek, start, end, garage.getBusinessHours())) {
+			throw new Exception("The opening hours cannot overlap");
+		}
+		
+		if(!overlapsWithBusinessHour(dayOfWeek, start, end, carShop.getBusiness().getBusinessHours())) {
+			throw new Exception("The opening hours are not within the opening hours of the business");
+		}
+		
+		if(!CarShopApplication.getLoggedInUser().equals(garage.getTechnician().getUsername())) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+		
+		try {
+			BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
+			garage.addBusinessHour(newBusinessHour);
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			wasAdded = true;
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		return wasAdded;
+	}
+	
+	public static boolean removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
+		ArrayList<BusinessHour> toRemove = new ArrayList<BusinessHour>();
+		boolean removed = false;
+				
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		Time start = new Time(sdf.parse(startTime).getTime());
+		Time end = new Time(sdf.parse(endTime).getTime());
+		
+		//add checks
+		if(!CarShopApplication.getLoggedInUser().equals(garage.getTechnician().getUsername())) {
+			throw new Exception("You are not authorized to perform this operation");
+		}
+		
+		try {
+			for(BusinessHour h: garage.getBusinessHours()) {
+				if(h.getDayOfWeek().equals(dayOfWeek) && h.getStartTime().equals(start) && h.getEndTime().equals(end)) {
+					toRemove.add(h);
+				}
+			}
+			garage.removeBusinessHour(toRemove.get(0));
+			toRemove.get(0).delete();
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+			removed = true;
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+		return removed;
+		
+	}
+	
+	private static boolean overlapsWithBusinessHour(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> hours) {
+		  
+		  boolean contains = false;
+
+			for(BusinessHour h: hours) {
+				// For business hours on the same day we want
+				// The startime of the existing schedule to be after the endtime of the new schedule or
+				// The endtime of the existing schedule to be before the starttime of the new schedule
+				if(h.getDayOfWeek() == day && h.getStartTime().compareTo(startTime) <= 0 && h.getEndTime().compareTo(endTime) >= 0) {
+					contains = true;
+					break;
+				}
+			}
+>>>>>>> serviceDev
 
         try {
             ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
@@ -1413,6 +2252,258 @@ public class CarShopController {
         return newTechnicians;
     }
 
+<<<<<<< HEAD
+=======
+			return isOverlapping;
+	  }
+	
+	public static boolean isCustomerLoggedIn() {
+		boolean isCustomer = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Customer) {
+				isCustomer = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isCustomer;
+	}
+	
+	public static boolean isTechnicianLoggedIn() {
+		boolean isTechnician = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Technician) {
+				isTechnician = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isTechnician;
+	}
+	
+	public static boolean isOwnerLoggedIn() {
+		boolean isOwner = false;
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Owner) {
+				isOwner = true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isOwner;
+	}
+	
+	public static List<TOBusinessHour> getBusinessHours(String type){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOBusinessHour> businessHours = new ArrayList<TOBusinessHour>();
+		try {
+			
+			if(type.equals("business")){
+				for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
+					businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+				}
+			} else {
+				for(Garage g: carShop.getGarages()) {
+					if(g.getTechnician().getType().name().toLowerCase().contains(type)) {
+						for(BusinessHour bh: g.getBusinessHours()) {
+							businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
+						}
+						break;
+					}
+				}
+			}
+			businessHours.sort(new BusinessHourComparator());
+		} catch (Exception e) {
+			
+		}
+		return businessHours;
+
+	}
+	
+	static class BusinessHourComparator implements Comparator<TOBusinessHour>
+	 {
+		private List<String> days = new ArrayList<String>() {
+            {
+                add("Monday");
+                add("Tuesday");
+                add("Wednesday");
+                add("Thursday");
+                add("Friday");
+                add("Saturday");
+                add("Sunday");
+            }
+        };
+		@Override
+		public int compare(TOBusinessHour o1, TOBusinessHour o2) {
+			return days.indexOf(o1.getDayOfWeek()) - days.indexOf(o2.getDayOfWeek());
+		}
+	 }
+	
+	public static String getLoggedInTechnicianType() {
+		String type = "";
+		try {
+			User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
+			if (user instanceof Technician) {
+				type = ((Technician)user).getType().name();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return type;
+	}
+	
+	public static TOService getTOService(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		TOService service = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs.getName().equals(name)) {
+				service = new TOService(name, ((Service) bs).getDuration());
+				break;
+			}
+		}
+		return service;
+	}
+	
+	public static String getLoggedInUsername() throws Exception {
+		return CarShopApplication.getLoggedInUser();
+	}
+	
+	public static boolean addBusinessHourFromDayAndTime(String day, Time startTime, Time endTime) throws Exception {
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		boolean wasAdded = false;
+		try {
+			CarShopController.addBusinessHour(dayOfWeek, startTime, endTime);
+			wasAdded = true;
+		} catch(Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return wasAdded;
+	}
+	
+	public static boolean removeBusinessHoursOnThatDay(String day) throws Exception{
+		boolean wasRemoved = false;
+		CarShop carShop = CarShopApplication.getCarShop();
+		ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+		try { 
+			for (BusinessHour bh : carShop.getBusiness().getBusinessHours()) {
+				if(bh.getDayOfWeek().equals(DayOfWeek.valueOf(day))) {
+					bhOnThatDay.add(bh);
+				}	
+			}
+			for (BusinessHour bh : bhOnThatDay) {
+				removeBusinessHour(DayOfWeek.valueOf(day), bh.getStartTime());
+			}
+			wasRemoved = true;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return wasRemoved;
+	}
+	
+	public static boolean removeGarageHoursOnDay(String day) throws Exception{
+		boolean updated = false;
+		String type = "";
+		ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+		try {
+			User user = User.getWithUsername(CarShopController.getLoggedInUsername());
+			type = CarShopController.getLoggedInTechnicianType();
+			for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
+
+				if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
+					bhOnThatDay.add(bh);
+				}
+			}
+			if (bhOnThatDay.size() == 0) {
+				throw new Exception("No existing hours on that day.");
+			}
+			else {
+				for (BusinessHour bh : bhOnThatDay) {
+					DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+					String start = dateFormat.format(bh.getStartTime());
+					String end = dateFormat.format(bh.getEndTime());
+					if (CarShopController.removeHoursToGarageOfTechnicianType(day, start, end, type)) {
+					}
+				}
+			}
+			updated = true;
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return updated;
+	}
+	
+	public static String getSystemDate() throws Exception{
+		String date = "";
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			date = dateFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return date;
+	}
+	
+	public static String getSystemTime() throws Exception{
+		String time = "";
+		try {
+			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+			time = timeFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return time;
+	}
+	
+	public static String getFullSystemDate() throws Exception{
+		String date = "";
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd+HH:mm");
+			date = dateFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return date;
+	}
+	
+	public static void setToCurrentDate() throws Exception{
+		try {
+			CarShopApplication.setToCurrentDate();
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static TOCustomer getLoggedInTOCustomer() {
+		CarShop carShop = CarShopApplication.getCarShop();
+		TOCustomer cust = null;
+		if(CarShopController.isCustomerLoggedIn()) {
+			String username = CarShopController.getLoggedInUser();
+			for(Customer c: carShop.getCustomers()) {
+				if(c.getUsername().equals(username)) {
+					cust = new TOCustomer();
+					cust.setNoShowCount(c.getNoShowCount());
+					break;
+				}
+			}
+			
+		}
+		return cust;
+	}
+	
+
+>>>>>>> serviceDev
 }
 
 

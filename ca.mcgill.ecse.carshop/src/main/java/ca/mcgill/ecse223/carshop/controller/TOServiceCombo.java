@@ -12,6 +12,9 @@ public class TOServiceCombo extends TOBookableService
   // MEMBER VARIABLES
   //------------------------
 
+  //TOServiceCombo Attributes
+  private String mainService;
+
   //TOServiceCombo Associations
   private List<TOComboItem> services;
 
@@ -19,15 +22,29 @@ public class TOServiceCombo extends TOBookableService
   // CONSTRUCTOR
   //------------------------
 
-  public TOServiceCombo(String aName)
+  public TOServiceCombo(String aName, String aMainService)
   {
     super(aName);
+    mainService = aMainService;
     services = new ArrayList<TOComboItem>();
   }
 
   //------------------------
   // INTERFACE
   //------------------------
+
+  public boolean setMainService(String aMainService)
+  {
+    boolean wasSet = false;
+    mainService = aMainService;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public String getMainService()
+  {
+    return mainService;
+  }
   /* Code from template association_GetMany */
   public TOComboItem getService(int index)
   {
@@ -143,4 +160,10 @@ public class TOServiceCombo extends TOBookableService
     super.delete();
   }
 
+
+  public String toString()
+  {
+    return super.toString() + "["+
+            "mainService" + ":" + getMainService()+ "]";
+  }
 }
