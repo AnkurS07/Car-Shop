@@ -1,7 +1,6 @@
 package ca.mcgill.ecse.carshop.view;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.List;
 

@@ -1,8 +1,6 @@
 
 package ca.mcgill.ecse223.carshop.controller;
 
-import static ca.mcgill.ecse223.carshop.controller.AppointmentController.parseDate;
-
 import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;

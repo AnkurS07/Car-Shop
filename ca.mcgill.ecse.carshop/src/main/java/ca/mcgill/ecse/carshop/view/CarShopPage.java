@@ -1080,12 +1080,12 @@ public class CarShopPage extends JFrame{
 						.addComponent(serviceComboTopSeparator)
 						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
+										.addComponent(addComboLabel)
 										.addComponent(nameLabel)
 										.addComponent(mainServiceLabel)
 										.addComponent(optService)
 										)
 								.addGroup(layout.createParallelGroup()
-										.addComponent(addComboLabel)
 										.addComponent(comboName)
 										.addComponent(mainService)
 										.addComponent(optComboItemPanel)
@@ -1141,7 +1141,7 @@ public class CarShopPage extends JFrame{
 														)
 												)
 										)
-								.addGap(150)
+								.addGap(100)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(removeHoursLabel)
 										.addGroup(layout.createSequentialGroup()
@@ -1234,10 +1234,10 @@ public class CarShopPage extends JFrame{
 				);
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {loginUsernameField, loginPasswordField, loginButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signupUsernameField, signupPasswordField, signupButton});
-		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updatePasswordField2, updateAccountButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updatePasswordField2, updateAccountButton, setBusinessName, startAppointmentButton, addComboButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {setBusinessName, setBusinessAddress, setBusinessEmail, setBusinessPhone, businessInfoButton});
-		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {selectBusinessHourDay, addBusinessHourStart, addBusinessHourEnd, addBusinessHourAddButton, removeBusinessHourButton});
-		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {newHoursDayBox, addGarageHoursButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {selectBusinessHourDay, addBusinessHourStart, addBusinessHourEnd, addBusinessHourAddButton, removeBusinessHourButton, endAppointmentLabel, updateComboLabel, serviceComboList});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {newHoursDayBox, addGarageHoursButton, updateAccountButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {removeHoursDayBox, removeGarageHoursButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelAppt});
@@ -1249,6 +1249,11 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {optComboItemPanel, addComboButton, mainService, comboName});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {optComboItemPanel2, cancelComboButton, updateComboButton, mainService2, comboName2, serviceComboList});
+		
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsername, businessPhoneLabel, startAppointment, addComboLabel, newHoursOpenLabel});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {serviceComboList, endAppointmentButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateAccount, newHoursOpenLabel});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {addBusinessHourStartLabel, updateComboLabel, endAppointmentLabel});
 		
 		// Vertical Layout
 		layout.setVerticalGroup( layout.createParallelGroup()
