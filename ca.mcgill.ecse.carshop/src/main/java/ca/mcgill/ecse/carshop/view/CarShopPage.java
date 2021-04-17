@@ -9,7 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -19,16 +18,9 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
 
-import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.Appointment;
-import ca.mcgill.ecse.carshop.model.Appointment.AppStatus;
-import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.Customer;
-import ca.mcgill.ecse.carshop.model.Garage;
-import ca.mcgill.ecse.carshop.model.Technician;
-import ca.mcgill.ecse.carshop.model.User;
-import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
-import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ServiceBooking;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
@@ -43,6 +35,7 @@ import ca.mcgill.ecse223.carshop.controller.TOTimeSlot;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.font.TextAttribute;
 import java.sql.Date;
 import java.sql.Time;
@@ -50,6 +43,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +59,9 @@ public class CarShopPage extends JFrame{
 	// Header
 	private JLabel headerTitle;
 	private JButton logoutButton;
+	private JLabel timeLabel;
+	private JLabel dateLabel;
+	private JButton refreshButton;
 	
 	// Login - Sign up
 	private JLabel login;
@@ -90,6 +87,7 @@ public class CarShopPage extends JFrame{
 	private JLabel updateAccountSuccessMessage;
 	private JLabel updateUsername;
 	private JLabel updatePassword;
+	private JLabel updatePasswordConfirm;
 	private JTextField updateUsernameField;
 	private JPasswordField updatePasswordField;
 	private JPasswordField updatePasswordField2;
@@ -127,14 +125,20 @@ public class CarShopPage extends JFrame{
 	
 	// Start appointment
 	private JLabel startAppointment;
+	private JLabel startAppointmentErrorMessage;
+	private JLabel startAppointmentSuccessMessage;
 	private JLabel startAppointmentLabel;
 	private JComboBox<String> appointmentsBooked;
 	private JButton startAppointmentButton;
 	private JButton registerNoShowButton;
+	private JLabel registerNoShowErrorMessage;
+	private JLabel registerNoShowSuccessMessage;
 	private JSeparator startAppointmentTopSeparator;
 	
 	// End appointment
 	private JLabel endAppointment;
+	private JLabel endAppointmentErrorMessage;
+	private JLabel endAppointmentSuccessMessage;
 	private JLabel endAppointmentLabel;
 	private JComboBox<String> appointmentsInProgress;
 	private JButton endAppointmentButton;
@@ -184,6 +188,8 @@ public class CarShopPage extends JFrame{
 	private JCheckBox showfluidsGarageHours;
 	
 	private HashMap<Integer, TOAppointment> appts;
+	private HashMap<Integer, TOAppointment> appointments;
+	private HashMap<Integer, TOAppointment> appointmentsStarted;
 	private HashMap<Integer, TOAppointment> bookedAppts;
 	private HashMap<Integer, TOBookableService> bookableServices;
 	private List<OptServiceVisualizer> optServices;
@@ -211,13 +217,34 @@ public class CarShopPage extends JFrame{
 	private String newGarageHoursSuccess = null;
 	private String removeGarageHoursError = null;
 	private String removeGarageHoursSuccess = null;
-	// toggle sick status
-	// private HashMap<Integer, Integer> drivers;
-	// toggle repairs status
-	// private HashMap<Integer, String> buses;
-	// bus assignment
-	// private HashMap<Integer, String> availableBuses;
-	// private HashMap<Integer, TORoute> routes;
+	private String startAppointmentError = null;
+	private String startAppointmentSuccess = null;
+	private String registerNoShowError = null;
+	private String registerNoShowSuccess = null;
+	private String endAppointmentError = null;
+	private String endAppointmentSuccess = null;
+	
+
+	//add service
+	private List<TOService> services;
+	
+	//add service combo
+	private JLabel addComboLabel;
+	private JLabel nameLabel;
+	private JTextField comboName;
+	private JLabel mainServiceLabel;
+	private HashMap<Integer, String> mainServiceMap;
+	private JComboBox<String> mainService;
+	private JLabel optService;
+	private List<ComboVisualizer> comboVisualizerList;
+	private JPanel optComboItemPanel;
+	private JButton addOptComboItemButton;
+	private JButton addComboButton;
+	private JSeparator serviceComboTopSeparator;
+	private JLabel serviceComboErrorMessage;
+	
+	//update service combo
+	
 
 	/** Creates new form BtmsPage */
 	public CarShopPage() {
@@ -243,6 +270,17 @@ public class CarShopPage extends JFrame{
 		logoutButton = new JButton();
 		logoutButton.setText("Log out");
 		logoutButton.setVisible(false);
+		dateLabel = new JLabel();
+		timeLabel = new JLabel();
+		try {
+			dateLabel.setText(CarShopController.getSystemDate());
+			timeLabel.setText(CarShopController.getSystemTime());
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		refreshButton = new JButton();
+		refreshButton.setText("Refresh");
+		
 		
 		// login
 		login = new JLabel();
@@ -297,6 +335,8 @@ public class CarShopPage extends JFrame{
 		updateUsername.setText("New username: ");
 		updatePassword = new JLabel();
 		updatePassword.setText("New password: ");
+		updatePasswordConfirm = new JLabel();
+		updatePasswordConfirm.setText("Confirm: ");
 		updateUsernameField = new JTextField(15);
 		updateUsernameField.setMaximumSize(getPreferredSize());
 		updatePasswordField = new JPasswordField(15);
@@ -342,6 +382,14 @@ public class CarShopPage extends JFrame{
 		// Start appointment
 		startAppointment = new JLabel("Start Appointment");
 		startAppointment.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		startAppointmentErrorMessage = new JLabel();
+		startAppointmentErrorMessage.setForeground(Color.RED);
+		startAppointmentSuccessMessage = new JLabel();
+		startAppointmentSuccessMessage.setForeground(new Color(0, 153, 0));
+		registerNoShowErrorMessage = new JLabel();
+		registerNoShowErrorMessage.setForeground(Color.RED);
+		registerNoShowSuccessMessage = new JLabel();
+		registerNoShowSuccessMessage.setForeground(new Color(0, 153, 0));
 		startAppointmentLabel = new JLabel("Appointment: ");
 		appointmentsBooked = new JComboBox<String>(new String[0]);
 		appointmentsBooked.setMaximumSize(getPreferredSize());
@@ -354,6 +402,10 @@ public class CarShopPage extends JFrame{
 		// End appointment
 		endAppointment = new JLabel("End Appointment");
 		endAppointment.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		endAppointmentErrorMessage = new JLabel();
+		endAppointmentErrorMessage.setForeground(Color.RED);
+		endAppointmentSuccessMessage = new JLabel();
+		endAppointmentSuccessMessage.setForeground(new Color(0, 153, 0));
 		endAppointmentLabel = new JLabel("Appointment: ");
 		appointmentsInProgress = new JComboBox<String>(new String[0]);
 		appointmentsInProgress.setMaximumSize(getPreferredSize());
@@ -388,83 +440,116 @@ public class CarShopPage extends JFrame{
 		
 		verticalLineRight = new JSeparator(SwingConstants.VERTICAL);
 		
-		 businessHourLabel = new JLabel();
-		 businessHourLabel.setText("Business Hours");
-		 businessHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 tireGarageHourLabel = new JLabel();
-		 tireGarageHourLabel.setText("Tire Garage Hours");
-		 tireGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 engineGarageHourLabel = new JLabel();
-		 engineGarageHourLabel.setText("Engine Garage Hours");
-		 engineGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 transmissionGarageHourLabel = new JLabel();
-		 transmissionGarageHourLabel.setText("Transmission Garage Hours");
-		 transmissionGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 elecGarageHourLabel = new JLabel();
-		 elecGarageHourLabel.setText("Electronics Garage Hours");
-		 elecGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
-		 fluidsGarageHourLabel = new JLabel();
-		 fluidsGarageHourLabel.setText("Fluids Garage Hours");
-		 fluidsGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		businessHourLabel = new JLabel();
+		businessHourLabel.setText("Business Hours");
+		businessHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		tireGarageHourLabel = new JLabel();
+		tireGarageHourLabel.setText("Tire Garage Hours");
+		tireGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		engineGarageHourLabel = new JLabel();
+		engineGarageHourLabel.setText("Engine Garage Hours");
+		engineGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		transmissionGarageHourLabel = new JLabel();
+		transmissionGarageHourLabel.setText("Transmission Garage Hours");
+		transmissionGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		elecGarageHourLabel = new JLabel();
+		elecGarageHourLabel.setText("Electronics Garage Hours");
+		elecGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
+		fluidsGarageHourLabel = new JLabel();
+		fluidsGarageHourLabel.setText("Fluids Garage Hours");
+		fluidsGarageHourLabel.setFont(titleFont.deriveFont(underlinedAttributes));
 		
-		 businessHourPanel = new JPanel();
-		 businessHourPanel.setLayout(new BoxLayout(businessHourPanel, BoxLayout.PAGE_AXIS));
-		 businessHourPanel.setVisible(false);
-		 tireGarageHourPanel = new JPanel();
-		 tireGarageHourPanel.setLayout(new BoxLayout(tireGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 tireGarageHourPanel.setVisible(false);
-		 engineGarageHourPanel = new JPanel();
-		 engineGarageHourPanel.setLayout(new BoxLayout(engineGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 engineGarageHourPanel.setVisible(false);
-		 transmissionGarageHourPanel = new JPanel();
-		 transmissionGarageHourPanel.setLayout(new BoxLayout(transmissionGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 transmissionGarageHourPanel.setVisible(false);
-		 elecGarageHourPanel = new JPanel();
-		 elecGarageHourPanel.setLayout(new BoxLayout(elecGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 elecGarageHourPanel.setVisible(false);
-		 fluidsGarageHourPanel = new JPanel();
-		 fluidsGarageHourPanel.setLayout(new BoxLayout(fluidsGarageHourPanel, BoxLayout.PAGE_AXIS));
-		 fluidsGarageHourPanel.setVisible(false);
+		businessHourPanel = new JPanel();
+		businessHourPanel.setLayout(new BoxLayout(businessHourPanel, BoxLayout.PAGE_AXIS));
+		businessHourPanel.setVisible(false);
+		tireGarageHourPanel = new JPanel();
+		tireGarageHourPanel.setLayout(new BoxLayout(tireGarageHourPanel, BoxLayout.PAGE_AXIS));
+		tireGarageHourPanel.setVisible(false);
+		engineGarageHourPanel = new JPanel();
+		engineGarageHourPanel.setLayout(new BoxLayout(engineGarageHourPanel, BoxLayout.PAGE_AXIS));
+		engineGarageHourPanel.setVisible(false);
+		transmissionGarageHourPanel = new JPanel();
+		transmissionGarageHourPanel.setLayout(new BoxLayout(transmissionGarageHourPanel, BoxLayout.PAGE_AXIS));
+		transmissionGarageHourPanel.setVisible(false);
+		elecGarageHourPanel = new JPanel();
+		elecGarageHourPanel.setLayout(new BoxLayout(elecGarageHourPanel, BoxLayout.PAGE_AXIS));
+		elecGarageHourPanel.setVisible(false);
+		fluidsGarageHourPanel = new JPanel();
+		fluidsGarageHourPanel.setLayout(new BoxLayout(fluidsGarageHourPanel, BoxLayout.PAGE_AXIS));
+		fluidsGarageHourPanel.setVisible(false);
 		 
-		 businessHours = new ArrayList<String>();
-		 tireGarageHours = new ArrayList<String>();
-		 engineGarageHours = new ArrayList<String>();
-		 transmissionGarageHours = new ArrayList<String>();
-		 elecGarageHours = new ArrayList<String>();
-		 fluidsGarageHours = new ArrayList<String>();
+		businessHours = new ArrayList<String>();
+		tireGarageHours = new ArrayList<String>();
+		engineGarageHours = new ArrayList<String>();
+		transmissionGarageHours = new ArrayList<String>();
+		elecGarageHours = new ArrayList<String>();
+		fluidsGarageHours = new ArrayList<String>();
 		 
-		 show1 = new JLabel();
-		 show1.setText("Show");
-		 show2 = new JLabel();
-		 show2.setText("Show");
-		 show3 = new JLabel();
-		 show3.setText("Show");
-		 show4 = new JLabel();
-		 show4.setText("Show");
-		 show5 = new JLabel();
-		 show5.setText("Show");
-		 show6 = new JLabel();
-		 show6.setText("Show");
-		 showBusinessHours = new JCheckBox();
-		 showBusinessHours.setSelected(false);
-		 showtireGarageHours = new JCheckBox();
-		 showtireGarageHours.setSelected(false);
-		 showengineGarageHours = new JCheckBox();
-		 showengineGarageHours.setSelected(false);
-		 showtransmissionGarageHours = new JCheckBox();
-		 showtransmissionGarageHours.setSelected(false);
-		 showelecGarageHours = new JCheckBox();
-		 showelecGarageHours.setSelected(false);
-		 showfluidsGarageHours = new JCheckBox();
-		 showfluidsGarageHours.setSelected(false);
-
-
+		show1 = new JLabel();
+		show1.setText("Show");
+		show2 = new JLabel();
+		show2.setText("Show");
+		show3 = new JLabel();
+		show3.setText("Show");
+		show4 = new JLabel();
+		show4.setText("Show");
+		show5 = new JLabel();
+		show5.setText("Show");
+		show6 = new JLabel();
+		show6.setText("Show");
+		showBusinessHours = new JCheckBox();
+		showBusinessHours.setSelected(false);
+		showtireGarageHours = new JCheckBox();
+		showtireGarageHours.setSelected(false);
+		showengineGarageHours = new JCheckBox();
+		showengineGarageHours.setSelected(false);
+		showtransmissionGarageHours = new JCheckBox();
+		showtransmissionGarageHours.setSelected(false);
+		showelecGarageHours = new JCheckBox();
+		showelecGarageHours.setSelected(false);
+		showfluidsGarageHours = new JCheckBox();
+		showfluidsGarageHours.setSelected(false);
+		
+		services = new ArrayList<TOService>();
+		 
+		addComboLabel = new JLabel();
+		addComboLabel.setText("Create Service Combo");
+		addComboLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		nameLabel = new JLabel();
+		nameLabel.setText("Name: ");
+		comboName = new JTextField(15);
+		comboName.setMaximumSize(getPreferredSize());
+		mainServiceLabel = new JLabel();
+		mainServiceLabel.setText("Main service: ");
+		mainServiceMap = new HashMap<Integer, String>();
+		mainService = new JComboBox<String>(new String[0]);
+		mainService.setMaximumSize(getPreferredSize());
+		optService = new JLabel();
+		optService.setText("Optional services: ");
+		comboVisualizerList = new ArrayList<ComboVisualizer>();
+		optComboItemPanel = new JPanel();
+		optComboItemPanel.setLayout(new BoxLayout(optComboItemPanel, BoxLayout.PAGE_AXIS));
+		addOptComboItemButton = new JButton();
+		addOptComboItemButton.setText("+");
+		addComboButton = new JButton();
+		addComboButton.setText("Add Service Combo");
+		serviceComboTopSeparator = new JSeparator();
+		serviceComboErrorMessage = new JLabel();
+		serviceComboErrorMessage.setForeground(Color.RED);
 		
 		hideAppointmentSection();
-		hideStartEndRegisterSection();
-
+		hideStartEndAppointmentSection();
+		hideServiceComboSection();
 		
 		// Action Listeners
+		// Listeners for header
+		refreshButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				refreshButtonActionPerformed(evt);
+			}
+		});
+		
+		
 		// Listeners for Login - Sign up
 		loginButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -526,18 +611,6 @@ public class CarShopPage extends JFrame{
 		cancelApptButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				cancelApptButtonActionPerformed(evt);
-			}
-		});
-		
-		appointmentsBooked.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				showAppointmentsToStart(evt);
-			}
-		});
-		
-		appointmentsInProgress.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				showAppointmentsToEnd(evt);
 			}
 		});
 		
@@ -624,6 +697,18 @@ public class CarShopPage extends JFrame{
 				pack();
 			}
 		});
+		
+		addOptComboItemButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addOptServiceActionPerformed(evt);
+			}
+		});
+		
+		addComboButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addComboActionPerformed(evt);
+			}
+		});
 	
 		
 		// global settings
@@ -644,6 +729,12 @@ public class CarShopPage extends JFrame{
 								.addComponent(headerTitle)
 								.addGap(50)
 								.addComponent(logoutButton)
+								.addGap(300)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(dateLabel)
+										.addComponent(timeLabel)
+										)
+								.addComponent(refreshButton)
 								)
 						// Login - Setup Section
 						.addComponent(loginTopSeparator)
@@ -682,6 +773,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccount)
 										.addComponent(updateUsername)
 										.addComponent(updatePassword)
+										.addComponent(updatePasswordConfirm)
 										)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(updateAccountErrorMessage)
@@ -692,7 +784,7 @@ public class CarShopPage extends JFrame{
 										)
 								.addComponent(updateAccountSuccessMessage)
 								)
-
+						
 						// Start Appointment Section
 						.addComponent(startAppointmentTopSeparator)
 						.addGroup(layout.createSequentialGroup()
@@ -704,6 +796,10 @@ public class CarShopPage extends JFrame{
 										.addComponent(appointmentsBooked)
 										.addComponent(startAppointmentButton)
 										.addComponent(registerNoShowButton)
+										.addComponent(startAppointmentErrorMessage)
+										.addComponent(startAppointmentSuccessMessage)
+										.addComponent(registerNoShowErrorMessage)
+										.addComponent(registerNoShowSuccessMessage)
 										)
 								)
 						
@@ -717,9 +813,29 @@ public class CarShopPage extends JFrame{
 								.addGroup(layout.createParallelGroup()
 										.addComponent(appointmentsInProgress)
 										.addComponent(endAppointmentButton)
+										.addComponent(endAppointmentErrorMessage)
+										.addComponent(endAppointmentSuccessMessage)
 										)
 								)
 						
+						
+						.addComponent(serviceComboTopSeparator)
+						.addComponent(serviceComboErrorMessage)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(nameLabel)
+										.addComponent(mainServiceLabel)
+										.addComponent(optService)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addComboLabel)
+										.addComponent(comboName)
+										.addComponent(mainService)
+										.addComponent(optComboItemPanel)
+										.addComponent(addOptComboItemButton)
+										.addComponent(addComboButton)
+										)
+								)
 						
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
@@ -849,7 +965,9 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptLabel});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, makeApptButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {bookableServiceList, apptDatePicker});
-
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {optComboItemPanel, addComboButton, mainService, comboName});
+		
+		
 		// Vertical Layout
 		layout.setVerticalGroup( layout.createParallelGroup()
 				.addGroup(layout.createSequentialGroup()
@@ -857,6 +975,11 @@ public class CarShopPage extends JFrame{
 						.addGroup(layout.createParallelGroup()
 								.addComponent(headerTitle)
 								.addComponent(logoutButton)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(dateLabel)
+										.addComponent(timeLabel)
+										)
+								.addComponent(refreshButton)
 								)
 						.addGap(20)
 						// Login - Sign up Section
@@ -908,6 +1031,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(updatePasswordField)
 										)
 								.addGroup(layout.createParallelGroup()
+										.addComponent(updatePasswordConfirm)
 										.addComponent(updatePasswordField2)
 										)
 								.addGroup(layout.createParallelGroup()
@@ -915,6 +1039,8 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccountSuccessMessage)
 										)
 								)
+
+						
 						// Start Appointment Section
 						.addGroup(layout.createParallelGroup()
 								.addComponent(startAppointmentTopSeparator))
@@ -926,6 +1052,10 @@ public class CarShopPage extends JFrame{
 										)
 								.addComponent(startAppointmentButton)
 								.addComponent(registerNoShowButton)
+								.addComponent(startAppointmentErrorMessage)
+								.addComponent(startAppointmentSuccessMessage)
+								.addComponent(registerNoShowErrorMessage)
+								.addComponent(registerNoShowSuccessMessage)
 								)
 						
 						// End Appointment Section
@@ -938,9 +1068,36 @@ public class CarShopPage extends JFrame{
 										.addComponent(appointmentsInProgress)
 										)
 								.addComponent(endAppointmentButton)
+								.addComponent(endAppointmentErrorMessage)
+								.addComponent(endAppointmentSuccessMessage)
 								)
 						
-						
+						.addGroup(layout.createParallelGroup()
+								.addComponent(serviceComboTopSeparator)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(serviceComboErrorMessage)
+								)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addComboLabel)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(nameLabel)
+										.addComponent(comboName)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(mainServiceLabel)
+										.addComponent(mainService)
+										)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(optService)
+										.addComponent(optComboItemPanel)
+										)
+								.addComponent(addOptComboItemButton)
+								.addComponent(addComboButton)
+								)
+
 						// Update Garage Hours Section
 						.addComponent(garageOpeningHoursTopSeparator)
 						.addGroup(layout.createParallelGroup()
@@ -1057,6 +1214,8 @@ public class CarShopPage extends JFrame{
 		if (error == null || error.length() == 0) {
 			
 			appts = new HashMap<Integer, TOAppointment>();
+			appointments = new HashMap<Integer, TOAppointment>();
+			appointmentsStarted = new HashMap<Integer, TOAppointment>();
 			apptList.removeAllItems();
 			appointmentsBooked.removeAllItems();
 			appointmentsInProgress.removeAllItems();
@@ -1071,12 +1230,36 @@ public class CarShopPage extends JFrame{
 				String apptDate = sdf.format(sd)+"+"+appTime;
 				appts.put(idx, a);
 				apptList.addItem(a.getMainServiceName() + " " + apptDate);
-				appointmentsBooked.addItem(a.getMainServiceName() + " " + apptDate);
-				appointmentsInProgress.addItem(a.getMainServiceName() + " " + apptDate);
 				idx++;
 			}
 			apptList.setSelectedIndex(-1);
+			
+			idx = 0;
+			for(TOAppointment a: AppointmentController.getAllAppointments()) {
+				Date sd = a.getToServiceBooking(0).getToTimeSlot().getStartDate();
+				Time st = a.getToServiceBooking(0).getToTimeSlot().getStartTime();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
+				String appTime = sdf2.format(new Date(st.getTime()));
+				String apptDate = sdf.format(sd)+"+"+appTime;
+				appointments.put(idx, a);
+				appointmentsBooked.addItem(a.getMainServiceName() + " " + apptDate);
+				idx++;
+			}
 			appointmentsBooked.setSelectedIndex(-1);
+			
+			idx = 0;
+			for(TOAppointment a: AppointmentController.getStartedAppointments()) {
+				Date sd = a.getToServiceBooking(0).getToTimeSlot().getStartDate();
+				Time st = a.getToServiceBooking(0).getToTimeSlot().getStartTime();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
+				String appTime = sdf2.format(new Date(st.getTime()));
+				String apptDate = sdf.format(sd)+"+"+appTime;
+				appointmentsStarted.put(idx, a);
+				appointmentsInProgress.addItem(a.getMainServiceName() + " " + apptDate);
+				idx++;
+			}
 			appointmentsInProgress.setSelectedIndex(-1);
 
 			
@@ -1090,6 +1273,27 @@ public class CarShopPage extends JFrame{
 			}
 			bookableServiceList.setSelectedIndex(-1);
 			
+			services.clear();
+			for(TOBookableService s: AppointmentController.getBookableServices()) {
+				if(s instanceof TOService) {
+					services.add((TOService) s);
+				}
+			}
+			
+			idx = 0;
+			mainService.removeAllItems();
+			mainServiceMap.clear();
+			for(TOService s: services) {
+				mainService.addItem(s.getName());
+				mainServiceMap.put(idx, s.getName());
+				idx++;
+			}
+			mainService.setSelectedIndex(-1);
+			
+			serviceComboErrorMessage.setText("");
+			comboName.setText("");
+			optComboItemPanel.removeAll();
+			
 			apptDatePicker.getModel().setValue(null);
 			apptDatePickerUpdate.getModel().setValue(null);
 			
@@ -1100,46 +1304,68 @@ public class CarShopPage extends JFrame{
 				businessHourPanel.add(new BusinessHoursVisualizer(toHour));
 				businessHours.add(toHour.getDayOfWeek());
 			}
+			businessHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			tireGarageHourPanel.removeAll();
 			tireGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("tire")) {
 				tireGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				tireGarageHours.add(toHour.getDayOfWeek());
 			}
+			tireGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			engineGarageHourPanel.removeAll();
 			engineGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("engine")) {
 				engineGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				engineGarageHours.add(toHour.getDayOfWeek());
 			}
+			engineGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			transmissionGarageHourPanel.removeAll();
 			transmissionGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("transmission")) {
 				transmissionGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				transmissionGarageHours.add(toHour.getDayOfWeek());
 			}
+			transmissionGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			elecGarageHourPanel.removeAll();
 			elecGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("electronics")) {
 				elecGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				elecGarageHours.add(toHour.getDayOfWeek());
 			}
+			elecGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			fluidsGarageHourPanel.removeAll();
 			fluidsGarageHours.clear();
 			for(TOBusinessHour toHour: CarShopController.getBusinessHours("fluids")) {
 				fluidsGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				fluidsGarageHours.add(toHour.getDayOfWeek());
 			}
-
+			fluidsGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			// Refresh time
+			try {
+				CarShopController.setToCurrentDate();
+				dateLabel.setText(CarShopController.getSystemDate());
+				timeLabel.setText(CarShopController.getSystemTime());
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
 		pack();
 	}
 	
+	private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {
+		refreshData();
+	}
+	
 	private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		loginError = "";
-		if (loginUsernameField.getText().isBlank() || loginPasswordField.getText().isBlank()) {
+		if (loginUsernameField.getText().isEmpty()|| loginPasswordField.getText().isEmpty()) {
 			loginError = "Username and password must not be empty.";
 		}
 		// Check for other errors here //
@@ -1154,8 +1380,9 @@ public class CarShopPage extends JFrame{
 						showAppointmentSection();
 					} else if (CarShopController.isTechnicianLoggedIn()) {
 						showUpdateGarageSection();
-					} else if (CarShopController.isOwnerLoggedIn()) {
-						showStartEndRegisterSection();
+					} else {
+						showStartEndAppointmentSection();
+						showServiceComboSection();
 					}
 				}
 			} catch (Exception e) {
@@ -1173,7 +1400,8 @@ public class CarShopPage extends JFrame{
 				hideUpdateAccountSection();
 				hideUpdateGarageSection();
 				hideAppointmentSection();
-				hideStartEndRegisterSection();
+				hideStartEndAppointmentSection();
+				hideServiceComboSection();
 				headerTitle.setText("CarShop");
 				logoutButton.setVisible(false);
 				loginUsernameField.setText("");
@@ -1183,6 +1411,22 @@ public class CarShopPage extends JFrame{
 				updatePasswordField2.setText("");
 				updateAccountErrorMessage.setText("");
 				updateAccountSuccessMessage.setText("");
+				errorMessage.setText("");
+				loginErrorMessage.setText("");
+				signupErrorMessage.setText("");
+				updateAccountErrorMessage.setText("");
+				newGarageHoursErrorMessage.setText("");
+				removeGarageHoursErrorMessage.setText("");
+				serviceComboErrorMessage.setText("");
+				error = "";
+				startAppointmentErrorMessage.setText("");
+				startAppointmentSuccessMessage.setText("");
+				registerNoShowErrorMessage.setText("");
+				registerNoShowSuccessMessage.setText("");
+				endAppointmentErrorMessage.setText("");
+				endAppointmentSuccessMessage.setText("");
+				//updateserviceComboErrorMessage.setText("");
+
 			}
 		} catch (Exception e) {
 			loginError = e.getMessage();
@@ -1192,7 +1436,7 @@ public class CarShopPage extends JFrame{
 	
 	private void signupButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		signupError = "";
-		if (signupUsernameField.getText().isBlank() || signupPasswordField.getText().isBlank()) {
+		if (signupUsernameField.getText().isEmpty() || signupPasswordField.getText().isEmpty()) {
 			signupError = "Username and password must not be empty.";
 		} else if (signupUsernameField.getText().toLowerCase().contains("owner") || signupUsernameField.getText().toLowerCase().contains("technician")) {
 			signupError = "Username cannot contain \"technician\" or \"owner\"";
@@ -1218,10 +1462,10 @@ public class CarShopPage extends JFrame{
 	private void updateAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		updateAccountError = "";
 		updateAccountSuccess = "";
-		if (updateUsernameField.getText().isBlank() || updatePasswordField.getText().isBlank()) {
+		if (updateUsernameField.getText().isEmpty() || updatePasswordField.getText().isEmpty()) {
 			updateAccountError = "Username and password must not be empty.";
-		} else if(!updatePasswordField.getText().equals(updatePasswordField.getText())) {
-			updateAccountError = "New password does not match";
+		} else if(!Arrays.equals( updatePasswordField.getPassword(),  updatePasswordField2.getPassword())) {
+			updateAccountError = "New passwords do not match";
 		}
 		// Check for other errors here //
 		if (updateAccountError.length() == 0) {
@@ -1268,19 +1512,12 @@ public class CarShopPage extends JFrame{
 				}
 			}
 		}
-			
-		
-		
 		if (newGarageHoursError.length() == 0) {
 			try {
 				String day = (String)newHoursDayBox.getSelectedItem();
 				String inputStartTime = newHoursOpenHBox.getSelectedItem() + ":" + newHoursOpenMBox.getSelectedItem();
 				String inputEndTime = newHoursCloseHBox.getSelectedItem() + ":" + newHoursCloseMBox.getSelectedItem();
-				String type = "";
-				User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
-				if (user instanceof Technician) {
-					type = String.valueOf(((Technician) user).getType());
-				}
+				String type = CarShopController.getLoggedInTechnicianType();
 				if (CarShopController.addHoursToGarageOfTechnicianType(day, inputStartTime, inputEndTime, type)) {
 					newGarageHoursSuccess = "Business hours successfully added!";
 				}
@@ -1293,6 +1530,7 @@ public class CarShopPage extends JFrame{
 		newGarageHoursSuccessMessage.setText(newGarageHoursSuccess);
 		refreshData();
 	}
+
 	
 	private void updateGarageHoursButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		removeGarageHoursError = "";
@@ -1301,33 +1539,11 @@ public class CarShopPage extends JFrame{
 		if (removeGarageHoursError.length() == 0) {
 			try {
 				String day = (String)newHoursDayBox.getSelectedItem();
-				String type = "";
-				ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
-				User user = User.getWithUsername(CarShopApplication.getLoggedInUser());
-				if (user instanceof Technician) {
-					type = String.valueOf(((Technician) user).getType());
-					for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
-						if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
-							bhOnThatDay.add(bh);
-						}
-					}
-					if (bhOnThatDay.size() == 0) {
-						removeGarageHoursError = "No existing hours on that day.";
-					}
-					else {
-						for (BusinessHour bh : bhOnThatDay) {
-							DateFormat dateFormat = new SimpleDateFormat("HH:mm");
-							String start = dateFormat.format(bh.getStartTime());
-							String end = dateFormat.format(bh.getEndTime());
-							if (CarShopController.removeHoursToGarageOfTechnicianType(day, start, end, type)) {
-								removeGarageHoursSuccess = "Business hours removed successfully!";
-								System.out.println(removeGarageHoursSuccess);
-							}
-						}
-					}
-				}				
+				if (CarShopController.removeGarageHoursOnDay(day)) {
+					removeGarageHoursSuccess = "Business hours succesfully updated!";
+				}
 			} catch (Exception e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 				removeGarageHoursError = e.getMessage();
 			}
 		}
@@ -1348,7 +1564,7 @@ public class CarShopPage extends JFrame{
 			// call the controller
 			try {
 				TOAppointment app = appts.get(selectedAppt);
-				AppointmentController.cancelAppointment(CarShopApplication.getLoggedInUser(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
+				AppointmentController.cancelAppointment(CarShopController.getLoggedInUsername(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
 			} catch (Exception e) {
 				error = e.getMessage();
 			}
@@ -1359,67 +1575,115 @@ public class CarShopPage extends JFrame{
 	}
 	
 	private void startAppointmentButtonActionPerformed(java.awt.event.ActionEvent evt) {
-		error = "";
+		startAppointmentError = "";
+		startAppointmentSuccess = "";
+		registerNoShowError = "";
+		registerNoShowSuccess = "";
+		endAppointmentError = "";
+		endAppointmentSuccess = "";
+		
 		int selectedAppt = appointmentsBooked.getSelectedIndex();
 		if(selectedAppt < 0) {
-			error = "Appointment needs to be selected to start";
+			startAppointmentError = "Appointment needs to be selected to start";
 		}
-		error = error.trim();
+		startAppointmentError = startAppointmentError.trim();
 		
-		if (error.length() == 0) {
+		if (startAppointmentError.length() == 0) {
 			// call the controller
 			try {
-				TOAppointment app = appts.get(selectedAppt);
-				//AppointmentController.startAppointment(date, app);
+				TOAppointment app = appointments.get(selectedAppt);
+				AppointmentController.startAppointmentFromView(app);
 			} catch (Exception e) {
-				error = e.getMessage();
+				startAppointmentError = e.getMessage();
 			}
 		}
-
+		
+		if (startAppointmentError.length() == 0) {
+			startAppointmentSuccess = "Appointment successfully started";
+		}
+		
+		startAppointmentErrorMessage.setText(startAppointmentError);
+		startAppointmentSuccessMessage.setText(startAppointmentSuccess);
+		registerNoShowErrorMessage.setText(registerNoShowError);
+		registerNoShowSuccessMessage.setText(registerNoShowSuccess);
+		endAppointmentErrorMessage.setText(endAppointmentError);
+		endAppointmentSuccessMessage.setText(endAppointmentSuccess);
 		// update visuals
 		refreshData();	
 	}
 	
 	private void endAppointmentButtonActionPerformed(java.awt.event.ActionEvent evt) {
-		error = "";
+		startAppointmentError = "";
+		startAppointmentSuccess = "";
+		registerNoShowError = "";
+		registerNoShowSuccess = "";
+		endAppointmentError = "";
+		endAppointmentSuccess = "";
+		
 		int selectedAppt = appointmentsInProgress.getSelectedIndex();
 		if(selectedAppt < 0) {
-			error = "Appointment needs to be selected to end";
+			endAppointmentError = "Appointment needs to be selected to end";
 		}
-		error = error.trim();
+		endAppointmentError = endAppointmentError.trim();
 		
-		if (error.length() == 0) {
+		if (endAppointmentError.length() == 0) {
 			// call the controller
 			try {
-				TOAppointment app = appts.get(selectedAppt);
-				//AppointmentController.endAppointment(date, app);
+				TOAppointment app = appointmentsStarted.get(selectedAppt);
+				AppointmentController.endAppointmentFromView(app);
 			} catch (Exception e) {
-				error = e.getMessage();
+				endAppointmentError = e.getMessage();
 			}
 		}
 
+		if (endAppointmentError.length() == 0) {
+			endAppointmentSuccess = "Appointment successfully ended";
+		}
+		
+		startAppointmentErrorMessage.setText(startAppointmentError);
+		startAppointmentSuccessMessage.setText(startAppointmentSuccess);
+		registerNoShowErrorMessage.setText(registerNoShowError);
+		registerNoShowSuccessMessage.setText(registerNoShowSuccess);
+		endAppointmentErrorMessage.setText(endAppointmentError);
+		endAppointmentSuccessMessage.setText(endAppointmentSuccess);
 		// update visuals
 		refreshData();	
 	}
 	
 	private void registerNoShowButtonActionPerformed(java.awt.event.ActionEvent evt) {
-		error = "";
+		startAppointmentError = "";
+		startAppointmentSuccess = "";
+		registerNoShowError = "";
+		registerNoShowSuccess = "";
+		endAppointmentError = "";
+		endAppointmentSuccess = "";
+		
 		int selectedAppt = appointmentsBooked.getSelectedIndex();
 		if(selectedAppt < 0) {
-			error = "Appointment needs to be selected to register no show";
+			registerNoShowError = "Appointment needs to be selected to register no show";
 		}
-		error = error.trim();
+		registerNoShowError = registerNoShowError.trim();
 		
-		if (error.length() == 0) {
+		if (registerNoShowError.length() == 0) {
 			// call the controller
 			try {
-				TOAppointment app = appts.get(selectedAppt);
-				//AppointmentController.registerNoShow(date, app);
+				TOAppointment app = appointments.get(selectedAppt);
+				AppointmentController.registerNoShowFromView(app);
 			} catch (Exception e) {
-				error = e.getMessage();
+				registerNoShowError = e.getMessage();
 			}
 		}
 
+		if (registerNoShowError.length() == 0) {
+			registerNoShowSuccess = "Registered no show successfully";
+		}
+		
+		startAppointmentErrorMessage.setText(startAppointmentError);
+		startAppointmentSuccessMessage.setText(startAppointmentSuccess);
+		registerNoShowErrorMessage.setText(registerNoShowError);
+		registerNoShowSuccessMessage.setText(registerNoShowSuccess);
+		endAppointmentErrorMessage.setText(endAppointmentError);
+		endAppointmentSuccessMessage.setText(endAppointmentSuccess);
 		// update visuals
 		refreshData();	
 	}
@@ -1455,7 +1719,7 @@ public class CarShopPage extends JFrame{
 					}
 				}
 
-				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots, new ArrayList<TOTimeSlot>());
+				AppointmentController.makeAppointmentFromView(false, CarShopController.getLoggedInUsername(), toBs, services, timeSlots, new ArrayList<TOTimeSlot>());
 			} catch (Exception e) {
 				error = e.getMessage();
 			}
@@ -1564,138 +1828,6 @@ public class CarShopPage extends JFrame{
 		pack();
 	}
 	
-	private void showAppointmentsToStart(java.awt.event.ActionEvent evt) {
-		int selectedApp = appointmentsBooked.getSelectedIndex();
-		try {
-			optServicePanelUpdate.removeAll();
-			optServicesUpdate = new ArrayList<OptServiceVisualizer>();
-		
-		
-			if(selectedApp >= 0) {
-				SimpleDateFormat sdf = new SimpleDateFormat("HH");
-				SimpleDateFormat sdf2 = new SimpleDateFormat("mm");
-				
-				Date sd = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartDate();
-				int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(sd));
-				int month = Integer.parseInt(new SimpleDateFormat("MM").format(sd)) - 1;
-				int day = Integer.parseInt(new SimpleDateFormat("dd").format(sd));
-				apptDatePickerUpdate.getModel().setDate(year, month, day);
-				apptDatePickerUpdate.getModel().setSelected(true);
-				
-				
-				TOBookableService toBs =  appts.get(selectedApp).getToBookableService();
-				if(toBs instanceof TOServiceCombo) {
-					TOServiceCombo toSc = (TOServiceCombo) toBs;
-					List<String> selectedServiceNames = AppointmentController.getSelectedServiceNames(appts.get(selectedApp));
-					int idx = 0;
-					for(int i = 0 ; i < toSc.getServices().size();i++) {
-						OptServiceVisualizer visualizer = new OptServiceVisualizer(toSc.getService(i));
-						if(selectedServiceNames.contains(visualizer.getTOService().getName())) {
-							visualizer.setIsSelected(true);
-							TOTimeSlot toTimeSlots = appts.get(selectedApp).getToServiceBooking(idx).getToTimeSlot();
-							
-							Time st = toTimeSlots.getStartTime();
-							
-							int startHour = Integer.parseInt(sdf.format(st));
-							int startMin = Integer.parseInt(sdf2.format(st));
-							visualizer.setStartTime(startHour, startMin);
-							
-							idx++;
-						}
-						
-							
-						optServicePanelUpdate.add(visualizer); 
-						optServicesUpdate.add(visualizer);
-					}
-				} else {
-					TOService toS = (TOService) toBs;
-					OptServiceVisualizer visualizer = new OptServiceVisualizer(toS);
-					
-					Time st = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartTime();
-					
-					int startHour = Integer.parseInt(sdf.format(st));
-					int startMin = Integer.parseInt(sdf2.format(st));
-					visualizer.setStartTime(startHour, startMin);
-					
-					optServicePanelUpdate.add(visualizer); 
-					optServicesUpdate.add(visualizer);
-				}
-			}
-		} catch (Exception e) {
-			error = e.getMessage();
-		}
-		
-		// update visuals
-		//refreshData();
-		pack();
-	}
-	
-	private void showAppointmentsToEnd(java.awt.event.ActionEvent evt) {
-		int selectedApp = appointmentsInProgress.getSelectedIndex();
-		try {
-			optServicePanelUpdate.removeAll();
-			optServicesUpdate = new ArrayList<OptServiceVisualizer>();
-		
-		
-			if(selectedApp >= 0) {
-				SimpleDateFormat sdf = new SimpleDateFormat("HH");
-				SimpleDateFormat sdf2 = new SimpleDateFormat("mm");
-				
-				Date sd = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartDate();
-				int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(sd));
-				int month = Integer.parseInt(new SimpleDateFormat("MM").format(sd)) - 1;
-				int day = Integer.parseInt(new SimpleDateFormat("dd").format(sd));
-				apptDatePickerUpdate.getModel().setDate(year, month, day);
-				apptDatePickerUpdate.getModel().setSelected(true);
-				
-				
-				TOBookableService toBs =  appts.get(selectedApp).getToBookableService();
-				if(toBs instanceof TOServiceCombo) {
-					TOServiceCombo toSc = (TOServiceCombo) toBs;
-					List<String> selectedServiceNames = AppointmentController.getSelectedServiceNames(appts.get(selectedApp));
-					int idx = 0;
-					for(int i = 0 ; i < toSc.getServices().size();i++) {
-						OptServiceVisualizer visualizer = new OptServiceVisualizer(toSc.getService(i));
-						if(selectedServiceNames.contains(visualizer.getTOService().getName())) {
-							visualizer.setIsSelected(true);
-							TOTimeSlot toTimeSlots = appts.get(selectedApp).getToServiceBooking(idx).getToTimeSlot();
-							
-							Time st = toTimeSlots.getStartTime();
-							
-							int startHour = Integer.parseInt(sdf.format(st));
-							int startMin = Integer.parseInt(sdf2.format(st));
-							visualizer.setStartTime(startHour, startMin);
-							
-							idx++;
-						}
-						
-							
-						optServicePanelUpdate.add(visualizer); 
-						optServicesUpdate.add(visualizer);
-					}
-				} else {
-					TOService toS = (TOService) toBs;
-					OptServiceVisualizer visualizer = new OptServiceVisualizer(toS);
-					
-					Time st = appts.get(selectedApp).getToServiceBooking(0).getToTimeSlot().getStartTime();
-					
-					int startHour = Integer.parseInt(sdf.format(st));
-					int startMin = Integer.parseInt(sdf2.format(st));
-					visualizer.setStartTime(startHour, startMin);
-					
-					optServicePanelUpdate.add(visualizer); 
-					optServicesUpdate.add(visualizer);
-				}
-			}
-		} catch (Exception e) {
-			error = e.getMessage();
-		}
-		
-		// update visuals
-		//refreshData();
-		pack();
-	}
-	
 	private void updateApptButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		// take services in optServicesUpdate
 		// easiest is probably to delete the existing appointment, try creating a new one and if it fails set it back to the previous one
@@ -1734,9 +1866,9 @@ public class CarShopPage extends JFrame{
 					toExclude.add(toServiceBooking.getToTimeSlot());
 				}
 				
-				AppointmentController.makeAppointmentFromView(false, CarShopApplication.getLoggedInUser(), toBs, services, timeSlots, toExclude);
+				AppointmentController.makeAppointmentFromView(false, CarShopController.getLoggedInUsername(), toBs, services, timeSlots, toExclude);
 				TOAppointment app = appts.get(selectedAppt);
-				AppointmentController.deleteAppt(CarShopApplication.getLoggedInUser(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
+				AppointmentController.deleteAppt(CarShopController.getLoggedInUsername(), app.getMainServiceName(), app.getToServiceBooking(0).getToTimeSlot().getStartDate(), app.getToServiceBooking(0).getToTimeSlot().getStartTime());
 			
 			} catch (Exception e) {
 				error = e.getMessage();
@@ -1745,6 +1877,54 @@ public class CarShopPage extends JFrame{
 
 		// update visuals
 		refreshData();	
+	}
+	
+	private void addOptServiceActionPerformed(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			ComboVisualizer visualizer = new ComboVisualizer(services, this);
+			optComboItemPanel.add(visualizer);
+			comboVisualizerList.add(visualizer);
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		serviceComboErrorMessage.setText(err);
+		pack();
+		
+	}
+	
+	private void addComboActionPerformed(ActionEvent evt) {
+		String err = "";
+		
+		try {
+			
+			int selectedMainService = mainService.getSelectedIndex();
+			if(selectedMainService < 0) {
+				throw new Exception("A main service needs to be selected");
+			} else if (comboName.getText().length() == 0) {
+				throw new Exception("The service combo must have a name");
+			}
+			
+			TOServiceCombo sc = new TOServiceCombo(comboName.getText());
+			TOService service = CarShopController.getTOService(mainServiceMap.get(selectedMainService));
+			new TOComboItem(true, service, sc);
+			
+			for(ComboVisualizer visualizer : comboVisualizerList) {
+				TOService s = visualizer.getSelectedService();
+				new TOComboItem(visualizer.isMnadatory(), s, sc);
+			}
+			
+			CarShopController.addServiceComboFromView(sc);
+			refreshData();
+			
+		} catch (Exception e) {
+			err = e.getMessage();
+		}
+		serviceComboErrorMessage.setText(err);
+
+		
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -1862,6 +2042,7 @@ public class CarShopPage extends JFrame{
 		updateAccountSuccessMessage.setVisible(false);
 		updateUsername.setVisible(false);
 		updatePassword.setVisible(false);
+		updatePasswordConfirm.setVisible(false);
 		updateUsernameField.setVisible(false);
 		updatePasswordField.setVisible(false);
 		updatePasswordField2.setVisible(false);
@@ -1875,6 +2056,7 @@ public class CarShopPage extends JFrame{
 		updateAccountSuccessMessage.setVisible(true);
 		updateUsername.setVisible(true);
 		updatePassword.setVisible(true);
+		updatePasswordConfirm.setVisible(true);
 		updateUsernameField.setVisible(true);
 		updatePasswordField.setVisible(true);
 		updatePasswordField2.setVisible(true);
@@ -1986,8 +2168,53 @@ public class CarShopPage extends JFrame{
 		optServicePanelUpdate.setVisible(true);
 		horizontalLineBottom.setVisible(true);
 	}
+
+	private void hideServiceComboSection() {
+		addComboLabel.setVisible(false);
+		nameLabel.setVisible(false);
+		comboName.setVisible(false);
+		mainServiceLabel.setVisible(false);
+		mainService.setVisible(false);
+		optService.setVisible(false);
+		optComboItemPanel.setVisible(false);
+		addOptComboItemButton.setVisible(false);
+		addComboButton.setVisible(false);
+		serviceComboTopSeparator.setVisible(false);
+		serviceComboErrorMessage.setVisible(false);
+	}
 	
-	private void showStartEndRegisterSection() {
+	private void showServiceComboSection() {
+		addComboLabel.setVisible(true);
+		nameLabel.setVisible(true);
+		comboName.setVisible(true);
+		mainServiceLabel.setVisible(true);
+		mainService.setVisible(true);
+		optService.setVisible(true);
+		optComboItemPanel.setVisible(true);
+		addOptComboItemButton.setVisible(true);
+		addComboButton.setVisible(true);
+		serviceComboTopSeparator.setVisible(true);
+		serviceComboErrorMessage.setVisible(true);
+	}
+	
+	// helper methods
+	
+	public void removeOptComboItem(ComboVisualizer combo) {
+		int idx = -1;
+		for (int i = 0; i < comboVisualizerList.size(); i++) {
+			if(combo.equals(comboVisualizerList.get(i))) {
+				idx = i;
+				break;
+			}
+		}
+		if(idx >= 0) {
+			comboVisualizerList.remove(idx);
+			optComboItemPanel.remove(idx);
+		}
+		pack();
+	}
+	
+	private void showStartEndAppointmentSection() {
 		// Start appointment
 		startAppointment.setVisible(true);
 		startAppointmentLabel.setVisible(true);
@@ -1995,16 +2222,22 @@ public class CarShopPage extends JFrame{
 		startAppointmentButton.setVisible(true);
 		registerNoShowButton.setVisible(true);
 		startAppointmentTopSeparator.setVisible(true);
-
+		startAppointmentErrorMessage.setVisible(true);
+		startAppointmentSuccessMessage.setVisible(true);
+		registerNoShowErrorMessage.setVisible(true);
+		registerNoShowSuccessMessage.setVisible(true);
+		
 		// End appointment
 		endAppointment.setVisible(true);
 		endAppointmentLabel.setVisible(true);
 		appointmentsInProgress.setVisible(true);
 		endAppointmentButton.setVisible(true);		
 		endAppointmentTopSeparator.setVisible(true);
+		endAppointmentErrorMessage.setVisible(true);
+		endAppointmentSuccessMessage.setVisible(true);
 	}
 	
-	private void hideStartEndRegisterSection() {
+	private void hideStartEndAppointmentSection() {
 		// Start appointment
 		startAppointment.setVisible(false);
 		startAppointmentLabel.setVisible(false);
@@ -2012,6 +2245,10 @@ public class CarShopPage extends JFrame{
 		startAppointmentButton.setVisible(false);
 		registerNoShowButton.setVisible(false);
 		startAppointmentTopSeparator.setVisible(false);
+		startAppointmentErrorMessage.setVisible(false);
+		startAppointmentSuccessMessage.setVisible(false);
+		registerNoShowErrorMessage.setVisible(false);
+		registerNoShowSuccessMessage.setVisible(false);
 		
 		// End appointment
 		endAppointment.setVisible(false);
@@ -2019,5 +2256,7 @@ public class CarShopPage extends JFrame{
 		appointmentsInProgress.setVisible(false);
 		endAppointmentButton.setVisible(false);		
 		endAppointmentTopSeparator.setVisible(false);
+		endAppointmentErrorMessage.setVisible(false);
+		endAppointmentSuccessMessage.setVisible(false);
 	}
 }

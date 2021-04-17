@@ -2,6 +2,7 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -945,6 +946,22 @@ public class CarShopController {
 		// returns true if the service already exists else returns false
 		return serviceUpdate1;
 	}
+	
+	public static void addServiceComboFromView(TOServiceCombo toCombo) throws Exception {
+
+		String services = "";
+		String mandatory = "";
+		for(int i=0 ; i< toCombo.getServices().size(); i++) {
+			services += toCombo.getService(i).getService().getName();
+			mandatory += Boolean.toString(toCombo.getService(i).getMandatory());
+			if (i < toCombo.getServices().size() - 1) {
+				services += ",";
+				mandatory += ",";
+			}
+		}
+		
+		defineServiceCombo(CarShopApplication.getLoggedInUser(), toCombo.getName(), services, mandatory, toCombo.getService(0).getService().getName());
+	}
 
 	/**
 	 * Allows the owner to define a service combo
@@ -1450,6 +1467,98 @@ public class CarShopController {
 			e.printStackTrace();
 		} 
 		return type;
+	}
+	
+	public static TOService getTOService(String name) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		TOService service = null;
+		for(BookableService bs: carShop.getBookableServices()) {
+			if(bs.getName().equals(name)) {
+				service = new TOService(name, ((Service) bs).getDuration());
+				break;
+			}
+		}
+		return service;
+	}
+	
+	public static String getLoggedInUsername() throws Exception {
+		return CarShopApplication.getLoggedInUser();
+	}
+	
+	public static boolean removeGarageHoursOnDay(String day) throws Exception{
+		boolean updated = false;
+		String type = "";
+		ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+		try {
+			User user = User.getWithUsername(CarShopController.getLoggedInUsername());
+			type = CarShopController.getLoggedInTechnicianType();
+			for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
+				if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
+					bhOnThatDay.add(bh);
+				}
+			}
+			if (bhOnThatDay.size() == 0) {
+				throw new Exception("No existing hours on that day.");
+			}
+			else {
+				for (BusinessHour bh : bhOnThatDay) {
+					DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+					String start = dateFormat.format(bh.getStartTime());
+					String end = dateFormat.format(bh.getEndTime());
+					if (CarShopController.removeHoursToGarageOfTechnicianType(day, start, end, type)) {
+					}
+				}
+			}
+			updated = true;
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return updated;
+	}
+	
+	public static String getSystemDate() throws Exception{
+		String date = "";
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			date = dateFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return date;
+	}
+	
+	public static String getSystemTime() throws Exception{
+		String time = "";
+		try {
+			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+			time = timeFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return time;
+	}
+	
+	public static String getFullSystemDate() throws Exception{
+		String date = "";
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd+HH:mm");
+			date = dateFormat.format(CarShopApplication.getSystemDate());
+		}
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return date;
+	}
+	
+	public static void setToCurrentDate() throws Exception{
+		try {
+			CarShopApplication.setToCurrentDate();
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
 }
