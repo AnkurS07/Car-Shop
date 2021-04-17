@@ -1061,6 +1061,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(registerNoShowErrorMessage)
 										.addComponent(registerNoShowSuccessMessage)
 										)
+								.addGap(100)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(endAppointment)
 										.addComponent(endAppointmentLabel)
@@ -1092,6 +1093,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(addComboButton)
 										.addComponent(serviceComboErrorMessage)
 										)
+								.addGap(100)
 								.addGroup(layout.createParallelGroup()
 										.addComponent(updateComboLabel)
 										.addComponent(nameLabel2)
@@ -1728,7 +1730,8 @@ public class CarShopPage extends JFrame{
 				fluidsGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				fluidsGarageHours.add(toHour.getDayOfWeek());
 			}
-
+			fluidsGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			
 			TOBusiness business = CarShopController.getBusiness();
 			if(business != null) {
 				businessInfoName.setText("Name: "+ CarShopController.getBusiness().getName());
@@ -1736,7 +1739,7 @@ public class CarShopPage extends JFrame{
 				businessInfoEmail.setText("Email: "+ CarShopController.getBusiness().getEmail());
 				businessInfoPhone.setText("Phone: "+ CarShopController.getBusiness().getPhoneNumber());
 
-			fluidsGarageHourPanel.setMaximumSize(tireGarageHourPanel.getPreferredSize());
+			}
 			// Refresh time
 			try {
 				CarShopController.setToCurrentDate();
@@ -1746,7 +1749,7 @@ public class CarShopPage extends JFrame{
 				System.out.println(e.getMessage());
 
 			}
-		}
+		
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
 		pack();
@@ -2383,7 +2386,7 @@ public class CarShopPage extends JFrame{
 		addBusinessHourSuccessMessage = "";
 		try {
 			String day = (String) selectBusinessHourDay.getSelectedItem();
-			if(addBusinessHourStart.getText().matches("\\d{2}:\\d{2}")) {
+			if(addBusinessHourStart.getText().matches("\\d{2}:\\d{2}") && addBusinessHourEnd.getText().matches("\\d{2}:\\d{2}")) {
 				if(CarShopController.getBusiness() == null) {
 					addBusinessHourErrorMessage ="Set Up Business Information First!";
 				}
