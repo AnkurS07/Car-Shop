@@ -248,6 +248,27 @@ public class AppointmentController {
 		return null;
 	}
 	
+	public static void startAppointmentFromView(TOAppointment toApp) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Appointment a = null;
+		for(Appointment app: carShop.getAppointments()) {
+			if(app.getServiceBooking(0).getTimeSlot().getStartDate().equals(toApp.getToServiceBooking(0).getToTimeSlot().getStartDate())
+					&& app.getServiceBooking(0).getTimeSlot().getStartTime().equals(toApp.getToServiceBooking(0).getToTimeSlot().getStartTime())
+					&& app.getServiceBooking(0).getService().getName().equals(toApp.getToServiceBooking(0).getToService().getName())) {
+				a = app;
+				break;
+			}
+		}
+		
+		try {
+			Date date = AppointmentController.parseDate(CarShopController.getFullSystemDate(), "yyyy-MM-dd+HH:mm");
+			startAppointment(date, a);
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
 	public static void startAppointment(Date startDate, Appointment a) throws Exception {
 		// add check with date in the state machine
 		CarShop carshop = CarShopApplication.getCarShop();
@@ -270,9 +291,72 @@ public class AppointmentController {
 		}
 	}
 	
-	public static void endAppointment(Date endDate,Appointment a) throws Exception {
-		if (a.getAppStatus()==AppStatus.InProgress) {
-			a.end();
+	public static void endAppointmentFromView(TOAppointment toApp) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Appointment a = null;
+		for(Appointment app: carShop.getAppointments()) {
+			if(app.getServiceBooking(0).getTimeSlot().getStartDate().equals(toApp.getToServiceBooking(0).getToTimeSlot().getStartDate())
+					&& app.getServiceBooking(0).getTimeSlot().getStartTime().equals(toApp.getToServiceBooking(0).getToTimeSlot().getStartTime())
+					&& app.getServiceBooking(0).getService().getName().equals(toApp.getToServiceBooking(0).getToService().getName())) {
+				a = app;
+				break;
+			}
+		}
+		
+		try {
+			Date date = AppointmentController.parseDate(CarShopController.getSystemDate(), "yyyy-MM-dd+hh:mm");
+			endAppointment(date, a);
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static void endAppointment(Date endDate, Appointment a) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+
+		a.end();
+		
+		try {
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static void registerNoShowFromView(TOAppointment toApp) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		Appointment a = null;
+		for(Appointment app: carShop.getAppointments()) {
+			if(app.getServiceBooking(0).getTimeSlot().getStartDate().equals(toApp.getToServiceBooking(0).getToTimeSlot().getStartDate())
+					&& app.getServiceBooking(0).getTimeSlot().getStartTime().equals(toApp.getToServiceBooking(0).getToTimeSlot().getStartTime())
+					&& app.getServiceBooking(0).getService().getName().equals(toApp.getToServiceBooking(0).getToService().getName())) {
+				a = app;
+				break;
+			}
+		}
+		
+		try {
+			Date date = AppointmentController.parseDate(CarShopController.getFullSystemDate(), "yyyy-MM-dd+HH:mm");
+			registerNoShow(date, a);
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public static void registerNoShow(Date d, Appointment a) throws Exception {	
+		CarShop carShop = CarShopApplication.getCarShop();
+		
+		if (d.after(CarShopApplication.getSystemDate()));
+			a.noShow(a.getCustomer());		
+			
+		try {
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (RuntimeException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 	
@@ -292,23 +376,6 @@ public class AppointmentController {
 	public static String getAppointmentState(Appointment a) {
 		return a.getAppStatusFullName();
 	}
-	
-	/*private static Appointment findAppointment(Date startDate) {
-		CarShop carShop = CarShopApplication.getCarShop();
-		Appointment app = null;
-		//find appointment with date
-		for(Appointment a: carShop.getAppointments()) {
-			Date sd = a.getServiceBooking(0).getTimeSlot().getStartDate();
-			Time st = a.getServiceBooking(0).getTimeSlot().getStartTime();
-			// if the appointment start date is within 30min of the appointment time, start it
-			if(Math.abs(startDate.getTime() - sd.getTime() - st.getTime()) < 30*60*1000) {
-				// this just changes state
-				app = a;
-				break;
-			}
-		}
-		return app;
-	}*/
 
 	public static BookableService findBookableService(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
@@ -683,16 +750,6 @@ public class AppointmentController {
 	public static Time incrementTimeByMinutes(Time original, int minutesElapsed) {
 		return new Time(original.getTime() + minutesElapsed * 60000);
 	}
-
-	public static void registerNoShow(Date d, Appointment a) throws Exception {		
-		try {
-			if (d.after(CarShopApplication.getSystemDate()));
-				a.noShow(a.getCustomer());
-		}
-		catch (RuntimeException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
 	
 	// Transfer objects
 	
@@ -733,6 +790,76 @@ public class AppointmentController {
 		}
 		return toAppts;
 		
+	}
+	
+	public static List<TOAppointment> getAllAppointments(){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOAppointment> toAppts = new ArrayList<TOAppointment>();
+		for(Appointment a: carShop.getAppointments()) {
+			try {
+				TOBookableService toBs;
+				if(a.getBookableService() instanceof Service) {
+					Service s = (Service) a.getBookableService();
+					toBs = new TOService(s.getName(), s.getDuration());
+				} else {
+					ServiceCombo sc = (ServiceCombo) a.getBookableService();
+					toBs = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
+					for(ComboItem ci: sc.getServices()) {
+						new TOComboItem(ci.getMandatory(), 
+								new TOService(ci.getService().getName(), 
+										ci.getService().getDuration()), (TOServiceCombo)toBs);
+					}
+				}
+				TOAppointment app = new TOAppointment(a.getBookableService().getName(), toBs);
+				for (ServiceBooking sb: a.getServiceBookings()) {
+					TOTimeSlot toTimeSlot = new TOTimeSlot(sb.getTimeSlot().getStartDate(), sb.getTimeSlot().getStartTime(), sb.getTimeSlot().getEndDate(), sb.getTimeSlot().getEndTime());
+					TOService toService = new TOService(sb.getService().getName(), sb.getService().getDuration()); 
+					new TOServiceBooking(toService, toTimeSlot, app);
+				}
+				toAppts.add(app);
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return toAppts;
+	}
+	
+	public static List<TOAppointment> getStartedAppointments(){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<TOAppointment> toAppts = new ArrayList<TOAppointment>();
+		for(Appointment a: carShop.getAppointments()) {
+			try {
+				if (a.getAppStatus()==AppStatus.InProgress) {
+					TOBookableService toBs;
+					if(a.getBookableService() instanceof Service) {
+						Service s = (Service) a.getBookableService();
+						toBs = new TOService(s.getName(), s.getDuration());
+					} else {
+						ServiceCombo sc = (ServiceCombo) a.getBookableService();
+						toBs = new TOServiceCombo(sc.getName(), sc.getMainService().getService().getName());
+						for(ComboItem ci: sc.getServices()) {
+							new TOComboItem(ci.getMandatory(), 
+									new TOService(ci.getService().getName(), 
+											ci.getService().getDuration()), (TOServiceCombo)toBs);
+						}
+					}
+					TOAppointment app = new TOAppointment(a.getBookableService().getName(), toBs);
+					for (ServiceBooking sb: a.getServiceBookings()) {
+						TOTimeSlot toTimeSlot = new TOTimeSlot(sb.getTimeSlot().getStartDate(), sb.getTimeSlot().getStartTime(), sb.getTimeSlot().getEndDate(), sb.getTimeSlot().getEndTime());
+						TOService toService = new TOService(sb.getService().getName(), sb.getService().getDuration()); 
+						new TOServiceBooking(toService, toTimeSlot, app);
+					}
+					toAppts.add(app);	
+				}
+					
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return toAppts;
 	}
 	
 	public static List<TOBookableService> getBookableServices(){
@@ -806,5 +933,7 @@ public class AppointmentController {
 		}
 		return null;
 	}
+	
+
 	
 }
