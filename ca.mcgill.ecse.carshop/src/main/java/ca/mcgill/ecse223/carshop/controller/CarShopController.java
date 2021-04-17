@@ -2,6 +2,7 @@ package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1059,11 +1060,7 @@ public class CarShopController {
 		if(!(services.contains(mainService))) {
 			throw new Exception("Main service must be included in the services");
 		}
-		/*for(int i=0; i<serviceList.length; i++) {
-			if(!(BookableService.hasWithName(serviceList[i]))) {
-				throw new Exception ("Service" + serviceList[i] + "does not exist");
-			}
-		}*/
+	
 		for(int i=0; i<serviceList.length; i++) {
 			if(serviceCheck(serviceList[i])==null) {
 				throw new Exception ("Service " + serviceList[i] + " does not exist");
@@ -1470,6 +1467,43 @@ public class CarShopController {
 		return CarShopApplication.getLoggedInUser();
 	}
 	
+	public static boolean addBusinessHourFromDayAndTime(String day, Time startTime, Time endTime) throws Exception {
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		boolean wasAdded = false;
+		try {
+			CarShopController.addBusinessHour(dayOfWeek, startTime, endTime);
+			wasAdded = true;
+		} catch(Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return wasAdded;
+	}
+	
+	public static boolean removeBusinessHoursOnThatDay(String day) throws Exception{
+		boolean wasRemoved = false;
+		CarShop carShop = CarShopApplication.getCarShop();
+		ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+		try { 
+			for (BusinessHour bh : carShop.getBusiness().getBusinessHours()) {
+				if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
+					bhOnThatDay.add(bh);
+				}
+			}
+			if (bhOnThatDay.size() == 0) {
+				throw new Exception("No existing hours on that day.");
+			}
+			else {
+				for (BusinessHour bh : bhOnThatDay) {
+					removeBusinessHour(DayOfWeek.valueOf(day), bh.getStartTime());
+				}
+			}
+			wasRemoved = true;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return wasRemoved;
+	}
 }
 	
 	

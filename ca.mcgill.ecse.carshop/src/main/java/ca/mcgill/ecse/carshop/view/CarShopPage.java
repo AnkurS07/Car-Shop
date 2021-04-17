@@ -26,6 +26,7 @@ import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
 import ca.mcgill.ecse223.carshop.controller.TOBookableService;
+import ca.mcgill.ecse223.carshop.controller.TOBusiness;
 import ca.mcgill.ecse223.carshop.controller.TOBusinessHour;
 import ca.mcgill.ecse223.carshop.controller.TOComboItem;
 import ca.mcgill.ecse223.carshop.controller.TOService;
@@ -37,6 +38,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
 import java.sql.Date;
 import java.sql.Time;
@@ -180,6 +182,41 @@ public class CarShopPage extends JFrame{
 	private JSeparator horizontalLineTop;
 	private JSeparator horizontalLineBottom;
 	
+	//addBusinessHour
+	private JLabel addBusinessHourLabel;
+	private JTextField addBusinessHourStart;
+	private JTextField addBusinessHourEnd;
+	private JComboBox<String> selectBusinessHourDay;
+	private JLabel addBusinessHourDayLabel;
+	private JLabel addBusinessHourStartLabel;
+	private JLabel addBusinessHourEndLabel;
+	private JButton addBusinessHourAddButton;
+	private JButton removeBusinessHourButton;
+	private JLabel businessHourUpdateSuccessLabel;
+	private JLabel businessHourUpdateErrorLabel;
+		
+	//setupBusinessInfo
+	private JSeparator businessInfoTopSeparator;
+	private JLabel setUpBusinessInfoLabel;
+	private JButton businessInfoButton;
+	private JTextField setBusinessName;
+	private JTextField setBusinessAddress;
+	private JTextField setBusinessEmail;
+	private JTextField setBusinessPhone;
+	private JButton businessInfoAddBusinessHourButton;
+    private JLabel businessNameLabel;
+	private JLabel businessAddressLabel;
+	private JLabel businessEmailLabel;
+	private JLabel businessPhoneLabel;	
+	private JLabel businessInfoUpdateSuccessLabel;
+	private JLabel businessInfoUpdateErrorLabel;
+	
+	//view business info
+	private JLabel showBusinessInfo;
+	private JLabel businessInfoName;
+	private JLabel businessInfoAddress;
+	private JLabel businessInfoEmail;
+	private JLabel businessInfoPhone;
 	
 	// data elements
 	private String error = null;
@@ -191,7 +228,11 @@ public class CarShopPage extends JFrame{
 	private String newGarageHoursSuccess = null;
 	private String removeGarageHoursError = null;
 	private String removeGarageHoursSuccess = null;
-
+	private String addBusinessInfoSuccessMessage = null;
+	private String addBusinessInfoErrorMessage = null;
+	private String addBusinessHourSuccessMessage = null;
+	private String addBusinessHourErrorMessage = null;
+	
 	//add service
 	private List<TOService> services;
 	
@@ -209,7 +250,7 @@ public class CarShopPage extends JFrame{
 	private JButton addComboButton;
 	private JSeparator serviceComboTopSeparator;
 	private JLabel serviceComboErrorMessage;
-	
+
 	//update service combo
 	
 
@@ -458,6 +499,72 @@ public class CarShopPage extends JFrame{
 		serviceComboErrorMessage = new JLabel();
 		serviceComboErrorMessage.setForeground(Color.RED);
 		
+		// Set up business info
+		
+		setUpBusinessInfoLabel = new JLabel();
+		setUpBusinessInfoLabel.setText("Setup Business Information");
+		setUpBusinessInfoLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		businessInfoButton = new JButton();
+		businessInfoButton.setText("Setup Business Info");
+		businessNameLabel = new JLabel();
+		businessAddressLabel = new JLabel();
+		businessEmailLabel = new JLabel();
+		businessPhoneLabel = new JLabel();
+		businessNameLabel.setText("Business Name:");
+		setBusinessName = new JTextField(15);
+		businessAddressLabel.setText("Business Address:");
+		setBusinessAddress = new JTextField(15);
+		businessEmailLabel.setText("Business Email:");
+		setBusinessEmail = new JTextField(15);
+		businessPhoneLabel.setText("Business Phone Number:");
+		setBusinessPhone = new JTextField(15);
+		businessInfoAddBusinessHourButton = new JButton();
+		businessInfoAddBusinessHourButton.setText("Add Business Hour");
+		businessInfoUpdateSuccessLabel = new JLabel();
+		businessInfoUpdateSuccessLabel.setText("");
+		businessInfoUpdateErrorLabel = new JLabel();
+		businessInfoUpdateErrorLabel.setText("");
+		businessInfoUpdateErrorLabel.setForeground(Color.RED);
+		businessInfoUpdateSuccessLabel.setForeground(new Color(0, 153, 0));
+		businessHourUpdateSuccessLabel = new JLabel();
+		businessHourUpdateSuccessLabel.setText("");
+		businessHourUpdateErrorLabel = new JLabel();
+		businessHourUpdateErrorLabel.setText("");
+		businessHourUpdateErrorLabel.setForeground(Color.RED);
+		businessHourUpdateSuccessLabel.setForeground(new Color(0, 153, 0));
+		businessInfoTopSeparator = new JSeparator();
+		showBusinessInfo = new JLabel();
+		showBusinessInfo.setText("Business Info");
+		showBusinessInfo.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		businessInfoName = new JLabel();
+		businessInfoName.setText("Name: ");
+		businessInfoAddress = new JLabel();
+		businessInfoAddress.setText("Address: ");
+		businessInfoEmail = new JLabel();
+		businessInfoEmail.setText("Email: ");
+		businessInfoPhone = new JLabel();
+		businessInfoPhone.setText("Phone: ");
+		
+		addBusinessHourLabel = new JLabel();
+		addBusinessHourLabel.setText("Add Business Hours");
+		addBusinessHourLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		addBusinessHourDayLabel = new JLabel();
+		addBusinessHourStartLabel = new JLabel();
+		addBusinessHourEndLabel = new JLabel();
+		addBusinessHourAddButton = new JButton();
+		addBusinessHourDayLabel.setText("Day");
+		addBusinessHourStartLabel.setText("Start Time");
+		addBusinessHourStart = new JTextField();
+		addBusinessHourEnd = new JTextField();
+		addBusinessHourEndLabel.setText("End Time");
+		addBusinessHourAddButton.setText("Add Business Hour");
+		removeBusinessHourButton = new JButton();
+		removeBusinessHourButton.setText("Remove on that day");
+		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+		selectBusinessHourDay = new JComboBox<String>(days);
+		hideBusinessSetupSection();
+
+
 		hideAppointmentSection();
 		hideServiceComboSection();
 		
@@ -603,7 +710,25 @@ public class CarShopPage extends JFrame{
 				addComboActionPerformed(evt);
 			}
 		});
+		
+		businessInfoButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				businessInfoButtonActionPerformed(evt);
+			}
+		});
+		
+		addBusinessHourAddButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addBusinessHourAddButtonActionPerformed(evt);
+			}
+		});
 	
+		removeBusinessHourButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				removeBusinessHourButtonActionPerformed(evt);
+			}
+
+		});
 		
 		// global settings
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -671,6 +796,52 @@ public class CarShopPage extends JFrame{
 										)
 								.addComponent(updateAccountSuccessMessage)
 								)
+						// Setup Business Info Section	
+						.addComponent(businessInfoTopSeparator)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup()
+										.addComponent(setUpBusinessInfoLabel)
+										.addGroup(layout.createSequentialGroup()
+												.addGroup(layout.createParallelGroup()
+														.addComponent(businessNameLabel)
+														.addComponent(businessAddressLabel)
+														.addComponent(businessEmailLabel)
+														.addComponent(businessPhoneLabel)
+														)
+												.addGroup(layout.createParallelGroup()
+														.addComponent(setBusinessName)
+														.addComponent(setBusinessAddress)
+														.addComponent(setBusinessEmail)
+														.addComponent(setBusinessPhone)
+														.addComponent(businessInfoButton)
+														.addComponent(businessInfoUpdateSuccessLabel)
+														.addComponent(businessInfoUpdateErrorLabel)
+														)
+												)
+										
+										)
+								.addGap(100)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addBusinessHourLabel)
+										.addGroup(layout.createSequentialGroup()
+												.addGroup(layout.createParallelGroup()
+														.addComponent(addBusinessHourDayLabel)
+														.addComponent(addBusinessHourStartLabel)
+														.addComponent(addBusinessHourEndLabel)
+														)
+												.addGroup(layout.createParallelGroup()
+														.addComponent(selectBusinessHourDay)
+														.addComponent(addBusinessHourStart)
+														.addComponent(addBusinessHourEnd)
+														.addComponent(addBusinessHourAddButton)
+														.addComponent(removeBusinessHourButton)
+														.addComponent(businessHourUpdateErrorLabel)
+														.addComponent(businessHourUpdateSuccessLabel)
+														)
+												)
+										)
+							)
+						// add/update service combo
 						.addComponent(serviceComboTopSeparator)
 						.addComponent(serviceComboErrorMessage)
 						.addGroup(layout.createSequentialGroup()
@@ -764,6 +935,11 @@ public class CarShopPage extends JFrame{
 					
 				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup()
+								.addComponent(showBusinessInfo)
+								.addComponent(businessInfoName)
+								.addComponent(businessInfoAddress)
+								.addComponent(businessInfoEmail)
+								.addComponent(businessInfoPhone)
 								.addGroup(layout.createSequentialGroup()
 										.addComponent(businessHourLabel)
 										.addComponent(showBusinessHours)
@@ -806,6 +982,8 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {loginUsernameField, loginPasswordField, loginButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signupUsernameField, signupPasswordField, signupButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateUsernameField, updatePasswordField, updatePasswordField2, updateAccountButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {setBusinessName, setBusinessAddress, setBusinessEmail, setBusinessPhone, businessInfoButton});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {selectBusinessHourDay, addBusinessHourStart, addBusinessHourEnd, addBusinessHourAddButton, removeBusinessHourButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {newHoursDayBox, addGarageHoursButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {removeHoursDayBox, removeGarageHoursButton});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptList, cancelApptButton});
@@ -883,6 +1061,48 @@ public class CarShopPage extends JFrame{
 										.addComponent(updateAccountSuccessMessage)
 										)
 								)
+						// Setup Business Info Section
+						.addComponent(businessInfoTopSeparator)
+						.addGroup(layout.createParallelGroup()
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(setUpBusinessInfoLabel)
+										.addGroup(layout.createParallelGroup()
+												.addComponent(businessNameLabel)
+												.addComponent(setBusinessName))
+										.addGroup(layout.createParallelGroup()		
+												.addComponent(businessAddressLabel)
+												.addComponent(setBusinessAddress))
+										.addGroup(layout.createParallelGroup()
+												.addComponent(businessEmailLabel)
+												.addComponent(setBusinessEmail))
+										.addGroup(layout.createParallelGroup()
+												.addComponent(businessPhoneLabel)
+												.addComponent(setBusinessPhone)
+												)
+										.addComponent(businessInfoButton)
+										.addComponent(businessInfoUpdateSuccessLabel)
+										.addComponent(businessInfoUpdateErrorLabel)
+										)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(addBusinessHourLabel)
+										.addGroup(layout.createParallelGroup()
+												.addComponent(addBusinessHourDayLabel)
+												.addComponent(selectBusinessHourDay))
+										.addGroup(layout.createParallelGroup()		
+												.addComponent(addBusinessHourStartLabel)
+												.addComponent(addBusinessHourStart))
+										.addGroup(layout.createParallelGroup()
+												.addComponent(addBusinessHourEndLabel)
+												.addComponent(addBusinessHourEnd))
+										.addComponent(addBusinessHourAddButton)
+										.addComponent(removeBusinessHourButton)
+										.addComponent(businessHourUpdateErrorLabel)
+										.addComponent(businessHourUpdateSuccessLabel)
+										)
+								)
+						
+						
+						// Add/Update Service Combo Section
 						.addGroup(layout.createParallelGroup()
 								.addComponent(serviceComboTopSeparator)
 								)
@@ -976,6 +1196,12 @@ public class CarShopPage extends JFrame{
 							)
 					
 					.addGroup(layout.createSequentialGroup()
+							.addComponent(showBusinessInfo)
+							.addComponent(businessInfoName)
+							.addComponent(businessInfoAddress)
+							.addComponent(businessInfoEmail)
+							.addComponent(businessInfoPhone)
+							.addGap(50)
 							.addGroup(layout.createParallelGroup()
 									.addComponent(businessHourLabel)
 									.addComponent(showBusinessHours)
@@ -1111,7 +1337,13 @@ public class CarShopPage extends JFrame{
 				fluidsGarageHourPanel.add(new BusinessHoursVisualizer(toHour));
 				fluidsGarageHours.add(toHour.getDayOfWeek());
 			}
-
+			TOBusiness business = CarShopController.getBusiness();
+			if(business != null) {
+				businessInfoName.setText("Name: "+ CarShopController.getBusiness().getName());
+				businessInfoAddress.setText("Address: "+ CarShopController.getBusiness().getAddress());
+				businessInfoEmail.setText("Email: "+ CarShopController.getBusiness().getEmail());
+				businessInfoPhone.setText("Phone: "+ CarShopController.getBusiness().getPhoneNumber());
+			}
 		}
 
 		// this is needed because the size of the window changes depending on whether an error message is shown or not
@@ -1120,7 +1352,7 @@ public class CarShopPage extends JFrame{
 	
 	private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		loginError = "";
-		if (loginUsernameField.getText().isBlank() || loginPasswordField.getText().isBlank()) {
+		if (loginUsernameField.getText().isEmpty() || loginPasswordField.getText().isEmpty()) {
 			loginError = "Username and password must not be empty.";
 		}
 		// Check for other errors here //
@@ -1136,6 +1368,7 @@ public class CarShopPage extends JFrame{
 					} else if (CarShopController.isTechnicianLoggedIn()) {
 						showUpdateGarageSection();
 					} else {
+						showBusinessSetupSection();
 						showServiceComboSection();
 					}
 				}
@@ -1155,6 +1388,7 @@ public class CarShopPage extends JFrame{
 				hideUpdateGarageSection();
 				hideAppointmentSection();
 				hideServiceComboSection();
+				hideBusinessSetupSection();
 				headerTitle.setText("CarShop");
 				logoutButton.setVisible(false);
 				loginUsernameField.setText("");
@@ -1173,7 +1407,7 @@ public class CarShopPage extends JFrame{
 	
 	private void signupButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		signupError = "";
-		if (signupUsernameField.getText().isBlank() || signupPasswordField.getText().isBlank()) {
+		if (signupUsernameField.getText().isEmpty() || signupPasswordField.getText().isEmpty()) {
 			signupError = "Username and password must not be empty.";
 		} else if (signupUsernameField.getText().toLowerCase().contains("owner") || signupUsernameField.getText().toLowerCase().contains("technician")) {
 			signupError = "Username cannot contain \"technician\" or \"owner\"";
@@ -1199,7 +1433,7 @@ public class CarShopPage extends JFrame{
 	private void updateAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		updateAccountError = "";
 		updateAccountSuccess = "";
-		if (updateUsernameField.getText().isBlank() || updatePasswordField.getText().isBlank()) {
+		if (updateUsernameField.getText().isEmpty() || updatePasswordField.getText().isEmpty()) {
 			updateAccountError = "Username and password must not be empty.";
 		} else if(!Arrays.equals( updatePasswordField.getPassword(),  updatePasswordField2.getPassword())) {
 			updateAccountError = "New passwords do not match";
@@ -1577,6 +1811,87 @@ public class CarShopPage extends JFrame{
 
 		
 	}
+
+	private void businessInfoButtonActionPerformed(ActionEvent evt) {
+		addBusinessInfoErrorMessage = "";
+		addBusinessInfoSuccessMessage = "";
+		try {
+			String name = setBusinessName.getText();
+			String address = setBusinessAddress.getText();
+			String phoneNumber = setBusinessPhone.getText();
+			String email = setBusinessEmail.getText();
+			if(name.isEmpty() || address.isEmpty() || phoneNumber.isEmpty() || email.isEmpty()) {
+				addBusinessInfoErrorMessage = "Field(s) should not be empty";
+			}
+			else {
+				if(CarShopController.getBusiness() == null) {
+					CarShopController.SetUpBusinessInformation(name, address, phoneNumber, email);
+					addBusinessInfoSuccessMessage = "The business " + name + " was set successfully"; 
+				}
+				else {
+					CarShopController.updateBusinessInformation(name, address, phoneNumber, email);
+					addBusinessInfoSuccessMessage = "The business " + name + " was updated successfully"; 
+				} 
+			}
+		} catch (Exception e) {
+			addBusinessInfoErrorMessage = e.getMessage();
+		}
+		
+		businessInfoUpdateSuccessLabel.setText(addBusinessInfoSuccessMessage);
+		businessInfoUpdateErrorLabel.setText(addBusinessInfoErrorMessage);
+		refreshData();
+	}
+
+	private void addBusinessHourAddButtonActionPerformed(ActionEvent evt) {
+		addBusinessHourErrorMessage = "";
+		addBusinessHourSuccessMessage = "";
+		try {
+			String day = (String) selectBusinessHourDay.getSelectedItem();
+			if(addBusinessHourStart.getText().matches("\\d{2}:\\d{2}")) {
+				if(CarShopController.getBusiness() == null) {
+					addBusinessHourErrorMessage ="Set Up Business Information First!";
+				}
+				else {
+					Time startTime = new Time(AppointmentController.parseDate(addBusinessHourStart.getText(), "HH:mm").getTime());
+					Time endTime = new Time(AppointmentController.parseDate(addBusinessHourEnd.getText(), "HH:mm").getTime());
+					CarShopController.addBusinessHourFromDayAndTime(day, startTime, endTime);
+					addBusinessHourSuccessMessage = "Business Hour added"; 
+				}
+			} else {
+				addBusinessHourErrorMessage ="Time should be of format HH:mm";
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			addBusinessHourErrorMessage = e.getMessage();
+		}
+		businessHourUpdateErrorLabel.setText(addBusinessHourErrorMessage);
+		businessHourUpdateSuccessLabel.setText(addBusinessHourSuccessMessage);
+		refreshData();
+	}
+	
+
+	private void removeBusinessHourButtonActionPerformed(ActionEvent evt) {
+		addBusinessHourErrorMessage = "";
+		addBusinessHourSuccessMessage = "";
+		try {
+			String day = (String) selectBusinessHourDay.getSelectedItem();
+			if(CarShopController.getBusiness() == null) {
+				addBusinessHourErrorMessage ="Set Up Business Information First!";
+			}
+			else {
+				if(CarShopController.removeBusinessHoursOnThatDay(day)) {
+					addBusinessHourSuccessMessage = "Business hours successfully removed!";
+				}
+			}
+		} catch (Exception e) {
+			addBusinessHourErrorMessage = e.getMessage();
+		}
+		businessHourUpdateErrorLabel.setText(addBusinessHourErrorMessage);
+		businessHourUpdateSuccessLabel.setText(addBusinessHourSuccessMessage);
+		refreshData();
+	}
+
 	
 	@SuppressWarnings("rawtypes")
 	private void initializeGarageHoursComponent() {
@@ -1848,6 +2163,61 @@ public class CarShopPage extends JFrame{
 		serviceComboErrorMessage.setVisible(true);
 	}
 	
+	private void showBusinessSetupSection() {
+		addBusinessHourLabel.setVisible(true);
+		addBusinessHourStart.setVisible(true);
+		addBusinessHourEnd.setVisible(true);
+		selectBusinessHourDay.setVisible(true);
+		addBusinessHourDayLabel.setVisible(true);
+		addBusinessHourStartLabel.setVisible(true);
+		addBusinessHourEndLabel.setVisible(true);
+		addBusinessHourAddButton.setVisible(true);
+		removeBusinessHourButton.setVisible(true);
+		businessHourUpdateSuccessLabel.setVisible(true);
+		businessHourUpdateErrorLabel.setVisible(true);
+		businessInfoTopSeparator.setVisible(true);
+		setUpBusinessInfoLabel.setVisible(true);
+		businessInfoButton.setVisible(true);
+		setBusinessName.setVisible(true);
+		setBusinessAddress.setVisible(true);
+		setBusinessEmail.setVisible(true);
+		setBusinessPhone.setVisible(true);
+		businessInfoAddBusinessHourButton.setVisible(true);
+	    businessNameLabel.setVisible(true);
+		businessAddressLabel.setVisible(true);
+		businessEmailLabel.setVisible(true);
+		businessPhoneLabel.setVisible(true);	
+		businessInfoUpdateSuccessLabel.setVisible(true);
+		businessInfoUpdateErrorLabel.setVisible(true);
+	}
+	
+	private void hideBusinessSetupSection() {
+		addBusinessHourLabel.setVisible(false);
+		addBusinessHourStart.setVisible(false);
+		addBusinessHourEnd.setVisible(false);
+		selectBusinessHourDay.setVisible(false);
+		addBusinessHourDayLabel.setVisible(false);
+		addBusinessHourStartLabel.setVisible(false);
+		addBusinessHourEndLabel.setVisible(false);
+		addBusinessHourAddButton.setVisible(false);
+		removeBusinessHourButton.setVisible(false);
+		businessHourUpdateSuccessLabel.setVisible(false);
+		businessHourUpdateErrorLabel.setVisible(false);
+		businessInfoTopSeparator.setVisible(false);
+		setUpBusinessInfoLabel.setVisible(false);
+		businessInfoButton.setVisible(false);
+		setBusinessName.setVisible(false);
+		setBusinessAddress.setVisible(false);
+		setBusinessEmail.setVisible(false);
+		setBusinessPhone.setVisible(false);
+		businessInfoAddBusinessHourButton.setVisible(false);
+	    businessNameLabel.setVisible(false);
+		businessAddressLabel.setVisible(false);
+		businessEmailLabel.setVisible(false);
+		businessPhoneLabel.setVisible(false);	
+		businessInfoUpdateSuccessLabel.setVisible(false);
+		businessInfoUpdateErrorLabel.setVisible(false);
+	}
 	// helper methods
 	
 	public void removeOptComboItem(ComboVisualizer combo) {
@@ -1864,5 +2234,7 @@ public class CarShopPage extends JFrame{
 		}
 		pack();
 	}
-
+	
+	
+	
 }
