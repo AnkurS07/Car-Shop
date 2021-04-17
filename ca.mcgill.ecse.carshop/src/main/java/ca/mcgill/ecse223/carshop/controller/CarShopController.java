@@ -1633,6 +1633,23 @@ public class CarShopController {
 		}
 	}
 	
+	public static TOCustomer getLoggedInTOCustomer() {
+		CarShop carShop = CarShopApplication.getCarShop();
+		TOCustomer cust = null;
+		if(CarShopController.isCustomerLoggedIn()) {
+			String username = CarShopController.getLoggedInUser();
+			for(Customer c: carShop.getCustomers()) {
+				if(c.getUsername().equals(username)) {
+					cust = new TOCustomer();
+					cust.setNoShowCount(c.getNoShowCount());
+					break;
+				}
+			}
+			
+		}
+		return cust;
+	}
+	
 }
 	
 	

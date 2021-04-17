@@ -60,6 +60,8 @@ public class CarShopPage extends JFrame{
 	private JLabel dateLabel;
 	private JButton refreshButton;
 	
+	private JLabel noShowLabel;
+	
 	// Login - Sign up
 	private JLabel login;
 	private JLabel signup;
@@ -263,6 +265,8 @@ public class CarShopPage extends JFrame{
 		refreshButton = new JButton();
 		refreshButton.setText("Refresh");
 		
+		noShowLabel = new JLabel();
+		noShowLabel.setText("");
 		
 		// login
 		login = new JLabel();
@@ -708,7 +712,10 @@ public class CarShopPage extends JFrame{
 				.addGroup(layout.createParallelGroup()
 						// Header Section
 						.addGroup(layout.createSequentialGroup()
-								.addComponent(headerTitle)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(headerTitle)
+										.addComponent(noShowLabel)
+										)
 								.addGap(50)
 								.addComponent(logoutButton)
 								.addGap(300)
@@ -941,6 +948,9 @@ public class CarShopPage extends JFrame{
 										.addComponent(timeLabel)
 										)
 								.addComponent(refreshButton)
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(noShowLabel)
 								)
 						.addGap(20)
 						// Login - Sign up Section
@@ -1323,6 +1333,7 @@ public class CarShopPage extends JFrame{
 					showUpdateAccountSection();
 					if(CarShopController.isCustomerLoggedIn()) {
 						showAppointmentSection();
+						noShowLabel.setText("Number of no-shows: "+CarShopController.getLoggedInTOCustomer().getNoShowCount());
 					} else if (CarShopController.isTechnicianLoggedIn()) {
 						showUpdateGarageSection();
 					} else {
@@ -1364,6 +1375,8 @@ public class CarShopPage extends JFrame{
 				updatePasswordField2.setText("");
 				updateAccountErrorMessage.setText("");
 				updateAccountSuccessMessage.setText("");
+				error = "";
+				noShowLabel.setText("");
 			}
 		} catch (Exception e) {
 			loginError = e.getMessage();
