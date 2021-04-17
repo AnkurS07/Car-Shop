@@ -1260,6 +1260,9 @@ public class CarShopController {
 			}
 			else if (username.equals("owner")) {
 				createOwner(username, password);
+				currentUser = User.getWithUsername(username);
+				CarShopApplication.setLoggedInUser(currentUser.getUsername());
+				isLoggedIn = true;
 			}
 			else if (username.contains("Technician")) {
 				TechnicianType technicianType = null;
@@ -1279,6 +1282,9 @@ public class CarShopController {
 					technicianType = Technician.TechnicianType.valueOf("Fluids");
 				}
     			createTechnician(username, password, technicianType);
+    			currentUser = User.getWithUsername(username);
+    			CarShopApplication.setLoggedInUser(currentUser.getUsername());
+    			isLoggedIn = true;
 			}
 			else {
 				throw new Exception("Username/password not found");
