@@ -604,21 +604,28 @@ public class CarShopPage extends JFrame{
 		setUpBusinessInfoLabel.setText("Setup Business Information");
 		setUpBusinessInfoLabel.setFont(underlinedFont.deriveFont(underlinedAttributes));
 		businessInfoButton = new JButton();
-		businessInfoButton.setText("Setup Business Info");
+		businessInfoButton.setText("Setup/Update Business Info");
+		businessInfoButton.setMaximumSize(getPreferredSize());
 		businessNameLabel = new JLabel();
 		businessAddressLabel = new JLabel();
 		businessEmailLabel = new JLabel();
 		businessPhoneLabel = new JLabel();
 		businessNameLabel.setText("Business Name:");
 		setBusinessName = new JTextField(15);
+		setBusinessName.setMaximumSize(getPreferredSize());
 		businessAddressLabel.setText("Business Address:");
 		setBusinessAddress = new JTextField(15);
+		setBusinessAddress.setMaximumSize(getPreferredSize());
 		businessEmailLabel.setText("Business Email:");
+		businessEmailLabel.setMaximumSize(getPreferredSize());
 		setBusinessEmail = new JTextField(15);
+		setBusinessEmail.setMaximumSize(getPreferredSize());
 		businessPhoneLabel.setText("Business Phone Number:");
 		setBusinessPhone = new JTextField(15);
+		setBusinessPhone.setMaximumSize(getPreferredSize());
 		businessInfoAddBusinessHourButton = new JButton();
 		businessInfoAddBusinessHourButton.setText("Add Business Hour");
+		businessInfoAddBusinessHourButton.setMaximumSize(getPreferredSize());
 		businessInfoUpdateSuccessLabel = new JLabel();
 		businessInfoUpdateSuccessLabel.setText("");
 		businessInfoUpdateErrorLabel = new JLabel();
@@ -654,13 +661,16 @@ public class CarShopPage extends JFrame{
 		addBusinessHourDayLabel.setText("Day");
 		addBusinessHourStartLabel.setText("Start Time");
 		addBusinessHourStart = new JTextField();
+		addBusinessHourStart.setMaximumSize(getPreferredSize());
 		addBusinessHourEnd = new JTextField();
+		addBusinessHourEnd.setMaximumSize(getPreferredSize());
 		addBusinessHourEndLabel.setText("End Time");
 		addBusinessHourAddButton.setText("Add Business Hour");
 		removeBusinessHourButton = new JButton();
 		removeBusinessHourButton.setText("Remove on that day");
 		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 		selectBusinessHourDay = new JComboBox<String>(days);
+		selectBusinessHourDay.setMaximumSize(getPreferredSize());
 		hideBusinessSetupSection();
 
 
@@ -669,6 +679,7 @@ public class CarShopPage extends JFrame{
 		updateComboLabel.setFont(titleFont.deriveFont(underlinedAttributes));
 		serviceComboMap = new HashMap<Integer, TOServiceCombo>();
 		serviceComboList = new JComboBox<String>(new String[0]);
+		serviceComboList.setMaximumSize(getPreferredSize());
 		nameLabel2 = new JLabel();
 		nameLabel2.setText("Name: ");
 		comboName2 = new JTextField(15);
@@ -1833,6 +1844,11 @@ public class CarShopPage extends JFrame{
 				
 				signupUsernameField.setText("");
 				signupPasswordField.setText("");
+				
+				businessInfoUpdateSuccessLabel.setText("");
+				businessInfoUpdateErrorLabel.setText("");
+				businessHourUpdateErrorLabel.setText("");
+				businessHourUpdateSuccessLabel.setText("");
 			}
 		} catch (Exception e) {
 			loginError = e.getMessage();
