@@ -1,7 +1,5 @@
 package ca.mcgill.ecse.carshop.view;
 
-import java.awt.event.ActionEvent;
-
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;

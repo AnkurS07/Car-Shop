@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import java.sql.Date;
 import java.sql.Time;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +41,7 @@ import ca.mcgill.ecse223.carshop.controller.TOTimeSlot;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -78,6 +78,22 @@ public class CucumberStepDefinitions {
 	private Appointment currentApp;
 
 	int numberOfAccounts = 0;
+	
+	@Before
+	public void beforeAll() {
+		carShop = CarShopApplication.getCarShop();
+		carShop.delete();
+		this.carShop = null;
+		currentApp = null;
+		CarshopPersistence.save(carShop);
+		try {
+			CarShopApplication.setLoggedInUser(null); // Set the logged in user to null to avoid information being
+														// carried over.
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	@After
 	public void tearDown() {
@@ -1068,9 +1084,7 @@ public class CucumberStepDefinitions {
 
 		if (User.hasWithUsername(string)) {
 			currentUser = User.getWithUsername(string);
-			if (currentUser.getPassword().equals(string2)) {
-				assertTrue(currentUser.getPassword().equals(string2));
-			}
+			assertTrue(currentUser.getPassword().equals(string2));
 		}
 	}
 
