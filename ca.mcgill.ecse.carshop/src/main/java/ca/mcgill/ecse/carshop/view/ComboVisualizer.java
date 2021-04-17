@@ -73,6 +73,16 @@ public class ComboVisualizer extends JPanel {
 		return isMandatory.isSelected();
 	}
 	
+	public void setMandatory(boolean isMandatory) {
+		this.isMandatory.setSelected(isMandatory);
+	}
+	
+	public void setSelectedService(int idx) {
+		if(idx >= 0) {
+			services.setSelectedIndex(idx);
+		}
+	}
+	
 	private ComboVisualizer getVisualizer() {
 		return this;
 	}
