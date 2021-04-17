@@ -41,7 +41,7 @@ public class CarShopApplication {
     	// Demo Parameters 
     	//   (Don't use the UI and the console demo at the same time to avoid duplicate problems)
     	//	 (Always clear the save before the console demo to avoid duplicate problems)
-    	boolean clearSave = false;
+    	boolean clearSave = true;
     	boolean consoleDemo = false;
     	boolean runUI = true;
     	

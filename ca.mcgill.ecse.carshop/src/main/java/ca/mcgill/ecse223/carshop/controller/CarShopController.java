@@ -1158,11 +1158,7 @@ public class CarShopController {
 		if(!(services.contains(mainService))) {
 			throw new Exception("Main service must be included in the services");
 		}
-		/*for(int i=0; i<serviceList.length; i++) {
-			if(!(BookableService.hasWithName(serviceList[i]))) {
-				throw new Exception ("Service" + serviceList[i] + "does not exist");
-			}
-		}*/
+	
 		for(int i=0; i<serviceList.length; i++) {
 			if(serviceCheck(serviceList[i])==null) {
 				throw new Exception ("Service " + serviceList[i] + " does not exist");
@@ -1583,6 +1579,39 @@ public class CarShopController {
 		return CarShopApplication.getLoggedInUser();
 	}
 	
+	public static boolean addBusinessHourFromDayAndTime(String day, Time startTime, Time endTime) throws Exception {
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		boolean wasAdded = false;
+		try {
+			CarShopController.addBusinessHour(dayOfWeek, startTime, endTime);
+			wasAdded = true;
+		} catch(Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return wasAdded;
+	}
+	
+	public static boolean removeBusinessHoursOnThatDay(String day) throws Exception{
+		boolean wasRemoved = false;
+		CarShop carShop = CarShopApplication.getCarShop();
+		ArrayList<BusinessHour> bhOnThatDay = new ArrayList<BusinessHour>();
+		try { 
+			for (BusinessHour bh : carShop.getBusiness().getBusinessHours()) {
+				if(bh.getDayOfWeek().equals(DayOfWeek.valueOf(day))) {
+					bhOnThatDay.add(bh);
+				}	
+			}
+			for (BusinessHour bh : bhOnThatDay) {
+				removeBusinessHour(DayOfWeek.valueOf(day), bh.getStartTime());
+			}
+			wasRemoved = true;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+		return wasRemoved;
+	}
+	
 	public static boolean removeGarageHoursOnDay(String day) throws Exception{
 		boolean updated = false;
 		String type = "";
@@ -1591,6 +1620,7 @@ public class CarShopController {
 			User user = User.getWithUsername(CarShopController.getLoggedInUsername());
 			type = CarShopController.getLoggedInTechnicianType();
 			for (BusinessHour bh : ((Technician) user).getGarage().getBusinessHours()) {
+
 				if (bh.getDayOfWeek() == DayOfWeek.valueOf(day)) {
 					bhOnThatDay.add(bh);
 				}
@@ -1676,6 +1706,7 @@ public class CarShopController {
 		return cust;
 	}
 	
+
 }
 	
 	
