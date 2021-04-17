@@ -1310,9 +1310,9 @@ public class CarShopController {
 	public static boolean createdAccount() throws Exception {
 		boolean createdAccount = true;
 		try {
-			if (User.hasWithUsername(CarShopApplication.getLoggedInUser())) {
+			/*if (User.hasWithUsername(CarShopApplication.getLoggedInUser())) {
 				createdAccount = false;
-			}
+			}*/
 		} catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
