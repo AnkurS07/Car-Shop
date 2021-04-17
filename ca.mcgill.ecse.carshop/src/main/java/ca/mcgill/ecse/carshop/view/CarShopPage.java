@@ -858,7 +858,7 @@ public class CarShopPage extends JFrame{
 								.addComponent(updateAccountSuccessMessage)
 								)
 						
-						// Start Appointment Section
+						// Start and end Appointment Section
 						.addComponent(startAppointmentTopSeparator)
 						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
@@ -874,11 +874,6 @@ public class CarShopPage extends JFrame{
 										.addComponent(registerNoShowErrorMessage)
 										.addComponent(registerNoShowSuccessMessage)
 										)
-								)
-						
-						// End Appointment Section
-						.addComponent(endAppointmentTopSeparator)
-						.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup()
 										.addComponent(endAppointment)
 										.addComponent(endAppointmentLabel)
@@ -890,6 +885,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(endAppointmentSuccessMessage)
 										)
 								)
+								
 						
 						//add/update service combo
 						.addComponent(serviceComboTopSeparator)
@@ -1135,32 +1131,30 @@ public class CarShopPage extends JFrame{
 						// Start Appointment Section
 						.addGroup(layout.createParallelGroup()
 								.addComponent(startAppointmentTopSeparator))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(startAppointment)
-								.addGroup(layout.createParallelGroup()
-										.addComponent(startAppointmentLabel)
-										.addComponent(appointmentsBooked)
-										)
-								.addComponent(startAppointmentButton)
-								.addComponent(registerNoShowButton)
-								.addComponent(startAppointmentErrorMessage)
-								.addComponent(startAppointmentSuccessMessage)
-								.addComponent(registerNoShowErrorMessage)
-								.addComponent(registerNoShowSuccessMessage)
-								)
-						
-						// End Appointment Section
 						.addGroup(layout.createParallelGroup()
-								.addComponent(endAppointmentTopSeparator))
-						.addGroup(layout.createSequentialGroup()
-								.addComponent(endAppointment)
-								.addGroup(layout.createParallelGroup()
-										.addComponent(endAppointmentLabel)
-										.addComponent(appointmentsInProgress)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(startAppointment)
+										.addGroup(layout.createParallelGroup()
+												.addComponent(startAppointmentLabel)
+												.addComponent(appointmentsBooked)
+												)
+										.addComponent(startAppointmentButton)
+										.addComponent(registerNoShowButton)
+										.addComponent(startAppointmentErrorMessage)
+										.addComponent(startAppointmentSuccessMessage)
+										.addComponent(registerNoShowErrorMessage)
+										.addComponent(registerNoShowSuccessMessage)
 										)
-								.addComponent(endAppointmentButton)
-								.addComponent(endAppointmentErrorMessage)
-								.addComponent(endAppointmentSuccessMessage)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(endAppointment)
+										.addGroup(layout.createParallelGroup()
+												.addComponent(endAppointmentLabel)
+												.addComponent(appointmentsInProgress)
+												)
+										.addComponent(endAppointmentButton)
+										.addComponent(endAppointmentErrorMessage)
+										.addComponent(endAppointmentSuccessMessage)
+										)
 								)
 						
 						//add/update service combo
