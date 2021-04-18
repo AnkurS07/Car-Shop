@@ -15,59 +15,63 @@ import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
 public class CarShopApplication {
-	
+
 	private static CarShop carShop;
 	private static java.util.Date systemDate;
 	private static String loggedInUser;
-	
-    public String getGreeting() {
-        return "Starting CarShop Application...";
-    }
 
-    public static void main(String[] args) throws Exception{
-    	// Demo Parameters 
-    	//   (Don't use the UI and the console demo at the same time to avoid duplicate problems)
-    	//	 (Always clear the save before the console demo to avoid duplicate problems)
-    	boolean clearSave = false;
-    	boolean consoleDemo = false;
-    	boolean runUI = true;
+	public String getGreeting() {
+		return "Starting CarShop Application...";
+	}
 
-        System.out.println(new CarShopApplication().getGreeting() + "\n");
-        System.out.println(
-        		"Demo parameters :\n\tClear save:\t"+clearSave+
-        		"\n\tConsole demo:\t"+consoleDemo+
-        		"\n\tShow UI:\t"+runUI+"\n");
-        
-        // Clearing previous save (For demo)
-        if (clearSave) {
-            System.out.println("Clearing previous CarShop Save...\n");
-            clearCarShopSave();
-        }
-        
-        // Set System date and time
-        setToCurrentDate();
-        
-        if (clearSave && !consoleDemo) CarShopController.createOwner("owner", "owner");
+	public static void main(String[] args) throws Exception{
+		// Demo Parameters 
+		//   (Don't use the UI and the console demo at the same time to avoid duplicate problems)
+		//	 (Always clear the save before the console demo to avoid duplicate problems)
+		boolean clearSave = false;
+		boolean consoleDemo = false;
+		boolean runUI = true;
 
-        // Run the UI
-        if (runUI) {
-        	System.out.println("Launching UI...");
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    new CarShopPage().setVisible(true);
-                }
-            });
-        }
-    }
+		System.out.println(new CarShopApplication().getGreeting() + "\n");
+		System.out.println(
+				"Demo parameters :\n\tClear save:\t"+clearSave+
+				"\n\tConsole demo:\t"+consoleDemo+
+				"\n\tShow UI:\t"+runUI+"\n");
+
+		// Clearing previous save (For demo)
+		if (clearSave) {
+			System.out.println("Clearing previous CarShop Save...\n");
+			clearCarShopSave();
+		}
+
+		// Set System date and time
+		setToCurrentDate();
+
+		if (clearSave && !consoleDemo) CarShopController.createOwner("owner", "owner");
+
+		// Run the UI
+		if (runUI) {
+			System.out.println("Launching UI...");
+			java.awt.EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					new CarShopPage().setVisible(true);
+				}
+			});
+		}
+	}
 
 	public static CarShop getCarShop() {
-    	if (carShop == null) {
-    		carShop = CarshopPersistence.load();
-    	}
-    	return carShop;
-    	
-    }
-    
+		if (carShop == null) {
+			try {
+				carShop = CarshopPersistence.load();
+			}catch (Exception e) {
+				carShop=new CarShop();
+			}
+		}
+		return carShop;
+
+	}
+
 	/**
 	 * Gets the current logged in user of the system.
 	 * @return The current logged in user of the system.
@@ -95,7 +99,7 @@ public class CarShopApplication {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Gets the current date of the system. Be careful, this uses java.util.date unlike the Date in the Umple models that is of type java.sql.Date
 	 * @return The current date of the system.
@@ -109,23 +113,23 @@ public class CarShopApplication {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Sets the system date to the current local time
 	 * @throws Exception
 	 */
 	public static void setToCurrentDate() throws Exception {
 		try {
-	        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");  
-	        LocalDateTime now = LocalDateTime.now();  
-	        Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+HH:mm");
-	        CarShopApplication.setSystemDate(systemDate);
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd+HH:mm");  
+			LocalDateTime now = LocalDateTime.now();  
+			Date systemDate = AppointmentController.parseDate(dtf.format(now), "yyyy-MM-dd+HH:mm");
+			CarShopApplication.setSystemDate(systemDate);
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Sets the current date of the system. Uses a Singleton class to persist information.
 	 * @param date Date to be set.
@@ -139,10 +143,10 @@ public class CarShopApplication {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	// Helper method that clears the save by deleting the save file
-    private static void clearCarShopSave() {
-    	File saveFile = new File("data.carshop"); 
-        saveFile.delete();
+	private static void clearCarShopSave() {
+		File saveFile = new File("data.carshop"); 
+		saveFile.delete();
 	}
 }

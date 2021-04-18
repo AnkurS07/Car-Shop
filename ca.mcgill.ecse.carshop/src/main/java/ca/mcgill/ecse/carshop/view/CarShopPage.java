@@ -2879,7 +2879,7 @@ public class CarShopPage extends JFrame{
 				try {
 					strduration = Integer.parseInt(duration.getText());
 					CarShopController.addServiceView(name, strduration, h);
-					serviceErrorMessage.setForeground(Color.GREEN);
+					serviceErrorMessage.setForeground(new Color(0, 153, 0));
 					serviceErrorMessage.setText("Service successfully added");
 					
 				}
@@ -2937,7 +2937,7 @@ public class CarShopPage extends JFrame{
 		if(error==null || error.length()==0){
 			try {
 				CarShopController.updateServiceView(g,setChangedName.getText(),duration, h);
-				changedNameError.setForeground(Color.GREEN);
+				changedNameError.setForeground(new Color(0, 153, 0));
 				changedNameError.setText("Service successfully updated");
 			} catch (Exception e) {
 				changedNameError.setText(e.getMessage());
