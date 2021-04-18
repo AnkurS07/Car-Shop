@@ -2431,7 +2431,13 @@ public class CarShopPage extends JFrame{
 
 				AppointmentController.makeAppointmentFromView(false, CarShopController.getLoggedInUsername(), toBs, services, timeSlots, new ArrayList<TOTimeSlot>());
 			} catch (Exception e) {
-				error = e.getMessage();
+				if(e instanceof NullPointerException) {
+					error = "Impossible to create appointment";
+				}
+				else {
+					error = e.getMessage();
+				}
+				
 			}
 		}
 
