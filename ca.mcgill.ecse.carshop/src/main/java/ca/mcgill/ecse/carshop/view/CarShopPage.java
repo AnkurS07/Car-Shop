@@ -1,53 +1,32 @@
 package ca.mcgill.ecse.carshop.view;
 
-import javax.swing.AbstractButton;
+
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-
 import javax.swing.JScrollPane;
-
 import javax.swing.JPasswordField;
-
 import javax.swing.JSeparator;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
-
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
-
-
-import ca.mcgill.ecse.carshop.application.CarShopApplication;
-import ca.mcgill.ecse.carshop.model.CarShop;
-import ca.mcgill.ecse.carshop.model.Garage;
-import ca.mcgill.ecse.carshop.model.Owner;
-import ca.mcgill.ecse.carshop.model.Service;
-import ca.mcgill.ecse.carshop.model.Technician;
-
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
 import ca.mcgill.ecse223.carshop.controller.TOBookableService;
-
 import ca.mcgill.ecse223.carshop.controller.TOBusiness;
 import ca.mcgill.ecse223.carshop.controller.TOBusinessHour;
-
 import ca.mcgill.ecse223.carshop.controller.TOComboItem;
 import ca.mcgill.ecse223.carshop.controller.TOGarage;
-import ca.mcgill.ecse223.carshop.controller.TOOwner;
 import ca.mcgill.ecse223.carshop.controller.TOService;
 import ca.mcgill.ecse223.carshop.controller.TOServiceBooking;
 import ca.mcgill.ecse223.carshop.controller.TOServiceCombo;
@@ -333,6 +312,7 @@ public class CarShopPage extends JFrame{
 	private JLabel optService;
 	private List<ComboVisualizer> comboVisualizerList;
 	private JPanel optComboItemPanel;
+	
 	private JButton addOptComboItemButton;
 	private JButton addComboButton;
 	private JSeparator serviceComboTopSeparator;
@@ -656,6 +636,10 @@ public class CarShopPage extends JFrame{
 		serviceComboTopSeparator = new JSeparator();
 		serviceComboErrorMessage = new JLabel();
 		serviceComboErrorMessage.setForeground(Color.RED);
+		
+		
+
+		
 
 		// Set up business info
 
@@ -3405,6 +3389,7 @@ public class CarShopPage extends JFrame{
 	}
 
 	private void showService() {
+		servicesep.setVisible(true);
 		updateService.setVisible(true);
 		serviceto.setVisible(true);
 		changedName.setVisible(true);
@@ -3429,6 +3414,7 @@ public class CarShopPage extends JFrame{
 
 	private void hideService() {
 		//service
+		servicesep.setVisible(false);
 		setserviceName.setVisible(false);
 		serviceNameLabel.setVisible(false);
 		addServiceButton.setVisible(false);
