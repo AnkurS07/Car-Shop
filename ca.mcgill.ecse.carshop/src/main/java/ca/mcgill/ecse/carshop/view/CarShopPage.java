@@ -312,7 +312,7 @@ public class CarShopPage extends JFrame{
 	private JLabel optService;
 	private List<ComboVisualizer> comboVisualizerList;
 	private JPanel optComboItemPanel;
-	private JScrollPane optComboItemScrollPane;
+	
 	private JButton addOptComboItemButton;
 	private JButton addComboButton;
 	private JSeparator serviceComboTopSeparator;
@@ -636,8 +636,7 @@ public class CarShopPage extends JFrame{
 		serviceComboTopSeparator = new JSeparator();
 		serviceComboErrorMessage = new JLabel();
 		serviceComboErrorMessage.setForeground(Color.RED);
-		optComboItemScrollPane = new JScrollPane();
-		optComboItemPanel.add(optComboItemScrollPane);
+		
 		
 
 		
