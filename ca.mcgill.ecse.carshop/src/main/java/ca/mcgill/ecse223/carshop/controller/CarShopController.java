@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -73,7 +74,7 @@ public class CarShopController {
 		try {
 			Technician t = new Technician(userName, password, type, carShop);
 			Garage g = new Garage(carShop, t);
-			
+
 			// set opening hours to the same as the business
 			if(carShop.hasBusiness()) {
 				for(BusinessHour h: carShop.getBusiness().getBusinessHours()) {
@@ -198,7 +199,7 @@ public class CarShopController {
 		if(!matcherEmail.matches()) {
 			throw new Exception("Invalid email");
 		}
-		
+
 		try {
 			carShop.getBusiness().setName(name);
 			carShop.getBusiness().setAddress(address);
@@ -821,11 +822,11 @@ public class CarShopController {
 			// checks if the parameters passed are true and then adds the service
 			if(checkServiceParameters(duration) && (!addExistingServices(name, garage))) {
 				garage.addService(name, carShop, duration);
-				
+
 			}
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
-			
+
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -841,7 +842,7 @@ public class CarShopController {
 	private static boolean addExistingServices(String name, Garage garage) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean serviceExists = false;
-		
+
 		// checks if service that has to be added already exists
 		for(Garage g: carShop.getGarages()) {
 			if(g.equals(garage)) {
@@ -868,14 +869,14 @@ public class CarShopController {
 		boolean parameters = true;
 		if(duration<=0) {
 			parameters = false;
-			 throw new Exception("Duration must be positive");
-					
+			throw new Exception("Duration must be positive");
+
 		}
 		// returns true if the duration passed is positive else returns false
 		return parameters;
 	}
 
-	
+
 	/**
 	 * Method used to update services in the model
 	 * @param name
@@ -887,41 +888,44 @@ public class CarShopController {
 	public static void updateService(String name,String changedname, int duration, Garage garage) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service serviceUpdate = null;
-		
+
 		//checks if the user logged is the owner 
 		if(!userIsOwner()) {
 			throw new Exception("You are not authorized to perform this operation");
 		}
-			
+		
+		boolean serviceExists = false;
 		// checks if the service to be added exists in the system
-			for(int i=0; i < carShop.getBookableServices().size();i++) {
-				if(carShop.getBookableService(i) instanceof Service) {
-					serviceUpdate = (Service) carShop.getBookableService(i);
-					if(serviceUpdate.getName().equals(name)) {
-						break;
-					}
-					else {
-						throw new Exception("This service cannot be added");
-					}
+		for(int i=0; i < carShop.getBookableServices().size();i++) {
+			if(carShop.getBookableService(i) instanceof Service) {
+				serviceUpdate = (Service) carShop.getBookableService(i);
+				if(serviceUpdate.getName().equals(name)) {
+					serviceExists = true;
+					break;
 				}
+				
 			}
-	
-			try {
-			
-				if(!updateExistingServices(serviceUpdate, changedname, duration) && checkServiceParameters(duration)){
-					serviceUpdate.setName(changedname);
-					serviceUpdate.setDuration(duration);
-					serviceUpdate.setGarage(garage);
-				}
-				CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		if(!serviceExists) {
+			throw new Exception("This service cannot be added");
+		}
+
+		try {
+
+			if(!updateExistingServices(serviceUpdate, changedname, duration) && checkServiceParameters(duration)){
+				serviceUpdate.setName(changedname);
+				serviceUpdate.setDuration(duration);
+				serviceUpdate.setGarage(garage);
 			}
-		catch (RuntimeException e){
+			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
+		}
+		catch (Exception e){
 			throw new Exception(e.getMessage());
 
 		}
 
 	}
-	
+
 	/**
 	 * Helper method to check is the service that has to be updated already exists 
 	 * @param serviceUpdate
@@ -933,7 +937,7 @@ public class CarShopController {
 	private static boolean updateExistingServices(Service serviceUpdate, String changedName, int duration) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean serviceUpdate1 = false; 
-		
+
 		// checks for service to be update already exists or not
 		for(BookableService s: carShop.getBookableServices()) {
 			if(s instanceof Service) {
@@ -941,12 +945,12 @@ public class CarShopController {
 					throw new Exception("Service " + changedName + " already exists");
 				}
 			}
-			
+
 		}
 		// returns true if the service already exists else returns false
 		return serviceUpdate1;
 	}
-	
+
 	public static void addServiceComboFromView(TOServiceCombo toCombo) throws Exception {
 
 		String services = "";
@@ -959,7 +963,7 @@ public class CarShopController {
 				mandatory += ",";
 			}
 		}
-		
+
 		defineServiceCombo(CarShopApplication.getLoggedInUser(), toCombo.getName(), services, mandatory, toCombo.getMainService());
 	}
 
@@ -972,7 +976,7 @@ public class CarShopController {
 	 * @param mainService
 	 * @throws Exception
 	 */
-	
+
 	public static void defineServiceCombo(String user, String name, String services, String mandatory, String mainService) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service service;
@@ -980,7 +984,7 @@ public class CarShopController {
 		ComboItem Item;
 		String []serviceList = services.split(",");
 		String[] mandatoryList = mandatory.split(",");
-		
+
 		if(!userIsOwner()) {
 			throw new Exception ("You are not authorized to perform this operation");
 		}
@@ -1009,7 +1013,7 @@ public class CarShopController {
 		if((serviceCheck(mainService))==null) {
 			throw new Exception ("Service " + mainService + " does not exist");
 		}
-		
+
 		try {
 			ServiceCombo combo = new ServiceCombo(name, carShop);
 			for(int i=0; i<serviceList.length; i++) {
@@ -1026,9 +1030,9 @@ public class CarShopController {
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 	}
-	
+
 	public static void cancelServiceComboFromView(TOServiceCombo toCombo) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		ServiceCombo current = null;
@@ -1037,7 +1041,7 @@ public class CarShopController {
 				current = (ServiceCombo) bs;
 			}
 		}
-		
+
 		try {	
 			current.delete();	
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
@@ -1046,7 +1050,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	public static void updateServiceComboFromView(TOServiceCombo toCombo, String previousName) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service service;
@@ -1062,10 +1066,10 @@ public class CarShopController {
 				mandatory += ",";
 			}
 		}
-		
+
 		String []serviceList = services.split(",");
 		String[] mandatoryList = mandatory.split(",");
-		
+
 		if(!userIsOwner()) {
 			throw new Exception ("You are not authorized to perform this operation");
 		}
@@ -1098,16 +1102,16 @@ public class CarShopController {
 				}
 			}
 		}
-		
+
 		ServiceCombo current = null;
 		for(BookableService bs: carShop.getBookableServices()) {
 			if(bs instanceof ServiceCombo && bs.getName().equals(toCombo.getName())) {
 				current = (ServiceCombo) bs;
 			}
 		}
-		
+
 		try {
-			
+
 			current.delete();
 			ServiceCombo combo = new ServiceCombo(toCombo.getName(), carShop);
 			for(int i=0; i<serviceList.length; i++) {
@@ -1119,14 +1123,14 @@ public class CarShopController {
 				}
 				combo.addService(item);
 			}
-			
+
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
 		}
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Allows the owner to update an existing service combo
 	 * @param user
@@ -1137,7 +1141,7 @@ public class CarShopController {
 	 * @param mainService
 	 * @throws Exception
 	 */
-	
+
 	public static void updateServiceCombo(String user, String existingCombo, String name, String services, String mandatory, String mainService) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service service;
@@ -1145,7 +1149,7 @@ public class CarShopController {
 		ComboItem Item;
 		String []serviceList = services.split(",");
 		String[] mandatoryList = mandatory.split(",");
-		
+
 		if(!userIsOwner()) {
 			throw new Exception ("You are not authorized to perform this operation");
 		}
@@ -1158,7 +1162,7 @@ public class CarShopController {
 		if(!(services.contains(mainService))) {
 			throw new Exception("Main service must be included in the services");
 		}
-	
+
 		for(int i=0; i<serviceList.length; i++) {
 			if(serviceCheck(serviceList[i])==null) {
 				throw new Exception ("Service " + serviceList[i] + " does not exist");
@@ -1174,7 +1178,7 @@ public class CarShopController {
 				}
 			}
 		}
-		
+
 		try {
 			ServiceCombo combo = serviceComboDuplicateCheck(existingCombo);
 			combo.setName(name);
@@ -1182,11 +1186,11 @@ public class CarShopController {
 				service = serviceCheck(serviceList[i]);
 				mandatoryToSet = Boolean.valueOf(mandatoryList[i]);
 				Item = new ComboItem(mandatoryToSet, service, combo);
-	
+
 				combo.addService(Item);
 				if (Item.getService().getName().equals(mainService)) {
 					combo.setMainService(Item);
-	
+
 				}
 			}
 			CarshopPersistence.save(carShop);			// Serialize the carShop and save to the disk
@@ -1194,10 +1198,10 @@ public class CarShopController {
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 	}
-	
-	
+
+
 
 	/**
 	 * Helper method to find a service 
@@ -1217,7 +1221,7 @@ public class CarShopController {
 		}
 		return (Service) specificService;
 	}
-	
+
 	/**
 	 * Helper method to find a service combo
 	 * @param name
@@ -1235,18 +1239,18 @@ public class CarShopController {
 		}
 		return (ServiceCombo) specificServiceCombo;
 	}
-	
+
 	public static boolean logIn(String username, String password) throws Exception{
 		CarShop carShop = CarShopApplication.getCarShop();
 		User currentUser = null;
 		boolean isLoggedIn = false;
 
-		
+
 		List<User> users = new ArrayList<User>();
 		users.addAll(carShop.getTechnicians());
 		users.addAll(carShop.getCustomers());
 		users.add(carShop.getOwner());
-		
+
 		try {
 			if(User.hasWithUsername(username)) {
 				currentUser = User.getWithUsername(username);
@@ -1281,10 +1285,10 @@ public class CarShopController {
 				else if (username.contains("Fluids")) {
 					technicianType = Technician.TechnicianType.valueOf("Fluids");
 				}
-    			createTechnician(username, password, technicianType);
-    			currentUser = User.getWithUsername(username);
-    			CarShopApplication.setLoggedInUser(currentUser.getUsername());
-    			isLoggedIn = true;
+				createTechnician(username, password, technicianType);
+				currentUser = User.getWithUsername(username);
+				CarShopApplication.setLoggedInUser(currentUser.getUsername());
+				isLoggedIn = true;
 			}
 			else {
 				throw new Exception("Username/password not found");
@@ -1292,10 +1296,10 @@ public class CarShopController {
 		} catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return isLoggedIn;
 	}
-	
+
 	public static boolean logout() throws Exception{
 		boolean isLoggedOut = false;
 		try {
@@ -1306,7 +1310,7 @@ public class CarShopController {
 		}
 		return isLoggedOut;
 	}
-	
+
 	public static boolean createdAccount() throws Exception {
 		boolean createdAccount = true;
 		try {
@@ -1316,14 +1320,14 @@ public class CarShopController {
 		} catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return createdAccount;
 	}
-	
+
 	public static boolean createdGarage() throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		boolean garageAssociatedToNewTechnician = true;
-		
+
 		for(Technician t: carShop.getTechnicians()) {
 			if(!t.hasGarage()) {
 				garageAssociatedToNewTechnician = false;
@@ -1332,18 +1336,18 @@ public class CarShopController {
 		return garageAssociatedToNewTechnician;
 	}
 
-	
+
 	public static boolean hasOpeningHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
 		List<BusinessHour>businessHours = garage.getBusinessHours();
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		Time start = new Time(sdf.parse(startTime).getTime());
 		Time end = new Time(sdf.parse(endTime).getTime());
 		BusinessHour aBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
-		
+
 		boolean hasBusinessHour = false;
 		try {
 			for (BusinessHour b: businessHours) {
@@ -1355,38 +1359,38 @@ public class CarShopController {
 		catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return hasBusinessHour;
 	}
-	
+
 	public static boolean addHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
 		boolean wasAdded = false;
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		Time start = new Time(sdf.parse(startTime).getTime());
 		Time end = new Time(sdf.parse(endTime).getTime());
 
-		
+
 		//add checks
 		if(start.compareTo(end)>0) {
 			throw new Exception("Start time must be before end time");
 		}
-		
+
 		if(intersectsWithBusinessHour(dayOfWeek, start, end, garage.getBusinessHours())) {
 			throw new Exception("The opening hours cannot overlap");
 		}
-		
+
 		if(!overlapsWithBusinessHour(dayOfWeek, start, end, carShop.getBusiness().getBusinessHours())) {
 			throw new Exception("The opening hours are not within the opening hours of the business");
 		}
-		
+
 		if(!CarShopApplication.getLoggedInUser().equals(garage.getTechnician().getUsername())) {
 			throw new Exception("You are not authorized to perform this operation");
 		}
-		
+
 		try {
 			BusinessHour newBusinessHour = new BusinessHour(dayOfWeek, start, end, carShop);
 			garage.addBusinessHour(newBusinessHour);
@@ -1398,23 +1402,23 @@ public class CarShopController {
 		}
 		return wasAdded;
 	}
-	
+
 	public static boolean removeHoursToGarageOfTechnicianType(String day, String startTime, String endTime, String type) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
 		Garage garage = carShop.getGarage(TechnicianType.valueOf(type).ordinal());
 		ArrayList<BusinessHour> toRemove = new ArrayList<BusinessHour>();
 		boolean removed = false;
-				
+
 		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		Time start = new Time(sdf.parse(startTime).getTime());
 		Time end = new Time(sdf.parse(endTime).getTime());
-		
+
 		//add checks
 		if(!CarShopApplication.getLoggedInUser().equals(garage.getTechnician().getUsername())) {
 			throw new Exception("You are not authorized to perform this operation");
 		}
-		
+
 		try {
 			for(BusinessHour h: garage.getBusinessHours()) {
 				if(h.getDayOfWeek().equals(dayOfWeek) && h.getStartTime().equals(start) && h.getEndTime().equals(end)) {
@@ -1430,43 +1434,43 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 		return removed;
-		
+
 	}
-	
+
 	private static boolean overlapsWithBusinessHour(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> hours) {
-		  
-		  boolean contains = false;
 
-			for(BusinessHour h: hours) {
-				// For business hours on the same day we want
-				// The startime of the existing schedule to be after the endtime of the new schedule or
-				// The endtime of the existing schedule to be before the starttime of the new schedule
-				if(h.getDayOfWeek() == day && h.getStartTime().compareTo(startTime) <= 0 && h.getEndTime().compareTo(endTime) >= 0) {
-					contains = true;
-					break;
-				}
+		boolean contains = false;
+
+		for(BusinessHour h: hours) {
+			// For business hours on the same day we want
+			// The startime of the existing schedule to be after the endtime of the new schedule or
+			// The endtime of the existing schedule to be before the starttime of the new schedule
+			if(h.getDayOfWeek() == day && h.getStartTime().compareTo(startTime) <= 0 && h.getEndTime().compareTo(endTime) >= 0) {
+				contains = true;
+				break;
 			}
+		}
 
-			return contains;
-	  }
-	
+		return contains;
+	}
+
 	private static boolean intersectsWithBusinessHour(DayOfWeek day, Time startTime, Time endTime, List<BusinessHour> hours) {
-		  
-		  boolean isOverlapping = false;
 
-			for(BusinessHour h: hours) {
-				// For business hours on the same day we want
-				// The startime of the existing schedule to be after the endtime of the new schedule or
-				// The endtime of the existing schedule to be before the starttime of the new schedule
-				if(h.getDayOfWeek() == day && !(h.getStartTime().compareTo(endTime) >= 0 || h.getEndTime().compareTo(startTime) <= 0)) {
-					isOverlapping = true;
-					break;
-				}
+		boolean isOverlapping = false;
+
+		for(BusinessHour h: hours) {
+			// For business hours on the same day we want
+			// The startime of the existing schedule to be after the endtime of the new schedule or
+			// The endtime of the existing schedule to be before the starttime of the new schedule
+			if(h.getDayOfWeek() == day && !(h.getStartTime().compareTo(endTime) >= 0 || h.getEndTime().compareTo(startTime) <= 0)) {
+				isOverlapping = true;
+				break;
 			}
+		}
 
-			return isOverlapping;
-	  }
-	
+		return isOverlapping;
+	}
+
 	public static boolean isCustomerLoggedIn() {
 		boolean isCustomer = false;
 		try {
@@ -1480,7 +1484,7 @@ public class CarShopController {
 		}
 		return isCustomer;
 	}
-	
+
 	public static boolean isTechnicianLoggedIn() {
 		boolean isTechnician = false;
 		try {
@@ -1494,7 +1498,7 @@ public class CarShopController {
 		}
 		return isTechnician;
 	}
-	
+
 	public static boolean isOwnerLoggedIn() {
 		boolean isOwner = false;
 		try {
@@ -1508,12 +1512,12 @@ public class CarShopController {
 		}
 		return isOwner;
 	}
-	
+
 	public static List<TOBusinessHour> getBusinessHours(String type){
 		CarShop carShop = CarShopApplication.getCarShop();
 		List<TOBusinessHour> businessHours = new ArrayList<TOBusinessHour>();
 		try {
-			
+
 			if(type.equals("business")){
 				for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
 					businessHours.add(new TOBusinessHour(bh.getDayOfWeek().name(), bh.getStartTime(), bh.getEndTime()));
@@ -1530,31 +1534,31 @@ public class CarShopController {
 			}
 			businessHours.sort(new BusinessHourComparator());
 		} catch (Exception e) {
-			
+
 		}
 		return businessHours;
 
 	}
-	
+
 	static class BusinessHourComparator implements Comparator<TOBusinessHour>
-	 {
+	{
 		private List<String> days = new ArrayList<String>() {
-            {
-                add("Monday");
-                add("Tuesday");
-                add("Wednesday");
-                add("Thursday");
-                add("Friday");
-                add("Saturday");
-                add("Sunday");
-            }
-        };
+			{
+				add("Monday");
+				add("Tuesday");
+				add("Wednesday");
+				add("Thursday");
+				add("Friday");
+				add("Saturday");
+				add("Sunday");
+			}
+		};
 		@Override
 		public int compare(TOBusinessHour o1, TOBusinessHour o2) {
 			return days.indexOf(o1.getDayOfWeek()) - days.indexOf(o2.getDayOfWeek());
 		}
-	 }
-	
+	}
+
 	public static String getLoggedInTechnicianType() {
 		String type = "";
 		try {
@@ -1568,7 +1572,7 @@ public class CarShopController {
 		} 
 		return type;
 	}
-	
+
 	public static TOService getTOService(String name) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TOService service = null;
@@ -1580,11 +1584,11 @@ public class CarShopController {
 		}
 		return service;
 	}
-	
+
 	public static String getLoggedInUsername() throws Exception {
 		return CarShopApplication.getLoggedInUser();
 	}
-	
+
 	public static boolean addBusinessHourFromDayAndTime(String day, Time startTime, Time endTime) throws Exception {
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 		boolean wasAdded = false;
@@ -1594,10 +1598,10 @@ public class CarShopController {
 		} catch(Exception e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return wasAdded;
 	}
-	
+
 	public static boolean removeBusinessHoursOnThatDay(String day) throws Exception{
 		boolean wasRemoved = false;
 		CarShop carShop = CarShopApplication.getCarShop();
@@ -1617,7 +1621,7 @@ public class CarShopController {
 		}
 		return wasRemoved;
 	}
-	
+
 	public static boolean removeGarageHoursOnDay(String day) throws Exception{
 		boolean updated = false;
 		String type = "";
@@ -1650,7 +1654,7 @@ public class CarShopController {
 		}
 		return updated;
 	}
-	
+
 	public static String getSystemDate() throws Exception{
 		String date = "";
 		try {
@@ -1662,7 +1666,7 @@ public class CarShopController {
 		}
 		return date;
 	}
-	
+
 	public static String getSystemTime() throws Exception{
 		String time = "";
 		try {
@@ -1674,7 +1678,7 @@ public class CarShopController {
 		}
 		return time;
 	}
-	
+
 	public static String getFullSystemDate() throws Exception{
 		String date = "";
 		try {
@@ -1686,7 +1690,7 @@ public class CarShopController {
 		}
 		return date;
 	}
-	
+
 	public static void setToCurrentDate() throws Exception{
 		try {
 			CarShopApplication.setToCurrentDate();
@@ -1694,7 +1698,7 @@ public class CarShopController {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	public static TOCustomer getLoggedInTOCustomer() {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TOCustomer cust = null;
@@ -1707,15 +1711,64 @@ public class CarShopController {
 					break;
 				}
 			}
-			
+
 		}
 		return cust;
 	}
-	
+
+	public static ArrayList<TOService> getExistingServices(){
+		ArrayList<TOService> existingServices = new ArrayList<TOService>();
+		CarShop carShop = CarShopApplication.getCarShop();
+
+		for(BookableService service : CarShopApplication.getCarShop().getBookableServices()) {
+			if(service instanceof Service) {
+				Garage g = ((Service) service).getGarage();
+				TOService toservice = new TOService(service.getName(),((Service) service).getDuration());
+				existingServices.add(toservice);
+			}
+		}
+
+		CarshopPersistence.save(CarShopApplication.getCarShop());
+		return existingServices;
+	}
+
+	public List<TOTechnician> getTOTechnicians()
+	{
+		List<TOTechnician> technicians = new ArrayList<>();
+		List<TOTechnician> newTechnicians = Collections.unmodifiableList(technicians);
+		return newTechnicians;
+	}
+
+	public static void updateServiceView(String name, String changedName, int duration, TOGarage garage) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean garagefound = false;
+		for (Technician t : carShop.getTechnicians()) {
+			if (t.getType().name().equals(garage.getTOTechnician().getType().toString())) {
+				Garage g = t.getGarage();
+				garagefound=true;
+				CarShopController.updateService(name,changedName, duration , g);
+			}
+		}
+		if(!garagefound) {
+			throw new Exception("Technician does not exist");
+		}
+	}
+
+	public static void addServiceView(String name, int duration, TOGarage garage) throws Exception {
+		CarShop carShop = CarShopApplication.getCarShop();
+		boolean garagefound = false;
+		
+		for (Technician t : carShop.getTechnicians()) {
+			if (t.getType().name().equals(garage.getTOTechnician().getType().toString())) {
+				Garage g = t.getGarage();
+				garagefound=true;
+					CarShopController.addService(name,duration , g);
+			}
+		}
+		if(!garagefound) {
+			throw new Exception("Technician does not exist");
+		}
+	}
+
 
 }
-	
-	
-
-
-

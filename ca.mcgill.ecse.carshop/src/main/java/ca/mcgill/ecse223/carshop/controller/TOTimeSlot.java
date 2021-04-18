@@ -5,7 +5,7 @@ package ca.mcgill.ecse223.carshop.controller;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 10 "../../../../../CarshopTransferObjects.ump"
+// line 11 "../../../../../CarshopTransferObjects.ump"
 public class TOTimeSlot
 {
 

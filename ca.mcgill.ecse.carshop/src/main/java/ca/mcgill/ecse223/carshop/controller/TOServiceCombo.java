@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.controller;
 import java.util.*;
 
-// line 17 "../../../../../CarshopTransferObjects.ump"
+// line 18 "../../../../../CarshopTransferObjects.ump"
 public class TOServiceCombo extends TOBookableService
 {
 
