@@ -2684,6 +2684,9 @@ public class CarShopPage extends JFrame{
 				else {
 					Time startTime = new Time(AppointmentController.parseDate(addBusinessHourStart.getText(), "HH:mm").getTime());
 					Time endTime = new Time(AppointmentController.parseDate(addBusinessHourEnd.getText(), "HH:mm").getTime());
+					if(startTime.getTime()>2400 || endTime.getTime()>2400) {
+						addBusinessHourErrorMessage = "Time cannot exceed 23:59";
+					}
 					CarShopController.addBusinessHourFromDayAndTime(day, startTime, endTime);
 					addBusinessHourSuccessMessage = "Business Hour added"; 
 				}
