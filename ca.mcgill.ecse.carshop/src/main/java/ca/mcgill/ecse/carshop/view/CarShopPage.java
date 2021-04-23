@@ -13,12 +13,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JPasswordField;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
+
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.SqlDateModel;
+
+import ca.mcgill.ecse.carshop.model.Customer;
+import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse223.carshop.controller.AppointmentController;
 import ca.mcgill.ecse223.carshop.controller.CarShopController;
 import ca.mcgill.ecse223.carshop.controller.TOAppointment;
@@ -42,6 +48,7 @@ import java.awt.font.TextAttribute;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -312,7 +319,7 @@ public class CarShopPage extends JFrame{
 	private JLabel optService;
 	private List<ComboVisualizer> comboVisualizerList;
 	private JPanel optComboItemPanel;
-	
+
 	private JButton addOptComboItemButton;
 	private JButton addComboButton;
 	private JSeparator serviceComboTopSeparator;
@@ -335,6 +342,20 @@ public class CarShopPage extends JFrame{
 	private JButton cancelComboButton;
 	private JLabel updateserviceComboErrorMessage;
 
+	//view appointments by date 
+	private JLabel viewAppointments;
+	private DefaultTableModel appointmentViewer;
+	private String appointmentsColumnNames[] = {"Time", "Service", "Technician"};
+	private static final int HEIGHT_OVERVIEW_TABLE = 600;
+	private JDatePickerImpl apptViewDatePicker;
+	private JLabel apptViewDateLabel;
+	private JTable apptViewDateTable;
+	private JScrollPane scrollView;
+	private JDatePickerImpl apptViewDatePicker2; 
+	private JLabel apptViewDateLabel2; 
+	private JLabel viewAppointments2; 
+	private JTable apptViewDateTable2;
+	private JScrollPane scrollView2;
 
 
 	/** Creates new form BtmsPage */
@@ -636,10 +657,10 @@ public class CarShopPage extends JFrame{
 		serviceComboTopSeparator = new JSeparator();
 		serviceComboErrorMessage = new JLabel();
 		serviceComboErrorMessage.setForeground(Color.RED);
-		
-		
 
-		
+
+
+
 
 		// Set up business info
 
@@ -714,7 +735,7 @@ public class CarShopPage extends JFrame{
 		String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 		selectBusinessHourDay = new JComboBox<String>(days);
 		selectBusinessHourDay.setMaximumSize(getPreferredSize());
-		hideBusinessSetupSection();
+		
 
 
 		updateComboLabel = new JLabel();
@@ -794,11 +815,51 @@ public class CarShopPage extends JFrame{
 		setChangedName.setMaximumSize(getPreferredSize());
 		technician2.setMaximumSize(getPreferredSize());
 
+		//view appointment by date for user
+		SqlDateModel appointmentsViewer = new SqlDateModel();
+		LocalDate date = LocalDate.now();
+		appointmentsViewer.setDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+		appointmentsViewer.setSelected(true);
+		Properties pO = new Properties();
+		pO.put("text.today", "Today");
+		pO.put("text.month", "Month");
+		pO.put("text.year", "Year");
+		JDatePanelImpl appointmentDatePanel = new JDatePanelImpl(appointmentsViewer, pO);
+		apptViewDatePicker = new JDatePickerImpl(appointmentDatePanel, new DateLabelFormatter());
+		apptViewDateLabel = new JLabel();
+		apptViewDateLabel.setText("Date:");
+		viewAppointments = new JLabel();
+		viewAppointments.setText("View appointments by date");
+		viewAppointments.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		String [] viewColumns = {"Time", "Garage", "Service", "Status"};
+		
+		apptViewDateTable = new JTable(new DefaultTableModel(new Object[][] {}, viewColumns));
+		scrollView = new JScrollPane(apptViewDateTable);
+		
+		//view appointment by date for owner 
+		SqlDateModel appointmentsViewer2 = new SqlDateModel();
+		appointmentsViewer.setDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+		appointmentsViewer.setSelected(true);
+		JDatePanelImpl appointmentDatePanel2 = new JDatePanelImpl(appointmentsViewer2, pO);
+		apptViewDatePicker2 = new JDatePickerImpl(appointmentDatePanel2, new DateLabelFormatter());
+		apptViewDateLabel2 = new JLabel();
+		apptViewDateLabel2.setText("Date:");
+		viewAppointments2 = new JLabel();
+		viewAppointments2.setText("View appointments by date");
+		viewAppointments2.setFont(underlinedFont.deriveFont(underlinedAttributes));
+		String [] viewColumns2 = {"User", "Time", "Garage", "Service", "Status"};
+		apptViewDateTable2 = new JTable(new DefaultTableModel(new Object[][] {}, viewColumns2));
+		scrollView2 = new JScrollPane(apptViewDateTable2);
+		
+
 		hideAppointmentSection();
 		hideStartEndAppointmentSection();
 		hideServiceComboSection();
 		hideUpdateServiceComboSection();
 		hideService();
+		hideBusinessSetupSection();
+
+
 
 		// Action Listeners
 		// Listeners for header
@@ -1028,6 +1089,20 @@ public class CarShopPage extends JFrame{
 				updateServiceButtonActionPerformed(evt);
 			}
 		});
+		
+		apptViewDatePicker.addActionListener(new java.awt.event.ActionListener(){
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				showAppointments(evt);
+				
+			}
+		});
+		
+		apptViewDatePicker2.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt ) {
+				
+				showAppointments2(evt);
+			}
+		});
 
 		// global settings
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -1136,6 +1211,10 @@ public class CarShopPage extends JFrame{
 														.addComponent(addBusinessHourDayLabel)
 														.addComponent(addBusinessHourStartLabel)
 														.addComponent(addBusinessHourEndLabel)
+														.addComponent(viewAppointments2)
+														.addComponent(apptViewDateLabel2)
+														.addComponent(apptViewDatePicker2)
+														.addComponent(scrollView2)
 														)
 												.addGroup(layout.createParallelGroup()
 														.addComponent(selectBusinessHourDay)
@@ -1334,7 +1413,8 @@ public class CarShopPage extends JFrame{
 								.addGroup(layout.createParallelGroup()
 										.addComponent(bookableServiceLabel)
 										.addComponent(updateService)
-										.addComponent(durationLabel2))
+										.addComponent(durationLabel2)
+										.addComponent(apptViewDateLabel))
 								.addGroup(layout.createParallelGroup()
 										.addComponent(makeApptLabel)
 										.addComponent(bookableServiceList)
@@ -1345,6 +1425,9 @@ public class CarShopPage extends JFrame{
 										.addComponent(serviceto)
 
 										.addComponent(duration2)
+										.addComponent(viewAppointments)
+										.addComponent(apptViewDatePicker)
+										.addComponent(scrollView)
 
 										)
 								.addGroup(layout.createParallelGroup()
@@ -1375,7 +1458,7 @@ public class CarShopPage extends JFrame{
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(verticalLineRight)
 						)
-
+				
 
 
 				.addGroup(layout.createSequentialGroup()
@@ -1447,7 +1530,9 @@ public class CarShopPage extends JFrame{
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {updateAccount, newHoursOpenLabel});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {addBusinessHourStartLabel, updateComboLabel, endAppointmentLabel});
 
-
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {viewAppointments});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {apptViewDateLabel, apptViewDatePicker});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {scrollView});
 
 		// Vertical Layout
 		layout.setVerticalGroup( layout.createParallelGroup()
@@ -1524,7 +1609,7 @@ public class CarShopPage extends JFrame{
 												)
 										)
 								.addGroup(layout.createSequentialGroup()
-										
+
 										.addComponent(setUpBusinessInfoLabel)
 										.addGroup(layout.createParallelGroup()
 												.addComponent(businessNameLabel)
@@ -1544,7 +1629,7 @@ public class CarShopPage extends JFrame{
 										.addComponent(businessInfoUpdateErrorLabel)
 										)
 								.addGroup(layout.createSequentialGroup()
-										
+
 										.addComponent(addBusinessHourLabel)
 										.addGroup(layout.createParallelGroup()
 												.addComponent(addBusinessHourDayLabel)
@@ -1605,7 +1690,20 @@ public class CarShopPage extends JFrame{
 												.addComponent(duration2))
 										.addComponent(updateServiceButton)
 										.addComponent(changedNameError))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(viewAppointments2)
+										.addGroup(layout.createParallelGroup()
+												.addComponent(apptViewDateLabel2)
+												)
+										.addGroup(layout.createParallelGroup()
+												.addComponent(apptViewDatePicker2))
+												
+										
+										.addGroup(layout.createParallelGroup()
+												.addComponent(scrollView2))
+										)
 								)
+						
 
 
 
@@ -1746,6 +1844,16 @@ public class CarShopPage extends JFrame{
 						.addGroup(layout.createParallelGroup()
 								.addComponent(horizontalLineBottom))
 
+						.addGroup(layout.createParallelGroup()
+								.addComponent(viewAppointments))
+						.addGroup(layout.createParallelGroup()
+								.addComponent(apptViewDateLabel)
+								.addComponent(apptViewDatePicker)
+
+								)
+						.addGroup(layout.createParallelGroup()
+								.addComponent(scrollView)
+								)
 						)
 
 				.addGroup(layout.createSequentialGroup()
@@ -2019,15 +2127,15 @@ public class CarShopPage extends JFrame{
 				System.out.println(e.getMessage());
 
 			}
-			
-			
+
+
 			setserviceName.setText("");
 			duration.setText("");
 			duration2.setText("");
 			setChangedName.setText("");
-			
-			
-			
+
+
+
 
 
 
@@ -2248,7 +2356,7 @@ public class CarShopPage extends JFrame{
 		// Check for other errors here //
 		if (removeGarageHoursError.length() == 0) {
 			try {
-				String day = (String)newHoursDayBox.getSelectedItem();
+				String day = (String)removeHoursDayBox.getSelectedItem();
 				if (CarShopController.removeGarageHoursOnDay(day)) {
 					removeGarageHoursSuccess = "Business hours succesfully updated!";
 				}
@@ -2437,7 +2545,7 @@ public class CarShopPage extends JFrame{
 				else {
 					error = e.getMessage();
 				}
-				
+
 			}
 		}
 
@@ -2684,6 +2792,14 @@ public class CarShopPage extends JFrame{
 				else {
 					Time startTime = new Time(AppointmentController.parseDate(addBusinessHourStart.getText(), "HH:mm").getTime());
 					Time endTime = new Time(AppointmentController.parseDate(addBusinessHourEnd.getText(), "HH:mm").getTime());
+					Time limit = new Time(AppointmentController.parseDate("24:00", "HH:mm").getTime());
+					if (startTime.after(limit) || endTime.after(limit)) {
+						addBusinessHourErrorMessage = "Time cannot exceed 23:59";
+					}
+					else {
+						CarShopController.addBusinessHourFromDayAndTime(day, startTime, endTime);
+						addBusinessHourSuccessMessage = "Business Hour added";
+					}
 					if(startTime.getTime()>2400 || endTime.getTime()>2400) {
 						addBusinessHourErrorMessage = "Time cannot exceed 23:59";
 					}
@@ -2890,7 +3006,7 @@ public class CarShopPage extends JFrame{
 					CarShopController.addServiceView(name, strduration, h);
 					serviceErrorMessage.setForeground(new Color(0, 153, 0));
 					serviceErrorMessage.setText("Service successfully added");
-					
+
 				}
 				catch(Exception e) {
 					serviceErrorMessage.setText(e.getMessage());
@@ -2912,7 +3028,7 @@ public class CarShopPage extends JFrame{
 		int duration = 0;
 		String changename2errortext = null;
 		String durationnameerrortext = null;
-		
+
 		changedNameError.setForeground(Color.RED);
 
 		TOTechnician c = new TOTechnician((ca.mcgill.ecse223.carshop.controller.TOTechnician.TechnicianType) technician.getSelectedItem());
@@ -2921,7 +3037,7 @@ public class CarShopPage extends JFrame{
 		if(serviceto.getSelectedItem()==null||serviceto.getSelectedItem().toString().length()==0) {
 			changedNameError.setText("Choose a Service");
 		}
-		
+
 		String g = serviceto.getSelectedItem().toString();
 
 		if(error == null || error.length() == 0) {
@@ -2952,10 +3068,34 @@ public class CarShopPage extends JFrame{
 				changedNameError.setText(e.getMessage());
 			}
 		}
-			refreshData();
-			pack();
+		refreshData();
+		pack();
 	}
 
+	private void showAppointments(ActionEvent evt) {
+		
+		JDatePanelImpl picker = (JDatePanelImpl)evt.getSource();
+		Date newDate = new Date((picker.getModel().getYear())-1900, picker.getModel().getMonth(), picker.getModel().getDay());
+		String user = CarShopController.getLoggedInUser();
+		List <String[]> data = AppointmentController.getApptInfo(user,newDate);
+		DefaultTableModel model = (DefaultTableModel)(apptViewDateTable.getModel());
+		model.setNumRows(0);
+		for (String[] s: data) {
+			model.addRow(s);
+		}
+	}
+	private void showAppointments2(ActionEvent evt) {
+		JDatePanelImpl picker = (JDatePanelImpl)evt.getSource();
+		Date newDate = new Date((picker.getModel().getYear())-1900, picker.getModel().getMonth(), picker.getModel().getDay());
+		List <String[]> data = AppointmentController.getApptInfo2(newDate);
+		DefaultTableModel model = (DefaultTableModel)(apptViewDateTable2.getModel());
+		model.setNumRows(0);
+		for (String[] s: data) {
+			model.addRow(s);
+		}
+	}
+		
+	
 	@SuppressWarnings("rawtypes")
 	private void initializeGarageHoursComponent() {
 		addNewLabel = new JLabel();
@@ -3169,6 +3309,12 @@ public class CarShopPage extends JFrame{
 		optServicePanelUpdate.setVisible(false);
 		horizontalLineBottom.setVisible(false);
 
+		//view appt 
+		viewAppointments.setVisible(false);
+		apptViewDateLabel.setVisible(false);
+		scrollView.setVisible(false);
+		apptViewDatePicker.setVisible(false);
+
 	}
 
 	private void showAppointmentSection() {
@@ -3197,6 +3343,14 @@ public class CarShopPage extends JFrame{
 		apptDatePickerUpdate.setVisible(true);
 		optServicePanelUpdate.setVisible(true);
 		horizontalLineBottom.setVisible(true);
+
+		//view appt 
+		viewAppointments.setVisible(true);
+		apptViewDateLabel.setVisible(true);
+		scrollView.setVisible(true);
+		apptViewDatePicker.setVisible(true);
+
+
 	}
 
 	private void hideServiceComboSection() {
@@ -3253,6 +3407,12 @@ public class CarShopPage extends JFrame{
 		businessPhoneLabel.setVisible(true);	
 		businessInfoUpdateSuccessLabel.setVisible(true);
 		businessInfoUpdateErrorLabel.setVisible(true);
+		//view appointments 
+		viewAppointments2.setVisible(true);
+		apptViewDateLabel2.setVisible(true);
+		apptViewDatePicker2.setVisible(true);
+		scrollView2.setVisible(true);
+		
 	}
 
 	private void hideBusinessSetupSection() {
@@ -3281,6 +3441,11 @@ public class CarShopPage extends JFrame{
 		businessPhoneLabel.setVisible(false);	
 		businessInfoUpdateSuccessLabel.setVisible(false);
 		businessInfoUpdateErrorLabel.setVisible(false);
+		//view appointments
+		viewAppointments2.setVisible(false);
+		apptViewDateLabel2.setVisible(false);
+		apptViewDatePicker2.setVisible(false);
+		scrollView2.setVisible(false);
 	}
 
 	private void hideServiceComboFieldsUpdate() {

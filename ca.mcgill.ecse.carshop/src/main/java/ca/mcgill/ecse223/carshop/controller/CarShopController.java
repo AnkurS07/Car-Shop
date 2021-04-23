@@ -727,6 +727,17 @@ public class CarShopController {
 		}
 		return user;
 	}
+	
+	/**
+	 * Helper method that gets the customer given a username
+	 * @return logged in user (Customer cust)
+	 *
+	 */
+	
+	public static Customer getCustomerByUsername(String username) {
+		Customer cust = (Customer)User.getWithUsername(username);
+		return cust;
+	}
 
 	/**
 	 * Helper method to check the validity of the inputs to update a customer Account
@@ -1611,6 +1622,9 @@ public class CarShopController {
 				if(bh.getDayOfWeek().equals(DayOfWeek.valueOf(day))) {
 					bhOnThatDay.add(bh);
 				}	
+			}
+			if (bhOnThatDay.size() == 0 ) {
+				throw new Exception("No existing hours on that day");
 			}
 			for (BusinessHour bh : bhOnThatDay) {
 				removeBusinessHour(DayOfWeek.valueOf(day), bh.getStartTime());

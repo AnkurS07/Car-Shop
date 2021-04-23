@@ -247,6 +247,55 @@ public class AppointmentController {
 		}
 		return null;
 	}
+	public static List<Appointment> getCustomerAppt(String username, Date date) {
+		Customer customer= CarShopController.getCustomerByUsername(username);
+		List <Appointment> apptList = new ArrayList<Appointment>(); 
+		for(Appointment a: customer.getAppointments()) {
+			ServiceBooking b = a.getServiceBooking(0);
+			if(b.getTimeSlot().getStartDate().equals(date)) {
+				apptList.add(a);
+			}
+		}
+		return apptList;
+	}
+	public static List<String[]> getApptInfo(String username, Date date){
+		
+		List<Appointment> apptList = getCustomerAppt(username, date);
+		List<String[]> apptSList = new ArrayList<String[]>();
+		for (Appointment a: apptList) {
+			for (ServiceBooking b: a.getServiceBookings()) {
+				String[] row = {
+					b.getTimeSlot().getStartTime().toString(),
+					b.getService().getGarage().getTechnician().getType().toString(),
+					b.getService().getName(),
+					a.getAppStatus().toString()
+					
+			};
+				apptSList.add(row);
+			}
+		}
+		return apptSList;
+		
+	}
+	
+	public static List<String[]> getApptInfo2(Date date){
+		CarShop carShop = CarShopApplication.getCarShop();
+		List<String[]> apptSList = new ArrayList<String[]>();
+		for (Appointment a: carShop.getAppointments() ) {
+			for (ServiceBooking b: a.getServiceBookings()) {
+				String[] row = {
+						a.getCustomer().getUsername(),
+						b.getTimeSlot().getStartTime().toString(),
+						b.getService().getGarage().getTechnician().getType().toString(),
+						b.getService().getName(),
+						a.getAppStatus().toString()
+					
+				};
+				apptSList.add(row);
+			}
+		}
+		return apptSList;
+	}
 	
 	public static void startAppointmentFromView(TOAppointment toApp) throws Exception {
 		CarShop carShop = CarShopApplication.getCarShop();
