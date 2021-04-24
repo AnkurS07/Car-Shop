@@ -811,6 +811,7 @@ public class CarShopPage extends JFrame{
 		duration2.setMaximumSize(getPreferredSize());
 		setChangedName.setMaximumSize(getPreferredSize());
 		technician2.setMaximumSize(getPreferredSize());
+		serviceto.setMaximumSize(getPreferredSize());
 
 		//view appointment by date for user
 		SqlDateModel appointmentsViewer = new SqlDateModel();
@@ -2341,6 +2342,9 @@ public class CarShopPage extends JFrame{
 			} catch (Exception e) {
 				//e.printStackTrace();
 				newGarageHoursError = e.getMessage();
+				if(e instanceof NullPointerException) {
+					newGarageHoursError = "You first need to set up the business";
+				}
 			}
 		}
 		newGarageHoursErrorMessage.setText(newGarageHoursError);
