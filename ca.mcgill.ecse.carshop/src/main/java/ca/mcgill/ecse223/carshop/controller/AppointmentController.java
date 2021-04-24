@@ -2,12 +2,15 @@
 package ca.mcgill.ecse223.carshop.controller;
 
 import java.sql.Date;
+
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -32,6 +35,17 @@ import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse.carshop.view.OptServiceVisualizer;
 import ca.mcgill.ecse223.carshop.persistence.CarshopPersistence;
 
+class SortByTime implements Comparator<String[]>{
+	public int compare(String[] data1, String[] data2) {
+		return data1[0].compareTo(data2[0]);
+	}
+}
+
+class SortByTime2 implements Comparator<String[]>{
+	public int compare(String[] data1, String[] data2) {
+		return data1[1].compareTo(data2[1]);
+	}
+}
 public class AppointmentController {
 
 	public static Appointment makeAppointmentFromView(boolean overrideErrors, String customerName, TOBookableService toBookableService, List<TOService> toServices, List<TOTimeSlot> toTimeSlots, List<TOTimeSlot> toExclude) throws Exception {
@@ -247,10 +261,13 @@ public class AppointmentController {
 		}
 		return null;
 	}
-	public static List<Appointment> getCustomerAppt(String username, Date date) {
-		Customer customer= CarShopController.getCustomerByUsername(username);
+	
+	
+	public static List<Appointment> getCustomerAppt(Date date) {
+		//Customer customer= CarShopController.getCustomerByUsername(username);
+		CarShop carShop = CarShopApplication.getCarShop();
 		List <Appointment> apptList = new ArrayList<Appointment>(); 
-		for(Appointment a: customer.getAppointments()) {
+		for(Appointment a: carShop.getAppointments()) {
 			ServiceBooking b = a.getServiceBooking(0);
 			if(b.getTimeSlot().getStartDate().equals(date)) {
 				apptList.add(a);
@@ -258,22 +275,26 @@ public class AppointmentController {
 		}
 		return apptList;
 	}
-	public static List<String[]> getApptInfo(String username, Date date){
+	
+	public static List<String[]> getApptInfo(Date date){
 		
-		List<Appointment> apptList = getCustomerAppt(username, date);
+		List<Appointment> apptList = getCustomerAppt(date);
 		List<String[]> apptSList = new ArrayList<String[]>();
 		for (Appointment a: apptList) {
 			for (ServiceBooking b: a.getServiceBookings()) {
 				String[] row = {
 					b.getTimeSlot().getStartTime().toString(),
+					b.getTimeSlot().getEndTime().toString(),
 					b.getService().getGarage().getTechnician().getType().toString(),
 					b.getService().getName(),
 					a.getAppStatus().toString()
 					
 			};
 				apptSList.add(row);
+				
 			}
 		}
+		Collections.sort(apptSList, new SortByTime());
 		return apptSList;
 		
 	}
@@ -286,14 +307,20 @@ public class AppointmentController {
 				String[] row = {
 						a.getCustomer().getUsername(),
 						b.getTimeSlot().getStartTime().toString(),
+						b.getTimeSlot().getEndTime().toString(),
 						b.getService().getGarage().getTechnician().getType().toString(),
 						b.getService().getName(),
 						a.getAppStatus().toString()
 					
 				};
-				apptSList.add(row);
+				if (b.getTimeSlot().getStartDate().equals(date)) {
+					apptSList.add(row);
+					
+				}
+				
 			}
 		}
+		Collections.sort(apptSList, new SortByTime2());
 		return apptSList;
 	}
 	

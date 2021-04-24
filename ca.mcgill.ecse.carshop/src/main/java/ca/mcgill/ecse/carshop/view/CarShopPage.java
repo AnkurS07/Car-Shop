@@ -344,9 +344,6 @@ public class CarShopPage extends JFrame{
 
 	//view appointments by date 
 	private JLabel viewAppointments;
-	private DefaultTableModel appointmentViewer;
-	private String appointmentsColumnNames[] = {"Time", "Service", "Technician"};
-	private static final int HEIGHT_OVERVIEW_TABLE = 600;
 	private JDatePickerImpl apptViewDatePicker;
 	private JLabel apptViewDateLabel;
 	private JTable apptViewDateTable;
@@ -831,10 +828,11 @@ public class CarShopPage extends JFrame{
 		viewAppointments = new JLabel();
 		viewAppointments.setText("View appointments by date");
 		viewAppointments.setFont(underlinedFont.deriveFont(underlinedAttributes));
-		String [] viewColumns = {"Time", "Garage", "Service", "Status"};
+		String [] viewColumns = {"Start Time", "End Time", "Garage", "Service", "Status"};
 		
 		apptViewDateTable = new JTable(new DefaultTableModel(new Object[][] {}, viewColumns));
 		scrollView = new JScrollPane(apptViewDateTable);
+
 		
 		//view appointment by date for owner 
 		SqlDateModel appointmentsViewer2 = new SqlDateModel();
@@ -847,9 +845,10 @@ public class CarShopPage extends JFrame{
 		viewAppointments2 = new JLabel();
 		viewAppointments2.setText("View appointments by date");
 		viewAppointments2.setFont(underlinedFont.deriveFont(underlinedAttributes));
-		String [] viewColumns2 = {"User", "Time", "Garage", "Service", "Status"};
+		String [] viewColumns2 = {"User", "Start Time", "End Time", "Garage", "Service", "Status"};
 		apptViewDateTable2 = new JTable(new DefaultTableModel(new Object[][] {}, viewColumns2));
 		scrollView2 = new JScrollPane(apptViewDateTable2);
+	
 		
 
 		hideAppointmentSection();
@@ -2800,11 +2799,7 @@ public class CarShopPage extends JFrame{
 						CarShopController.addBusinessHourFromDayAndTime(day, startTime, endTime);
 						addBusinessHourSuccessMessage = "Business Hour added";
 					}
-					if(startTime.getTime()>2400 || endTime.getTime()>2400) {
-						addBusinessHourErrorMessage = "Time cannot exceed 23:59";
-					}
-					CarShopController.addBusinessHourFromDayAndTime(day, startTime, endTime);
-					addBusinessHourSuccessMessage = "Business Hour added"; 
+		
 				}
 			} else {
 				addBusinessHourErrorMessage ="Time should be of format HH:mm";
@@ -3076,8 +3071,8 @@ public class CarShopPage extends JFrame{
 		
 		JDatePanelImpl picker = (JDatePanelImpl)evt.getSource();
 		Date newDate = new Date((picker.getModel().getYear())-1900, picker.getModel().getMonth(), picker.getModel().getDay());
-		String user = CarShopController.getLoggedInUser();
-		List <String[]> data = AppointmentController.getApptInfo(user,newDate);
+		//String user = CarShopController.getLoggedInUser();
+		List <String[]> data = AppointmentController.getApptInfo(newDate);
 		DefaultTableModel model = (DefaultTableModel)(apptViewDateTable.getModel());
 		model.setNumRows(0);
 		for (String[] s: data) {
